@@ -2006,6 +2006,12 @@
 #define MASK_CBO_INVAL 0xfff07fff
 #define MATCH_CBO_ZERO 0x40200f
 #define MASK_CBO_ZERO 0xfff07fff
+#define MATCH_PREFETCH_I 0x6013
+#define MASK_PREFETCH_I 0x1f07fff
+#define MATCH_PREFETCH_R 0x106013
+#define MASK_PREFETCH_R 0x1f07fff
+#define MATCH_PREFETCH_W 0x306013
+#define MASK_PREFETCH_W 0x1f07fff
 /* Privileged CSR addresses.  */
 #define CSR_USTATUS 0x0
 #define CSR_UIE 0x4
