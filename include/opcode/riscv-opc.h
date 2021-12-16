@@ -1998,6 +1998,14 @@
 #define MASK_HINVAL_VVMA 0xfe007fff
 #define MATCH_HINVAL_GVMA 0x66000073
 #define MASK_HINVAL_GVMA 0xfe007fff
+#define MATCH_CBO_CLEAN 0x10200f
+#define MASK_CBO_CLEAN 0xfff07fff
+#define MATCH_CBO_FLUSH 0x20200f
+#define MASK_CBO_FLUSH 0xfff07fff
+#define MATCH_CBO_INVAL 0x200f
+#define MASK_CBO_INVAL 0xfff07fff
+#define MATCH_CBO_ZERO 0x40200f
+#define MASK_CBO_ZERO 0xfff07fff
 /* Privileged CSR addresses.  */
 #define CSR_USTATUS 0x0
 #define CSR_UIE 0x4
