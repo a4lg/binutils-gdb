@@ -1,4 +1,4 @@
-#as: -march=rv32if -mpriv-spec=1.11
+#as: -march=rv32if -mpriv-spec=1.12
 #objdump: --dwarf=frames
 
 
