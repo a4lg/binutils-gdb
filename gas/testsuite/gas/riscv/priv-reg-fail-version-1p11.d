@@ -1,4 +1,4 @@
-#as: -march=rv32ifv_zkr -mcsr-check -mpriv-spec=1.11 -march-attr
+#as: -I$srcdir/$subdir -march=rv32ifv_zkr -mcsr-check -mpriv-spec=1.11 -march-attr
 #source: priv-reg.s
 #warning_output: priv-reg-fail-version-1p11.l
 #readelf: -A
