@@ -2336,6 +2336,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "i");
     case INSN_CLASS_ZICBOM:
       return riscv_subset_supports (rps, "zicbom");
+    case INSN_CLASS_ZICBOP:
+      return riscv_subset_supports (rps, "zicbop");
     case INSN_CLASS_ZICBOZ:
       return riscv_subset_supports (rps, "zicboz");
     case INSN_CLASS_ZICSR:
