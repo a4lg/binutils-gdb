@@ -469,6 +469,127 @@
 .*Warning: invalid CSR `hstateen3h' for the privileged spec `1.10'
 .*Warning: invalid CSR `hstateen3h' for the current ISA
 .*Warning: invalid CSR `hstateen3h' for the privileged spec `1.10'
+.*Warning: invalid CSR `scountovf' for the current ISA
+.*Warning: invalid CSR `scountovf' for the privileged spec `1.10'
+.*Warning: invalid CSR `scountovf' for the current ISA
+.*Warning: invalid CSR `scountovf' for the privileged spec `1.10'
+.*Warning: read-only CSR is written `csrw scountovf,a1'
+.*Warning: invalid CSR `mhpmevent3h' for the current ISA
+.*Warning: invalid CSR `mhpmevent3h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent3h' for the current ISA
+.*Warning: invalid CSR `mhpmevent3h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent4h' for the current ISA
+.*Warning: invalid CSR `mhpmevent4h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent4h' for the current ISA
+.*Warning: invalid CSR `mhpmevent4h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent5h' for the current ISA
+.*Warning: invalid CSR `mhpmevent5h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent5h' for the current ISA
+.*Warning: invalid CSR `mhpmevent5h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent6h' for the current ISA
+.*Warning: invalid CSR `mhpmevent6h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent6h' for the current ISA
+.*Warning: invalid CSR `mhpmevent6h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent7h' for the current ISA
+.*Warning: invalid CSR `mhpmevent7h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent7h' for the current ISA
+.*Warning: invalid CSR `mhpmevent7h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent8h' for the current ISA
+.*Warning: invalid CSR `mhpmevent8h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent8h' for the current ISA
+.*Warning: invalid CSR `mhpmevent8h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent9h' for the current ISA
+.*Warning: invalid CSR `mhpmevent9h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent9h' for the current ISA
+.*Warning: invalid CSR `mhpmevent9h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent10h' for the current ISA
+.*Warning: invalid CSR `mhpmevent10h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent10h' for the current ISA
+.*Warning: invalid CSR `mhpmevent10h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent11h' for the current ISA
+.*Warning: invalid CSR `mhpmevent11h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent11h' for the current ISA
+.*Warning: invalid CSR `mhpmevent11h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent12h' for the current ISA
+.*Warning: invalid CSR `mhpmevent12h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent12h' for the current ISA
+.*Warning: invalid CSR `mhpmevent12h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent13h' for the current ISA
+.*Warning: invalid CSR `mhpmevent13h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent13h' for the current ISA
+.*Warning: invalid CSR `mhpmevent13h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent14h' for the current ISA
+.*Warning: invalid CSR `mhpmevent14h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent14h' for the current ISA
+.*Warning: invalid CSR `mhpmevent14h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent15h' for the current ISA
+.*Warning: invalid CSR `mhpmevent15h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent15h' for the current ISA
+.*Warning: invalid CSR `mhpmevent15h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent16h' for the current ISA
+.*Warning: invalid CSR `mhpmevent16h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent16h' for the current ISA
+.*Warning: invalid CSR `mhpmevent16h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent17h' for the current ISA
+.*Warning: invalid CSR `mhpmevent17h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent17h' for the current ISA
+.*Warning: invalid CSR `mhpmevent17h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent18h' for the current ISA
+.*Warning: invalid CSR `mhpmevent18h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent18h' for the current ISA
+.*Warning: invalid CSR `mhpmevent18h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent19h' for the current ISA
+.*Warning: invalid CSR `mhpmevent19h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent19h' for the current ISA
+.*Warning: invalid CSR `mhpmevent19h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent20h' for the current ISA
+.*Warning: invalid CSR `mhpmevent20h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent20h' for the current ISA
+.*Warning: invalid CSR `mhpmevent20h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent21h' for the current ISA
+.*Warning: invalid CSR `mhpmevent21h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent21h' for the current ISA
+.*Warning: invalid CSR `mhpmevent21h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent22h' for the current ISA
+.*Warning: invalid CSR `mhpmevent22h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent22h' for the current ISA
+.*Warning: invalid CSR `mhpmevent22h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent23h' for the current ISA
+.*Warning: invalid CSR `mhpmevent23h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent23h' for the current ISA
+.*Warning: invalid CSR `mhpmevent23h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent24h' for the current ISA
+.*Warning: invalid CSR `mhpmevent24h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent24h' for the current ISA
+.*Warning: invalid CSR `mhpmevent24h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent25h' for the current ISA
+.*Warning: invalid CSR `mhpmevent25h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent25h' for the current ISA
+.*Warning: invalid CSR `mhpmevent25h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent26h' for the current ISA
+.*Warning: invalid CSR `mhpmevent26h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent26h' for the current ISA
+.*Warning: invalid CSR `mhpmevent26h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent27h' for the current ISA
+.*Warning: invalid CSR `mhpmevent27h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent27h' for the current ISA
+.*Warning: invalid CSR `mhpmevent27h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent28h' for the current ISA
+.*Warning: invalid CSR `mhpmevent28h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent28h' for the current ISA
+.*Warning: invalid CSR `mhpmevent28h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent29h' for the current ISA
+.*Warning: invalid CSR `mhpmevent29h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent29h' for the current ISA
+.*Warning: invalid CSR `mhpmevent29h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent30h' for the current ISA
+.*Warning: invalid CSR `mhpmevent30h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent30h' for the current ISA
+.*Warning: invalid CSR `mhpmevent30h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent31h' for the current ISA
+.*Warning: invalid CSR `mhpmevent31h' for the privileged spec `1.10'
+.*Warning: invalid CSR `mhpmevent31h' for the current ISA
+.*Warning: invalid CSR `mhpmevent31h' for the privileged spec `1.10'
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.10'
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.10'
 .*Warning: invalid CSR `sbadaddr' for the privileged spec `1.10'
