@@ -221,6 +221,46 @@
 .*Warning: invalid CSR `henvcfgh' for the current ISA
 .*Warning: invalid CSR `htimedeltah' for the current ISA
 .*Warning: invalid CSR `htimedeltah' for the current ISA
+.*Warning: invalid CSR `mstateen0' for the current ISA
+.*Warning: invalid CSR `mstateen0' for the current ISA
+.*Warning: invalid CSR `mstateen1' for the current ISA
+.*Warning: invalid CSR `mstateen1' for the current ISA
+.*Warning: invalid CSR `mstateen2' for the current ISA
+.*Warning: invalid CSR `mstateen2' for the current ISA
+.*Warning: invalid CSR `mstateen3' for the current ISA
+.*Warning: invalid CSR `mstateen3' for the current ISA
+.*Warning: invalid CSR `sstateen0' for the current ISA
+.*Warning: invalid CSR `sstateen0' for the current ISA
+.*Warning: invalid CSR `sstateen1' for the current ISA
+.*Warning: invalid CSR `sstateen1' for the current ISA
+.*Warning: invalid CSR `sstateen2' for the current ISA
+.*Warning: invalid CSR `sstateen2' for the current ISA
+.*Warning: invalid CSR `sstateen3' for the current ISA
+.*Warning: invalid CSR `sstateen3' for the current ISA
+.*Warning: invalid CSR `hstateen0' for the current ISA
+.*Warning: invalid CSR `hstateen0' for the current ISA
+.*Warning: invalid CSR `hstateen1' for the current ISA
+.*Warning: invalid CSR `hstateen1' for the current ISA
+.*Warning: invalid CSR `hstateen2' for the current ISA
+.*Warning: invalid CSR `hstateen2' for the current ISA
+.*Warning: invalid CSR `hstateen3' for the current ISA
+.*Warning: invalid CSR `hstateen3' for the current ISA
+.*Warning: invalid CSR `mstateen0h' for the current ISA
+.*Warning: invalid CSR `mstateen0h' for the current ISA
+.*Warning: invalid CSR `mstateen1h' for the current ISA
+.*Warning: invalid CSR `mstateen1h' for the current ISA
+.*Warning: invalid CSR `mstateen2h' for the current ISA
+.*Warning: invalid CSR `mstateen2h' for the current ISA
+.*Warning: invalid CSR `mstateen3h' for the current ISA
+.*Warning: invalid CSR `mstateen3h' for the current ISA
+.*Warning: invalid CSR `hstateen0h' for the current ISA
+.*Warning: invalid CSR `hstateen0h' for the current ISA
+.*Warning: invalid CSR `hstateen1h' for the current ISA
+.*Warning: invalid CSR `hstateen1h' for the current ISA
+.*Warning: invalid CSR `hstateen2h' for the current ISA
+.*Warning: invalid CSR `hstateen2h' for the current ISA
+.*Warning: invalid CSR `hstateen3h' for the current ISA
+.*Warning: invalid CSR `hstateen3h' for the current ISA
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.12'
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.12'
 .*Warning: invalid CSR `sbadaddr' for the privileged spec `1.12'
