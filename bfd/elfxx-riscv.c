@@ -1913,7 +1913,7 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
       && riscv_lookup_subset (rps->subset_list, "f", &subset))
     {
       rps->error_handler
-	(_("`zfinx' is conflict with the `f/d/q' extension"));
+	(_("`zfinx' is conflict with the `f/d/q/zfh/zfhmin' extension"));
       no_conflict = false;
     }
 
