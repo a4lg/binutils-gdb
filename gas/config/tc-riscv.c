@@ -69,6 +69,8 @@ enum riscv_csr_class
   CSR_CLASS_SMSTATEEN_32,	/* Smstateen RV32 only */
   CSR_CLASS_SSCOFPMF,		/* Sscofpmf only */
   CSR_CLASS_SSCOFPMF_32,	/* Sscofpmf RV32 only */
+  CSR_CLASS_SSTC,		/* Sstc only */
+  CSR_CLASS_SSTC_32,		/* Sstc RV32 only */
   CSR_CLASS_DEBUG	/* debug CSR */
 };
 
@@ -920,6 +922,12 @@ riscv_csr_address (const char *csr_name,
       break;
     case CSR_CLASS_SSCOFPMF_32:
       result = (xlen == 32 && riscv_subset_supports (&riscv_rps_as, "sscofpmf"));
+      break;
+    case CSR_CLASS_SSTC:
+      result = riscv_subset_supports (&riscv_rps_as, "sstc");
+      break;
+    case CSR_CLASS_SSTC_32:
+      result = (xlen == 32 && riscv_subset_supports (&riscv_rps_as, "sstc"));
       break;
     case CSR_CLASS_DEBUG:
       need_check_version = false;

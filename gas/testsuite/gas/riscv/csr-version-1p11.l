@@ -528,6 +528,18 @@
 .*Warning: invalid CSR `mhpmevent30h' for the current ISA
 .*Warning: invalid CSR `mhpmevent31h' for the current ISA
 .*Warning: invalid CSR `mhpmevent31h' for the current ISA
+.*Warning: invalid CSR `stimecmp' for the current ISA
+.*Warning: invalid CSR `stimecmp' for the current ISA
+.*Warning: invalid CSR `stimecmph' for the current ISA
+.*Warning: invalid CSR `stimecmph' for the current ISA
+.*Warning: invalid CSR `vstimecmp' for the current ISA
+.*Warning: invalid CSR `vstimecmp' for the privileged spec `1.11'
+.*Warning: invalid CSR `vstimecmp' for the current ISA
+.*Warning: invalid CSR `vstimecmp' for the privileged spec `1.11'
+.*Warning: invalid CSR `vstimecmph' for the current ISA
+.*Warning: invalid CSR `vstimecmph' for the privileged spec `1.11'
+.*Warning: invalid CSR `vstimecmph' for the current ISA
+.*Warning: invalid CSR `vstimecmph' for the privileged spec `1.11'
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.11'
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.11'
 .*Warning: invalid CSR `sbadaddr' for the privileged spec `1.11'

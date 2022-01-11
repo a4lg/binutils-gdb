@@ -642,6 +642,22 @@
 .*Warning: invalid CSR `mhpmevent31h' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `mhpmevent31h' for the current ISA
 .*Warning: invalid CSR `mhpmevent31h' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `stimecmp' for the current ISA
+.*Warning: invalid CSR `stimecmp' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `stimecmp' for the current ISA
+.*Warning: invalid CSR `stimecmp' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `stimecmph' for the current ISA
+.*Warning: invalid CSR `stimecmph' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `stimecmph' for the current ISA
+.*Warning: invalid CSR `stimecmph' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `vstimecmp' for the current ISA
+.*Warning: invalid CSR `vstimecmp' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `vstimecmp' for the current ISA
+.*Warning: invalid CSR `vstimecmp' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `vstimecmph' for the current ISA
+.*Warning: invalid CSR `vstimecmph' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `vstimecmph' for the current ISA
+.*Warning: invalid CSR `vstimecmph' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `fflags' for the current ISA
 .*Warning: invalid CSR `fflags' for the current ISA
 .*Warning: invalid CSR `frm' for the current ISA
