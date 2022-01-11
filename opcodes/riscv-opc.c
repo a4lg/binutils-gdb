@@ -649,7 +649,9 @@ const struct riscv_opcode riscv_opcodes[] =
 
 /* Half-precision floating-point instruction subset.  */
 {"flh",        0, INSN_CLASS_ZFHMIN,   "D,o(s)",    MATCH_FLH, MASK_FLH, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"flh",        0, INSN_CLASS_ZFHMIN,   "D,A,s",     0, (int) M_FLH, match_never, INSN_MACRO },
 {"fsh",        0, INSN_CLASS_ZFHMIN,   "T,q(s)",    MATCH_FSH, MASK_FSH, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"fsh",        0, INSN_CLASS_ZFHMIN,   "T,A,s",     0, (int) M_FSH, match_never, INSN_MACRO },
 {"fmv.x.h",    0, INSN_CLASS_ZFHMIN,   "d,S",       MATCH_FMV_X_H, MASK_FMV_X_H, match_opcode, 0 },
 {"fmv.h.x",    0, INSN_CLASS_ZFHMIN,   "D,s",       MATCH_FMV_H_X, MASK_FMV_H_X, match_opcode, 0 },
 {"fsgnj.h",    0, INSN_CLASS_ZFH,   "D,S,T",     MATCH_FSGNJ_H, MASK_FSGNJ_H, match_opcode, 0 },
