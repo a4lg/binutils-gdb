@@ -2113,6 +2113,23 @@
 #define MASK_CBO_INVAL 0xfff07fff
 #define MATCH_CBO_ZERO 0x40200f
 #define MASK_CBO_ZERO 0xfff07fff
+/* Zihintntl hint instructions.  */
+#define MATCH_NTL_P1 0x200033
+#define MASK_NTL_P1 0xffffffff
+#define MATCH_NTL_PALL 0x300033
+#define MASK_NTL_PALL 0xffffffff
+#define MATCH_NTL_S1 0x400033
+#define MASK_NTL_S1 0xffffffff
+#define MATCH_NTL_ALL 0x500033
+#define MASK_NTL_ALL 0xffffffff
+#define MATCH_C_NTL_P1 0x900a
+#define MASK_C_NTL_P1 0xffff
+#define MATCH_C_NTL_PALL 0x900e
+#define MASK_C_NTL_PALL 0xffff
+#define MATCH_C_NTL_S1 0x9012
+#define MASK_C_NTL_S1 0xffff
+#define MATCH_C_NTL_ALL 0x9016
+#define MASK_C_NTL_ALL 0xffff
 /* Zawrs intructions.  */
 #define MATCH_WRS_NTO 0x00d00073
 #define MASK_WRS_NTO 0xffffffff
@@ -3115,6 +3132,15 @@ DECLARE_INSN(cbo_clean, MATCH_CBO_CLEAN, MASK_CBO_CLEAN);
 DECLARE_INSN(cbo_flush, MATCH_CBO_FLUSH, MASK_CBO_FLUSH);
 DECLARE_INSN(cbo_inval, MATCH_CBO_INVAL, MASK_CBO_INVAL);
 DECLARE_INSN(cbo_zero, MATCH_CBO_ZERO, MASK_CBO_ZERO);
+/* Zihintntl hint instructions.  */
+DECLARE_INSN(ntl_p1, MATCH_NTL_P1, MASK_NTL_P1);
+DECLARE_INSN(ntl_pall, MATCH_NTL_PALL, MASK_NTL_PALL);
+DECLARE_INSN(ntl_s1, MATCH_NTL_S1, MASK_NTL_S1);
+DECLARE_INSN(ntl_all, MATCH_NTL_ALL, MASK_NTL_ALL);
+DECLARE_INSN(c_ntl_p1, MATCH_C_NTL_P1, MASK_C_NTL_P1);
+DECLARE_INSN(c_ntl_pall, MATCH_C_NTL_PALL, MASK_C_NTL_PALL);
+DECLARE_INSN(c_ntl_s1, MATCH_C_NTL_S1, MASK_C_NTL_S1);
+DECLARE_INSN(c_ntl_all, MATCH_C_NTL_ALL, MASK_C_NTL_ALL);
 /* Zawrs instructions.  */
 DECLARE_INSN(wrs_nto, MATCH_WRS_NTO, MASK_WRS_NTO)
 DECLARE_INSN(wrs_sto, MATCH_WRS_STO, MASK_WRS_STO)
