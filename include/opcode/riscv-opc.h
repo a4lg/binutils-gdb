@@ -2113,6 +2113,23 @@
 #define MASK_CBO_INVAL 0xfff07fff
 #define MATCH_CBO_ZERO 0x40200f
 #define MASK_CBO_ZERO 0xfff07fff
+/* Zihintntl hint instructions */
+#define MATCH_NTL_P1 0x200033
+#define MASK_NTL_P1 0xffffffff
+#define MATCH_NTL_PALL 0x300033
+#define MASK_NTL_PALL 0xffffffff
+#define MATCH_NTL_S1 0x400033
+#define MASK_NTL_S1 0xffffffff
+#define MATCH_NTL_ALL 0x500033
+#define MASK_NTL_ALL 0xffffffff
+#define MATCH_C_NTL_P1 0x900a
+#define MASK_C_NTL_P1 0xffff
+#define MATCH_C_NTL_PALL 0x900e
+#define MASK_C_NTL_PALL 0xffff
+#define MATCH_C_NTL_S1 0x9012
+#define MASK_C_NTL_S1 0xffff
+#define MATCH_C_NTL_ALL 0x9016
+#define MASK_C_NTL_ALL 0xffff
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
