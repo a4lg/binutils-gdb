@@ -2306,6 +2306,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
   int argnum;
   const struct percent_op_match *p;
   struct riscv_ip_error error;
+  enum riscv_insn_class insn_class;
   error.msg = "unrecognized opcode";
   error.statement = str;
   error.missing_ext = NULL;
@@ -2332,8 +2333,24 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 
       if (!riscv_multi_subset_supports (&riscv_rps_as, insn->insn_class))
 	{
-	  error.missing_ext = riscv_multi_subset_supports_ext (&riscv_rps_as,
-							       insn->insn_class);
+	  insn_class = insn->insn_class;
+	  if (insn->pinfo != INSN_MACRO && insn->pinfo & INSN_F_OR_X)
+	    switch (insn_class)
+	      {
+		case INSN_CLASS_D:
+		case INSN_CLASS_ZDINX:
+		  insn_class = INSN_CLASS_D_OR_ZDINX;
+		  break;
+		case INSN_CLASS_Q:
+		case INSN_CLASS_ZQINX:
+		  insn_class = INSN_CLASS_Q_OR_ZQINX;
+		  break;
+		default:
+		  break;
+	      }
+	  if (!riscv_multi_subset_supports (&riscv_rps_as, insn_class))
+	    error.missing_ext = riscv_multi_subset_supports_ext (&riscv_rps_as,
+								 insn_class);
 	  continue;
 	}
 
