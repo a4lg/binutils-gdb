@@ -2420,6 +2420,22 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      */
 	      switch (insn_class)
 		{
+		case INSN_CLASS_D:
+		case INSN_CLASS_ZDINX:
+		  insn_class = INSN_CLASS_D_OR_ZDINX;
+		  break;
+		case INSN_CLASS_Q:
+		case INSN_CLASS_ZQINX:
+		  insn_class = INSN_CLASS_Q_OR_ZQINX;
+		  break;
+		case INSN_CLASS_ZFHMIN_AND_D:
+		case INSN_CLASS_ZHINXMIN_AND_ZDINX:
+		  insn_class = INSN_CLASS_ZFHMIN_AND_D_OR_X;
+		  break;
+		case INSN_CLASS_ZFHMIN_AND_Q:
+		case INSN_CLASS_ZHINXMIN_AND_ZQINX:
+		  insn_class = INSN_CLASS_ZFHMIN_AND_Q_OR_X;
+		  break;
 		default:
 		  break;
 		}
