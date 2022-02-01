@@ -109,6 +109,7 @@ const char * const riscv_vma[2] =
 
 #define MASK_RS1 (OP_MASK_RS1 << OP_SH_RS1)
 #define MASK_RS2 (OP_MASK_RS2 << OP_SH_RS2)
+#define MASK_RS3 (OP_MASK_RS3 << OP_SH_RS3)
 #define MASK_RD (OP_MASK_RD << OP_SH_RD)
 #define MASK_CRS2 (OP_MASK_CRS2 << OP_SH_CRS2)
 #define MASK_IMM ENCODE_ITYPE_IMM (-1U)
@@ -264,6 +265,146 @@ match_vd_eq_vs1_eq_vs2 (const struct riscv_opcode *op,
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
 
   return match_opcode (op, insn) && vd == vs1 && vs1 == vs2;
+}
+
+/* Functions below are used for Zdinx/Zqinx instructions.  */
+
+static int
+match_opcode_zdinx_rtype_g2 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  return match_opcode (op, insn) && (rd % 2 == 0)
+    && (rs1 % 2 == 0) && (rs2 % 2 == 0);
+}
+
+static int
+match_opcode_zdinx_rtype_g4 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  return match_opcode (op, insn) && (rd % 4 == 0)
+    && (rs1 % 4 == 0) && (rs2 % 4 == 0);
+}
+
+static int
+match_rs1_eq_rs2_zdinx_rtype_g2 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_rs1_eq_rs2 (op, insn) && (rd % 2 == 0) && (rs1 % 2 == 0);
+}
+
+static int
+match_rs1_eq_rs2_zdinx_rtype_g4 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_rs1_eq_rs2 (op, insn) && (rd % 4 == 0) && (rs1 % 4 == 0);
+}
+
+static int
+match_opcode_zdinx_r4type_g2 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  int rs3 = (insn & MASK_RS3) >> OP_SH_RS3;
+  return match_opcode (op, insn) && (rd % 2 == 0)
+    && (rs1 % 2 == 0) && (rs2 % 2 == 0) && (rs3 % 2 == 0);
+}
+
+static int
+match_opcode_zdinx_r4type_g4 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  int rs3 = (insn & MASK_RS3) >> OP_SH_RS3;
+  return match_opcode (op, insn) && (rd % 4 == 0)
+    & (rs1 % 4 == 0) && (rs2 % 4 == 0) && (rs3 % 4 == 0);
+}
+
+static int
+match_opcode_zdinx_itype_g1_2 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_opcode (op, insn) && (rd % 1 == 0) && (rs1 % 2 == 0);
+}
+
+static int
+match_opcode_zdinx_itype_g1_4 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_opcode (op, insn) && (rd % 1 == 0) && (rs1 % 4 == 0);
+}
+
+static int
+match_opcode_zdinx_itype_g2_1 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_opcode (op, insn) && (rd % 2 == 0) && (rs1 % 1 == 0);
+}
+
+static int
+match_opcode_zdinx_itype_g2_2 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_opcode (op, insn) && (rd % 2 == 0) && (rs1 % 2 == 0);
+}
+
+static int
+match_opcode_zdinx_itype_g2_4 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_opcode (op, insn) && (rd % 2 == 0) && (rs1 % 4 == 0);
+}
+
+static int
+match_opcode_zdinx_itype_g4_1 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_opcode (op, insn) && (rd % 4 == 0) && (rs1 % 1 == 0);
+}
+
+static int
+match_opcode_zdinx_itype_g4_2 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_opcode (op, insn) && (rd % 4 == 0) && (rs1 % 2 == 0);
+}
+
+static int
+match_opcode_zdinx_itype_g4_4 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_opcode (op, insn) && (rd % 4 == 0) && (rs1 % 4 == 0);
+}
+
+static int
+match_opcode_zdinx_cmp_g2 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  return match_opcode (op, insn) && (rs1 % 2 == 0) && (rs2 % 2 == 0);
+}
+
+static int
+match_opcode_zdinx_cmp_g4 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  return match_opcode (op, insn) && (rs1 % 4 == 0) && (rs2 % 4 == 0);
 }
 
 const struct riscv_opcode riscv_opcodes[] =
@@ -715,7 +856,9 @@ const struct riscv_opcode riscv_opcodes[] =
 {"fcvt.s.lu", 64, INSN_CLASS_F_OR_ZFINX,   "D,s",       MATCH_FCVT_S_LU|MASK_RM, MASK_FCVT_S_LU|MASK_RM, match_opcode, 0 },
 {"fcvt.s.lu", 64, INSN_CLASS_F_OR_ZFINX,   "D,s,m",     MATCH_FCVT_S_LU, MASK_FCVT_S_LU, match_opcode, 0 },
 
-/* Double-precision floating-point instruction subset.  */
+/* Double-precision floating-point instruction subset.
+   Zdinx instructions must be defined per xlen. D/Zdinx instructions that
+   share the name must have INSN_F_OR_X flag.  */
 {"fld",        0, INSN_CLASS_D_AND_C, "D,Cn(Cc)",  MATCH_C_FLDSP, MASK_C_FLDSP, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"fld",        0, INSN_CLASS_D_AND_C, "CD,Cl(Cs)", MATCH_C_FLD, MASK_C_FLD, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"fld",        0, INSN_CLASS_D,   "D,o(s)",    MATCH_FLD, MASK_FLD, match_opcode, INSN_DREF|INSN_8_BYTE },
@@ -724,115 +867,303 @@ const struct riscv_opcode riscv_opcodes[] =
 {"fsd",        0, INSN_CLASS_D_AND_C, "CD,Cl(Cs)", MATCH_C_FSD, MASK_C_FSD, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"fsd",        0, INSN_CLASS_D,   "T,q(s)",    MATCH_FSD, MASK_FSD, match_opcode, INSN_DREF|INSN_8_BYTE },
 {"fsd",        0, INSN_CLASS_D,   "T,A,s",     0, (int) M_FSD, match_never, INSN_MACRO },
-{"fmv.d",      0, INSN_CLASS_D_OR_ZDINX,   "D,U",       MATCH_FSGNJ_D, MASK_FSGNJ_D, match_rs1_eq_rs2, INSN_ALIAS },
-{"fneg.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,U",       MATCH_FSGNJN_D, MASK_FSGNJN_D, match_rs1_eq_rs2, INSN_ALIAS },
-{"fabs.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,U",       MATCH_FSGNJX_D, MASK_FSGNJX_D, match_rs1_eq_rs2, INSN_ALIAS },
-{"fsgnj.d",    0, INSN_CLASS_D_OR_ZDINX,   "D,S,T",     MATCH_FSGNJ_D, MASK_FSGNJ_D, match_opcode, 0 },
-{"fsgnjn.d",   0, INSN_CLASS_D_OR_ZDINX,   "D,S,T",     MATCH_FSGNJN_D, MASK_FSGNJN_D, match_opcode, 0 },
-{"fsgnjx.d",   0, INSN_CLASS_D_OR_ZDINX,   "D,S,T",     MATCH_FSGNJX_D, MASK_FSGNJX_D, match_opcode, 0 },
-{"fadd.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,S,T",     MATCH_FADD_D|MASK_RM, MASK_FADD_D|MASK_RM, match_opcode, 0 },
-{"fadd.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,S,T,m",   MATCH_FADD_D, MASK_FADD_D, match_opcode, 0 },
-{"fsub.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,S,T",     MATCH_FSUB_D|MASK_RM, MASK_FSUB_D|MASK_RM, match_opcode, 0 },
-{"fsub.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,S,T,m",   MATCH_FSUB_D, MASK_FSUB_D, match_opcode, 0 },
-{"fmul.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,S,T",     MATCH_FMUL_D|MASK_RM, MASK_FMUL_D|MASK_RM, match_opcode, 0 },
-{"fmul.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,S,T,m",   MATCH_FMUL_D, MASK_FMUL_D, match_opcode, 0 },
-{"fdiv.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,S,T",     MATCH_FDIV_D|MASK_RM, MASK_FDIV_D|MASK_RM, match_opcode, 0 },
-{"fdiv.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,S,T,m",   MATCH_FDIV_D, MASK_FDIV_D, match_opcode, 0 },
-{"fsqrt.d",    0, INSN_CLASS_D_OR_ZDINX,   "D,S",       MATCH_FSQRT_D|MASK_RM, MASK_FSQRT_D|MASK_RM, match_opcode, 0 },
-{"fsqrt.d",    0, INSN_CLASS_D_OR_ZDINX,   "D,S,m",     MATCH_FSQRT_D, MASK_FSQRT_D, match_opcode, 0 },
-{"fmin.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,S,T",     MATCH_FMIN_D, MASK_FMIN_D, match_opcode, 0 },
-{"fmax.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,S,T",     MATCH_FMAX_D, MASK_FMAX_D, match_opcode, 0 },
-{"fmadd.d",    0, INSN_CLASS_D_OR_ZDINX,   "D,S,T,R",   MATCH_FMADD_D|MASK_RM, MASK_FMADD_D|MASK_RM, match_opcode, 0 },
-{"fmadd.d",    0, INSN_CLASS_D_OR_ZDINX,   "D,S,T,R,m", MATCH_FMADD_D, MASK_FMADD_D, match_opcode, 0 },
-{"fnmadd.d",   0, INSN_CLASS_D_OR_ZDINX,   "D,S,T,R",   MATCH_FNMADD_D|MASK_RM, MASK_FNMADD_D|MASK_RM, match_opcode, 0 },
-{"fnmadd.d",   0, INSN_CLASS_D_OR_ZDINX,   "D,S,T,R,m", MATCH_FNMADD_D, MASK_FNMADD_D, match_opcode, 0 },
-{"fmsub.d",    0, INSN_CLASS_D_OR_ZDINX,   "D,S,T,R",   MATCH_FMSUB_D|MASK_RM, MASK_FMSUB_D|MASK_RM, match_opcode, 0 },
-{"fmsub.d",    0, INSN_CLASS_D_OR_ZDINX,   "D,S,T,R,m", MATCH_FMSUB_D, MASK_FMSUB_D, match_opcode, 0 },
-{"fnmsub.d",   0, INSN_CLASS_D_OR_ZDINX,   "D,S,T,R",   MATCH_FNMSUB_D|MASK_RM, MASK_FNMSUB_D|MASK_RM, match_opcode, 0 },
-{"fnmsub.d",   0, INSN_CLASS_D_OR_ZDINX,   "D,S,T,R,m", MATCH_FNMSUB_D, MASK_FNMSUB_D, match_opcode, 0 },
-{"fcvt.w.d",   0, INSN_CLASS_D_OR_ZDINX,   "d,S",       MATCH_FCVT_W_D|MASK_RM, MASK_FCVT_W_D|MASK_RM, match_opcode, 0 },
-{"fcvt.w.d",   0, INSN_CLASS_D_OR_ZDINX,   "d,S,m",     MATCH_FCVT_W_D, MASK_FCVT_W_D, match_opcode, 0 },
-{"fcvt.wu.d",  0, INSN_CLASS_D_OR_ZDINX,   "d,S",       MATCH_FCVT_WU_D|MASK_RM, MASK_FCVT_WU_D|MASK_RM, match_opcode, 0 },
-{"fcvt.wu.d",  0, INSN_CLASS_D_OR_ZDINX,   "d,S,m",     MATCH_FCVT_WU_D, MASK_FCVT_WU_D, match_opcode, 0 },
-{"fcvt.d.w",   0, INSN_CLASS_D_OR_ZDINX,   "D,s",       MATCH_FCVT_D_W, MASK_FCVT_D_W|MASK_RM, match_opcode, 0 },
-{"fcvt.d.wu",  0, INSN_CLASS_D_OR_ZDINX,   "D,s",       MATCH_FCVT_D_WU, MASK_FCVT_D_WU|MASK_RM, match_opcode, 0 },
-{"fcvt.d.s",   0, INSN_CLASS_D_OR_ZDINX,   "D,S",       MATCH_FCVT_D_S, MASK_FCVT_D_S|MASK_RM, match_opcode, 0 },
-{"fcvt.s.d",   0, INSN_CLASS_D_OR_ZDINX,   "D,S",       MATCH_FCVT_S_D|MASK_RM, MASK_FCVT_S_D|MASK_RM, match_opcode, 0 },
-{"fcvt.s.d",   0, INSN_CLASS_D_OR_ZDINX,   "D,S,m",     MATCH_FCVT_S_D, MASK_FCVT_S_D, match_opcode, 0 },
-{"fclass.d",   0, INSN_CLASS_D_OR_ZDINX,   "d,S",       MATCH_FCLASS_D, MASK_FCLASS_D, match_opcode, 0 },
-{"feq.d",      0, INSN_CLASS_D_OR_ZDINX,   "d,S,T",     MATCH_FEQ_D, MASK_FEQ_D, match_opcode, 0 },
-{"flt.d",      0, INSN_CLASS_D_OR_ZDINX,   "d,S,T",     MATCH_FLT_D, MASK_FLT_D, match_opcode, 0 },
-{"fle.d",      0, INSN_CLASS_D_OR_ZDINX,   "d,S,T",     MATCH_FLE_D, MASK_FLE_D, match_opcode, 0 },
-{"fgt.d",      0, INSN_CLASS_D_OR_ZDINX,   "d,T,S",     MATCH_FLT_D, MASK_FLT_D, match_opcode, 0 },
-{"fge.d",      0, INSN_CLASS_D_OR_ZDINX,   "d,T,S",     MATCH_FLE_D, MASK_FLE_D, match_opcode, 0 },
+{"fmv.d",      0, INSN_CLASS_D,       "D,U",       MATCH_FSGNJ_D, MASK_FSGNJ_D, match_rs1_eq_rs2, INSN_ALIAS|INSN_F_OR_X },
+{"fmv.d",     32, INSN_CLASS_ZDINX,   "D,U",       MATCH_FSGNJ_D, MASK_FSGNJ_D, match_rs1_eq_rs2_zdinx_rtype_g2, INSN_ALIAS|INSN_F_OR_X },
+{"fmv.d",     64, INSN_CLASS_ZDINX,   "D,U",       MATCH_FSGNJ_D, MASK_FSGNJ_D, match_rs1_eq_rs2, INSN_ALIAS|INSN_F_OR_X },
+{"fneg.d",     0, INSN_CLASS_D,       "D,U",       MATCH_FSGNJN_D, MASK_FSGNJN_D, match_rs1_eq_rs2, INSN_ALIAS|INSN_F_OR_X },
+{"fneg.d",    32, INSN_CLASS_ZDINX,   "D,U",       MATCH_FSGNJN_D, MASK_FSGNJN_D, match_rs1_eq_rs2_zdinx_rtype_g2, INSN_ALIAS|INSN_F_OR_X },
+{"fneg.d",    64, INSN_CLASS_ZDINX,   "D,U",       MATCH_FSGNJN_D, MASK_FSGNJN_D, match_rs1_eq_rs2, INSN_ALIAS|INSN_F_OR_X },
+{"fabs.d",     0, INSN_CLASS_D,       "D,U",       MATCH_FSGNJX_D, MASK_FSGNJX_D, match_rs1_eq_rs2, INSN_ALIAS|INSN_F_OR_X },
+{"fabs.d",    32, INSN_CLASS_ZDINX,   "D,U",       MATCH_FSGNJX_D, MASK_FSGNJX_D, match_rs1_eq_rs2_zdinx_rtype_g2, INSN_ALIAS|INSN_F_OR_X },
+{"fabs.d",    64, INSN_CLASS_ZDINX,   "D,U",       MATCH_FSGNJX_D, MASK_FSGNJX_D, match_rs1_eq_rs2, INSN_ALIAS|INSN_F_OR_X },
+{"fsgnj.d",    0, INSN_CLASS_D,       "D,S,T",     MATCH_FSGNJ_D, MASK_FSGNJ_D, match_opcode, INSN_F_OR_X },
+{"fsgnj.d",   32, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FSGNJ_D, MASK_FSGNJ_D, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fsgnj.d",   64, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FSGNJ_D, MASK_FSGNJ_D, match_opcode, INSN_F_OR_X },
+{"fsgnjn.d",   0, INSN_CLASS_D,       "D,S,T",     MATCH_FSGNJN_D, MASK_FSGNJN_D, match_opcode, INSN_F_OR_X },
+{"fsgnjn.d",  32, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FSGNJN_D, MASK_FSGNJN_D, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fsgnjn.d",  64, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FSGNJN_D, MASK_FSGNJN_D, match_opcode, INSN_F_OR_X },
+{"fsgnjx.d",   0, INSN_CLASS_D,       "D,S,T",     MATCH_FSGNJX_D, MASK_FSGNJX_D, match_opcode, INSN_F_OR_X },
+{"fsgnjx.d",  32, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FSGNJX_D, MASK_FSGNJX_D, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fsgnjx.d",  64, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FSGNJX_D, MASK_FSGNJX_D, match_opcode, INSN_F_OR_X },
+{"fadd.d",     0, INSN_CLASS_D,       "D,S,T",     MATCH_FADD_D|MASK_RM, MASK_FADD_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fadd.d",    32, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FADD_D|MASK_RM, MASK_FADD_D|MASK_RM, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fadd.d",    64, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FADD_D|MASK_RM, MASK_FADD_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fadd.d",     0, INSN_CLASS_D,       "D,S,T,m",   MATCH_FADD_D, MASK_FADD_D, match_opcode, INSN_F_OR_X },
+{"fadd.d",    32, INSN_CLASS_ZDINX,   "D,S,T,m",   MATCH_FADD_D, MASK_FADD_D, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fadd.d",    64, INSN_CLASS_ZDINX,   "D,S,T,m",   MATCH_FADD_D, MASK_FADD_D, match_opcode, INSN_F_OR_X },
+{"fsub.d",     0, INSN_CLASS_D,       "D,S,T",     MATCH_FSUB_D|MASK_RM, MASK_FSUB_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fsub.d",    32, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FSUB_D|MASK_RM, MASK_FSUB_D|MASK_RM, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fsub.d",    64, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FSUB_D|MASK_RM, MASK_FSUB_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fsub.d",     0, INSN_CLASS_D,       "D,S,T,m",   MATCH_FSUB_D, MASK_FSUB_D, match_opcode, INSN_F_OR_X },
+{"fsub.d",    32, INSN_CLASS_ZDINX,   "D,S,T,m",   MATCH_FSUB_D, MASK_FSUB_D, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fsub.d",    64, INSN_CLASS_ZDINX,   "D,S,T,m",   MATCH_FSUB_D, MASK_FSUB_D, match_opcode, INSN_F_OR_X },
+{"fmul.d",     0, INSN_CLASS_D,       "D,S,T",     MATCH_FMUL_D|MASK_RM, MASK_FMUL_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fmul.d",    32, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FMUL_D|MASK_RM, MASK_FMUL_D|MASK_RM, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fmul.d",    64, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FMUL_D|MASK_RM, MASK_FMUL_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fmul.d",     0, INSN_CLASS_D,       "D,S,T,m",   MATCH_FMUL_D, MASK_FMUL_D, match_opcode, INSN_F_OR_X },
+{"fmul.d",    32, INSN_CLASS_ZDINX,   "D,S,T,m",   MATCH_FMUL_D, MASK_FMUL_D, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fmul.d",    64, INSN_CLASS_ZDINX,   "D,S,T,m",   MATCH_FMUL_D, MASK_FMUL_D, match_opcode, INSN_F_OR_X },
+{"fdiv.d",     0, INSN_CLASS_D,       "D,S,T",     MATCH_FDIV_D|MASK_RM, MASK_FDIV_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fdiv.d",    32, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FDIV_D|MASK_RM, MASK_FDIV_D|MASK_RM, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fdiv.d",    64, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FDIV_D|MASK_RM, MASK_FDIV_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fdiv.d",     0, INSN_CLASS_D,       "D,S,T,m",   MATCH_FDIV_D, MASK_FDIV_D, match_opcode, INSN_F_OR_X },
+{"fdiv.d",    32, INSN_CLASS_ZDINX,   "D,S,T,m",   MATCH_FDIV_D, MASK_FDIV_D, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fdiv.d",    64, INSN_CLASS_ZDINX,   "D,S,T,m",   MATCH_FDIV_D, MASK_FDIV_D, match_opcode, INSN_F_OR_X },
+{"fsqrt.d",    0, INSN_CLASS_D,       "D,S",       MATCH_FSQRT_D|MASK_RM, MASK_FSQRT_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fsqrt.d",   32, INSN_CLASS_ZDINX,   "D,S",       MATCH_FSQRT_D|MASK_RM, MASK_FSQRT_D|MASK_RM, match_opcode_zdinx_itype_g2_2, INSN_F_OR_X },
+{"fsqrt.d",   64, INSN_CLASS_ZDINX,   "D,S",       MATCH_FSQRT_D|MASK_RM, MASK_FSQRT_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fsqrt.d",    0, INSN_CLASS_D,       "D,S,m",     MATCH_FSQRT_D, MASK_FSQRT_D, match_opcode, INSN_F_OR_X },
+{"fsqrt.d",   32, INSN_CLASS_ZDINX,   "D,S,m",     MATCH_FSQRT_D, MASK_FSQRT_D, match_opcode_zdinx_itype_g2_2, INSN_F_OR_X },
+{"fsqrt.d",   64, INSN_CLASS_ZDINX,   "D,S,m",     MATCH_FSQRT_D, MASK_FSQRT_D, match_opcode, INSN_F_OR_X },
+{"fmin.d",     0, INSN_CLASS_D,       "D,S,T",     MATCH_FMIN_D, MASK_FMIN_D, match_opcode, INSN_F_OR_X },
+{"fmin.d",    32, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FMIN_D, MASK_FMIN_D, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fmin.d",    64, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FMIN_D, MASK_FMIN_D, match_opcode, INSN_F_OR_X },
+{"fmax.d",     0, INSN_CLASS_D,       "D,S,T",     MATCH_FMAX_D, MASK_FMAX_D, match_opcode, INSN_F_OR_X },
+{"fmax.d",    32, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FMAX_D, MASK_FMAX_D, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fmax.d",    64, INSN_CLASS_ZDINX,   "D,S,T",     MATCH_FMAX_D, MASK_FMAX_D, match_opcode, INSN_F_OR_X },
+{"fmadd.d",    0, INSN_CLASS_D,       "D,S,T,R",   MATCH_FMADD_D|MASK_RM, MASK_FMADD_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fmadd.d",   32, INSN_CLASS_ZDINX,   "D,S,T,R",   MATCH_FMADD_D|MASK_RM, MASK_FMADD_D|MASK_RM, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fmadd.d",   64, INSN_CLASS_ZDINX,   "D,S,T,R",   MATCH_FMADD_D|MASK_RM, MASK_FMADD_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fmadd.d",    0, INSN_CLASS_D,       "D,S,T,R,m", MATCH_FMADD_D, MASK_FMADD_D, match_opcode, INSN_F_OR_X },
+{"fmadd.d",   32, INSN_CLASS_ZDINX,   "D,S,T,R,m", MATCH_FMADD_D, MASK_FMADD_D, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fmadd.d",   64, INSN_CLASS_ZDINX,   "D,S,T,R,m", MATCH_FMADD_D, MASK_FMADD_D, match_opcode, INSN_F_OR_X },
+{"fnmadd.d",   0, INSN_CLASS_D,       "D,S,T,R",   MATCH_FNMADD_D|MASK_RM, MASK_FNMADD_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fnmadd.d",  32, INSN_CLASS_ZDINX,   "D,S,T,R",   MATCH_FNMADD_D|MASK_RM, MASK_FNMADD_D|MASK_RM, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fnmadd.d",  64, INSN_CLASS_ZDINX,   "D,S,T,R",   MATCH_FNMADD_D|MASK_RM, MASK_FNMADD_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fnmadd.d",   0, INSN_CLASS_D,       "D,S,T,R,m", MATCH_FNMADD_D, MASK_FNMADD_D, match_opcode, INSN_F_OR_X },
+{"fnmadd.d",  32, INSN_CLASS_ZDINX,   "D,S,T,R,m", MATCH_FNMADD_D, MASK_FNMADD_D, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fnmadd.d",  64, INSN_CLASS_ZDINX,   "D,S,T,R,m", MATCH_FNMADD_D, MASK_FNMADD_D, match_opcode, INSN_F_OR_X },
+{"fmsub.d",    0, INSN_CLASS_D,       "D,S,T,R",   MATCH_FMSUB_D|MASK_RM, MASK_FMSUB_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fmsub.d",   32, INSN_CLASS_ZDINX,   "D,S,T,R",   MATCH_FMSUB_D|MASK_RM, MASK_FMSUB_D|MASK_RM, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fmsub.d",   64, INSN_CLASS_ZDINX,   "D,S,T,R",   MATCH_FMSUB_D|MASK_RM, MASK_FMSUB_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fmsub.d",    0, INSN_CLASS_D,       "D,S,T,R,m", MATCH_FMSUB_D, MASK_FMSUB_D, match_opcode, INSN_F_OR_X },
+{"fmsub.d",   32, INSN_CLASS_ZDINX,   "D,S,T,R,m", MATCH_FMSUB_D, MASK_FMSUB_D, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fmsub.d",   64, INSN_CLASS_ZDINX,   "D,S,T,R,m", MATCH_FMSUB_D, MASK_FMSUB_D, match_opcode, INSN_F_OR_X },
+{"fnmsub.d",   0, INSN_CLASS_D,       "D,S,T,R",   MATCH_FNMSUB_D|MASK_RM, MASK_FNMSUB_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fnmsub.d",  32, INSN_CLASS_ZDINX,   "D,S,T,R",   MATCH_FNMSUB_D|MASK_RM, MASK_FNMSUB_D|MASK_RM, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fnmsub.d",  64, INSN_CLASS_ZDINX,   "D,S,T,R",   MATCH_FNMSUB_D|MASK_RM, MASK_FNMSUB_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fnmsub.d",   0, INSN_CLASS_D,       "D,S,T,R,m", MATCH_FNMSUB_D, MASK_FNMSUB_D, match_opcode, INSN_F_OR_X },
+{"fnmsub.d",  32, INSN_CLASS_ZDINX,   "D,S,T,R,m", MATCH_FNMSUB_D, MASK_FNMSUB_D, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fnmsub.d",  64, INSN_CLASS_ZDINX,   "D,S,T,R,m", MATCH_FNMSUB_D, MASK_FNMSUB_D, match_opcode, INSN_F_OR_X },
+{"fcvt.w.d",   0, INSN_CLASS_D,       "d,S",       MATCH_FCVT_W_D|MASK_RM, MASK_FCVT_W_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.w.d",  32, INSN_CLASS_ZDINX,   "d,S",       MATCH_FCVT_W_D|MASK_RM, MASK_FCVT_W_D|MASK_RM, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.w.d",  64, INSN_CLASS_ZDINX,   "d,S",       MATCH_FCVT_W_D|MASK_RM, MASK_FCVT_W_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.w.d",   0, INSN_CLASS_D,       "d,S,m",     MATCH_FCVT_W_D, MASK_FCVT_W_D, match_opcode, INSN_F_OR_X },
+{"fcvt.w.d",  32, INSN_CLASS_ZDINX,   "d,S,m",     MATCH_FCVT_W_D, MASK_FCVT_W_D, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.w.d",  64, INSN_CLASS_ZDINX,   "d,S,m",     MATCH_FCVT_W_D, MASK_FCVT_W_D, match_opcode, INSN_F_OR_X },
+{"fcvt.wu.d",  0, INSN_CLASS_D,       "d,S",       MATCH_FCVT_WU_D|MASK_RM, MASK_FCVT_WU_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.wu.d", 32, INSN_CLASS_ZDINX,   "d,S",       MATCH_FCVT_WU_D|MASK_RM, MASK_FCVT_WU_D|MASK_RM, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.wu.d", 64, INSN_CLASS_ZDINX,   "d,S",       MATCH_FCVT_WU_D|MASK_RM, MASK_FCVT_WU_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.wu.d",  0, INSN_CLASS_D,       "d,S,m",     MATCH_FCVT_WU_D, MASK_FCVT_WU_D, match_opcode, INSN_F_OR_X },
+{"fcvt.wu.d", 32, INSN_CLASS_ZDINX,   "d,S,m",     MATCH_FCVT_WU_D, MASK_FCVT_WU_D, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.wu.d", 64, INSN_CLASS_ZDINX,   "d,S,m",     MATCH_FCVT_WU_D, MASK_FCVT_WU_D, match_opcode, INSN_F_OR_X },
+{"fcvt.d.w",   0, INSN_CLASS_D,       "D,s",       MATCH_FCVT_D_W, MASK_FCVT_D_W|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.d.w",  32, INSN_CLASS_ZDINX,   "D,s",       MATCH_FCVT_D_W, MASK_FCVT_D_W|MASK_RM, match_opcode_zdinx_itype_g2_1, INSN_F_OR_X },
+{"fcvt.d.w",  64, INSN_CLASS_ZDINX,   "D,s",       MATCH_FCVT_D_W, MASK_FCVT_D_W|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.d.wu",  0, INSN_CLASS_D,       "D,s",       MATCH_FCVT_D_WU, MASK_FCVT_D_WU|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.d.wu", 32, INSN_CLASS_ZDINX,   "D,s",       MATCH_FCVT_D_WU, MASK_FCVT_D_WU|MASK_RM, match_opcode_zdinx_itype_g2_1, INSN_F_OR_X },
+{"fcvt.d.wu", 64, INSN_CLASS_ZDINX,   "D,s",       MATCH_FCVT_D_WU, MASK_FCVT_D_WU|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.d.s",   0, INSN_CLASS_D,       "D,S",       MATCH_FCVT_D_S, MASK_FCVT_D_S|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.d.s",  32, INSN_CLASS_ZDINX,   "D,S",       MATCH_FCVT_D_S, MASK_FCVT_D_S|MASK_RM, match_opcode_zdinx_itype_g2_1, INSN_F_OR_X },
+{"fcvt.d.s",  64, INSN_CLASS_ZDINX,   "D,S",       MATCH_FCVT_D_S, MASK_FCVT_D_S|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.s.d",   0, INSN_CLASS_D,       "D,S",       MATCH_FCVT_S_D|MASK_RM, MASK_FCVT_S_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.s.d",  32, INSN_CLASS_ZDINX,   "D,S",       MATCH_FCVT_S_D|MASK_RM, MASK_FCVT_S_D|MASK_RM, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.s.d",  64, INSN_CLASS_ZDINX,   "D,S",       MATCH_FCVT_S_D|MASK_RM, MASK_FCVT_S_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.s.d",   0, INSN_CLASS_D,       "D,S,m",     MATCH_FCVT_S_D, MASK_FCVT_S_D, match_opcode, INSN_F_OR_X },
+{"fcvt.s.d",  32, INSN_CLASS_ZDINX,   "D,S,m",     MATCH_FCVT_S_D, MASK_FCVT_S_D, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.s.d",  64, INSN_CLASS_ZDINX,   "D,S,m",     MATCH_FCVT_S_D, MASK_FCVT_S_D, match_opcode, INSN_F_OR_X },
+{"fclass.d",   0, INSN_CLASS_D,       "d,S",       MATCH_FCLASS_D, MASK_FCLASS_D, match_opcode, INSN_F_OR_X },
+{"fclass.d",  32, INSN_CLASS_ZDINX,   "d,S",       MATCH_FCLASS_D, MASK_FCLASS_D, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fclass.d",  64, INSN_CLASS_ZDINX,   "d,S",       MATCH_FCLASS_D, MASK_FCLASS_D, match_opcode, INSN_F_OR_X },
+{"feq.d",      0, INSN_CLASS_D,       "d,S,T",     MATCH_FEQ_D, MASK_FEQ_D, match_opcode, INSN_F_OR_X },
+{"feq.d",     32, INSN_CLASS_ZDINX,   "d,S,T",     MATCH_FEQ_D, MASK_FEQ_D, match_opcode_zdinx_cmp_g2, INSN_F_OR_X },
+{"feq.d",     64, INSN_CLASS_ZDINX,   "d,S,T",     MATCH_FEQ_D, MASK_FEQ_D, match_opcode, INSN_F_OR_X },
+{"flt.d",      0, INSN_CLASS_D,       "d,S,T",     MATCH_FLT_D, MASK_FLT_D, match_opcode, INSN_F_OR_X },
+{"flt.d",     32, INSN_CLASS_ZDINX,   "d,S,T",     MATCH_FLT_D, MASK_FLT_D, match_opcode_zdinx_cmp_g2, INSN_F_OR_X },
+{"flt.d",     64, INSN_CLASS_ZDINX,   "d,S,T",     MATCH_FLT_D, MASK_FLT_D, match_opcode, INSN_F_OR_X },
+{"fle.d",      0, INSN_CLASS_D,       "d,S,T",     MATCH_FLE_D, MASK_FLE_D, match_opcode, INSN_F_OR_X },
+{"fle.d",     32, INSN_CLASS_ZDINX,   "d,S,T",     MATCH_FLE_D, MASK_FLE_D, match_opcode_zdinx_cmp_g2, INSN_F_OR_X },
+{"fle.d",     64, INSN_CLASS_ZDINX,   "d,S,T",     MATCH_FLE_D, MASK_FLE_D, match_opcode, INSN_F_OR_X },
+{"fgt.d",      0, INSN_CLASS_D,       "d,T,S",     MATCH_FLT_D, MASK_FLT_D, match_opcode, INSN_F_OR_X },
+{"fgt.d",     32, INSN_CLASS_ZDINX,   "d,T,S",     MATCH_FLT_D, MASK_FLT_D, match_opcode_zdinx_cmp_g2, INSN_F_OR_X },
+{"fgt.d",     64, INSN_CLASS_ZDINX,   "d,T,S",     MATCH_FLT_D, MASK_FLT_D, match_opcode, INSN_F_OR_X },
+{"fge.d",      0, INSN_CLASS_D,       "d,T,S",     MATCH_FLE_D, MASK_FLE_D, match_opcode, INSN_F_OR_X },
+{"fge.d",     32, INSN_CLASS_ZDINX,   "d,T,S",     MATCH_FLE_D, MASK_FLE_D, match_opcode_zdinx_cmp_g2, INSN_F_OR_X },
+{"fge.d",     64, INSN_CLASS_ZDINX,   "d,T,S",     MATCH_FLE_D, MASK_FLE_D, match_opcode, INSN_F_OR_X },
 {"fmv.x.d",   64, INSN_CLASS_D,   "d,S",       MATCH_FMV_X_D, MASK_FMV_X_D, match_opcode, 0 },
 {"fmv.d.x",   64, INSN_CLASS_D,   "D,s",       MATCH_FMV_D_X, MASK_FMV_D_X, match_opcode, 0 },
-{"fcvt.l.d",  64, INSN_CLASS_D_OR_ZDINX,   "d,S",       MATCH_FCVT_L_D|MASK_RM, MASK_FCVT_L_D|MASK_RM, match_opcode, 0 },
-{"fcvt.l.d",  64, INSN_CLASS_D_OR_ZDINX,   "d,S,m",     MATCH_FCVT_L_D, MASK_FCVT_L_D, match_opcode, 0 },
-{"fcvt.lu.d", 64, INSN_CLASS_D_OR_ZDINX,   "d,S",       MATCH_FCVT_LU_D|MASK_RM, MASK_FCVT_LU_D|MASK_RM, match_opcode, 0 },
-{"fcvt.lu.d", 64, INSN_CLASS_D_OR_ZDINX,   "d,S,m",     MATCH_FCVT_LU_D, MASK_FCVT_LU_D, match_opcode, 0 },
-{"fcvt.d.l",  64, INSN_CLASS_D_OR_ZDINX,   "D,s",       MATCH_FCVT_D_L|MASK_RM, MASK_FCVT_D_L|MASK_RM, match_opcode, 0 },
-{"fcvt.d.l",  64, INSN_CLASS_D_OR_ZDINX,   "D,s,m",     MATCH_FCVT_D_L, MASK_FCVT_D_L, match_opcode, 0 },
-{"fcvt.d.lu", 64, INSN_CLASS_D_OR_ZDINX,   "D,s",       MATCH_FCVT_D_LU|MASK_RM, MASK_FCVT_D_LU|MASK_RM, match_opcode, 0 },
-{"fcvt.d.lu", 64, INSN_CLASS_D_OR_ZDINX,   "D,s,m",     MATCH_FCVT_D_LU, MASK_FCVT_D_LU, match_opcode, 0 },
+{"fcvt.l.d",  64, INSN_CLASS_D,       "d,S",       MATCH_FCVT_L_D|MASK_RM, MASK_FCVT_L_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.l.d",  64, INSN_CLASS_ZDINX,   "d,S",       MATCH_FCVT_L_D|MASK_RM, MASK_FCVT_L_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.l.d",  64, INSN_CLASS_D,       "d,S,m",     MATCH_FCVT_L_D, MASK_FCVT_L_D, match_opcode, INSN_F_OR_X },
+{"fcvt.l.d",  64, INSN_CLASS_ZDINX,   "d,S,m",     MATCH_FCVT_L_D, MASK_FCVT_L_D, match_opcode, INSN_F_OR_X },
+{"fcvt.lu.d", 64, INSN_CLASS_D,       "d,S",       MATCH_FCVT_LU_D|MASK_RM, MASK_FCVT_LU_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.lu.d", 64, INSN_CLASS_ZDINX,   "d,S",       MATCH_FCVT_LU_D|MASK_RM, MASK_FCVT_LU_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.lu.d", 64, INSN_CLASS_D,       "d,S,m",     MATCH_FCVT_LU_D, MASK_FCVT_LU_D, match_opcode, INSN_F_OR_X },
+{"fcvt.lu.d", 64, INSN_CLASS_ZDINX,   "d,S,m",     MATCH_FCVT_LU_D, MASK_FCVT_LU_D, match_opcode, INSN_F_OR_X },
+{"fcvt.d.l",  64, INSN_CLASS_D,       "D,s",       MATCH_FCVT_D_L|MASK_RM, MASK_FCVT_D_L|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.d.l",  64, INSN_CLASS_ZDINX,   "D,s",       MATCH_FCVT_D_L|MASK_RM, MASK_FCVT_D_L|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.d.l",  64, INSN_CLASS_D,       "D,s,m",     MATCH_FCVT_D_L, MASK_FCVT_D_L, match_opcode, INSN_F_OR_X },
+{"fcvt.d.l",  64, INSN_CLASS_ZDINX,   "D,s,m",     MATCH_FCVT_D_L, MASK_FCVT_D_L, match_opcode, INSN_F_OR_X },
+{"fcvt.d.lu", 64, INSN_CLASS_D,       "D,s",       MATCH_FCVT_D_LU|MASK_RM, MASK_FCVT_D_LU|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.d.lu", 64, INSN_CLASS_ZDINX,   "D,s",       MATCH_FCVT_D_LU|MASK_RM, MASK_FCVT_D_LU|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.d.lu", 64, INSN_CLASS_D,       "D,s,m",     MATCH_FCVT_D_LU, MASK_FCVT_D_LU, match_opcode, INSN_F_OR_X },
+{"fcvt.d.lu", 64, INSN_CLASS_ZDINX,   "D,s,m",     MATCH_FCVT_D_LU, MASK_FCVT_D_LU, match_opcode, INSN_F_OR_X },
 
-/* Quad-precision floating-point instruction subset.  */
+/* Quad-precision floating-point instruction subset.
+   Zqinx instructions must be defined per xlen. Q/Zqinx instructions that
+   share the name must have INSN_F_OR_X flag.  */
 {"flq",        0, INSN_CLASS_Q,   "D,o(s)",    MATCH_FLQ, MASK_FLQ, match_opcode, INSN_DREF|INSN_16_BYTE },
 {"flq",        0, INSN_CLASS_Q,   "D,A,s",     0, (int) M_FLQ, match_never, INSN_MACRO },
 {"fsq",        0, INSN_CLASS_Q,   "T,q(s)",    MATCH_FSQ, MASK_FSQ, match_opcode, INSN_DREF|INSN_16_BYTE },
 {"fsq",        0, INSN_CLASS_Q,   "T,A,s",     0, (int) M_FSQ, match_never, INSN_MACRO },
-{"fmv.q",      0, INSN_CLASS_Q_OR_ZQINX,   "D,U",       MATCH_FSGNJ_Q, MASK_FSGNJ_Q, match_rs1_eq_rs2, INSN_ALIAS },
-{"fneg.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,U",       MATCH_FSGNJN_Q, MASK_FSGNJN_Q, match_rs1_eq_rs2, INSN_ALIAS },
-{"fabs.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,U",       MATCH_FSGNJX_Q, MASK_FSGNJX_Q, match_rs1_eq_rs2, INSN_ALIAS },
-{"fsgnj.q",    0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T",     MATCH_FSGNJ_Q, MASK_FSGNJ_Q, match_opcode, 0 },
-{"fsgnjn.q",   0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T",     MATCH_FSGNJN_Q, MASK_FSGNJN_Q, match_opcode, 0 },
-{"fsgnjx.q",   0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T",     MATCH_FSGNJX_Q, MASK_FSGNJX_Q, match_opcode, 0 },
-{"fadd.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T",     MATCH_FADD_Q|MASK_RM, MASK_FADD_Q|MASK_RM, match_opcode, 0 },
-{"fadd.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T,m",   MATCH_FADD_Q, MASK_FADD_Q, match_opcode, 0 },
-{"fsub.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T",     MATCH_FSUB_Q|MASK_RM, MASK_FSUB_Q|MASK_RM, match_opcode, 0 },
-{"fsub.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T,m",   MATCH_FSUB_Q, MASK_FSUB_Q, match_opcode, 0 },
-{"fmul.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T",     MATCH_FMUL_Q|MASK_RM, MASK_FMUL_Q|MASK_RM, match_opcode, 0 },
-{"fmul.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T,m",   MATCH_FMUL_Q, MASK_FMUL_Q, match_opcode, 0 },
-{"fdiv.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T",     MATCH_FDIV_Q|MASK_RM, MASK_FDIV_Q|MASK_RM, match_opcode, 0 },
-{"fdiv.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T,m",   MATCH_FDIV_Q, MASK_FDIV_Q, match_opcode, 0 },
-{"fsqrt.q",    0, INSN_CLASS_Q_OR_ZQINX,   "D,S",       MATCH_FSQRT_Q|MASK_RM, MASK_FSQRT_Q|MASK_RM, match_opcode, 0 },
-{"fsqrt.q",    0, INSN_CLASS_Q_OR_ZQINX,   "D,S,m",     MATCH_FSQRT_Q, MASK_FSQRT_Q, match_opcode, 0 },
-{"fmin.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T",     MATCH_FMIN_Q, MASK_FMIN_Q, match_opcode, 0 },
-{"fmax.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T",     MATCH_FMAX_Q, MASK_FMAX_Q, match_opcode, 0 },
-{"fmadd.q",    0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T,R",   MATCH_FMADD_Q|MASK_RM, MASK_FMADD_Q|MASK_RM, match_opcode, 0 },
-{"fmadd.q",    0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T,R,m", MATCH_FMADD_Q, MASK_FMADD_Q, match_opcode, 0 },
-{"fnmadd.q",   0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T,R",   MATCH_FNMADD_Q|MASK_RM, MASK_FNMADD_Q|MASK_RM, match_opcode, 0 },
-{"fnmadd.q",   0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T,R,m", MATCH_FNMADD_Q, MASK_FNMADD_Q, match_opcode, 0 },
-{"fmsub.q",    0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T,R",   MATCH_FMSUB_Q|MASK_RM, MASK_FMSUB_Q|MASK_RM, match_opcode, 0 },
-{"fmsub.q",    0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T,R,m", MATCH_FMSUB_Q, MASK_FMSUB_Q, match_opcode, 0 },
-{"fnmsub.q",   0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T,R",   MATCH_FNMSUB_Q|MASK_RM, MASK_FNMSUB_Q|MASK_RM, match_opcode, 0 },
-{"fnmsub.q",   0, INSN_CLASS_Q_OR_ZQINX,   "D,S,T,R,m", MATCH_FNMSUB_Q, MASK_FNMSUB_Q, match_opcode, 0 },
-{"fcvt.w.q",   0, INSN_CLASS_Q_OR_ZQINX,   "d,S",       MATCH_FCVT_W_Q|MASK_RM, MASK_FCVT_W_Q|MASK_RM, match_opcode, 0 },
-{"fcvt.w.q",   0, INSN_CLASS_Q_OR_ZQINX,   "d,S,m",     MATCH_FCVT_W_Q, MASK_FCVT_W_Q, match_opcode, 0 },
-{"fcvt.wu.q",  0, INSN_CLASS_Q_OR_ZQINX,   "d,S",       MATCH_FCVT_WU_Q|MASK_RM, MASK_FCVT_WU_Q|MASK_RM, match_opcode, 0 },
-{"fcvt.wu.q",  0, INSN_CLASS_Q_OR_ZQINX,   "d,S,m",     MATCH_FCVT_WU_Q, MASK_FCVT_WU_Q, match_opcode, 0 },
-{"fcvt.q.w",   0, INSN_CLASS_Q_OR_ZQINX,   "D,s",       MATCH_FCVT_Q_W, MASK_FCVT_Q_W|MASK_RM, match_opcode, 0 },
-{"fcvt.q.wu",  0, INSN_CLASS_Q_OR_ZQINX,   "D,s",       MATCH_FCVT_Q_WU, MASK_FCVT_Q_WU|MASK_RM, match_opcode, 0 },
-{"fcvt.q.s",   0, INSN_CLASS_Q_OR_ZQINX,   "D,S",       MATCH_FCVT_Q_S, MASK_FCVT_Q_S|MASK_RM, match_opcode, 0 },
-{"fcvt.q.d",   0, INSN_CLASS_Q_OR_ZQINX,   "D,S",       MATCH_FCVT_Q_D, MASK_FCVT_Q_D|MASK_RM, match_opcode, 0 },
-{"fcvt.s.q",   0, INSN_CLASS_Q_OR_ZQINX,   "D,S",       MATCH_FCVT_S_Q|MASK_RM, MASK_FCVT_S_Q|MASK_RM, match_opcode, 0 },
-{"fcvt.s.q",   0, INSN_CLASS_Q_OR_ZQINX,   "D,S,m",     MATCH_FCVT_S_Q, MASK_FCVT_S_Q, match_opcode, 0 },
-{"fcvt.d.q",   0, INSN_CLASS_Q_OR_ZQINX,   "D,S",       MATCH_FCVT_D_Q|MASK_RM, MASK_FCVT_D_Q|MASK_RM, match_opcode, 0 },
-{"fcvt.d.q",   0, INSN_CLASS_Q_OR_ZQINX,   "D,S,m",     MATCH_FCVT_D_Q, MASK_FCVT_D_Q, match_opcode, 0 },
-{"fclass.q",   0, INSN_CLASS_Q_OR_ZQINX,   "d,S",       MATCH_FCLASS_Q, MASK_FCLASS_Q, match_opcode, 0 },
-{"feq.q",      0, INSN_CLASS_Q_OR_ZQINX,   "d,S,T",     MATCH_FEQ_Q, MASK_FEQ_Q, match_opcode, 0 },
-{"flt.q",      0, INSN_CLASS_Q_OR_ZQINX,   "d,S,T",     MATCH_FLT_Q, MASK_FLT_Q, match_opcode, 0 },
-{"fle.q",      0, INSN_CLASS_Q_OR_ZQINX,   "d,S,T",     MATCH_FLE_Q, MASK_FLE_Q, match_opcode, 0 },
-{"fgt.q",      0, INSN_CLASS_Q_OR_ZQINX,   "d,T,S",     MATCH_FLT_Q, MASK_FLT_Q, match_opcode, 0 },
-{"fge.q",      0, INSN_CLASS_Q_OR_ZQINX,   "d,T,S",     MATCH_FLE_Q, MASK_FLE_Q, match_opcode, 0 },
-{"fcvt.l.q",  64, INSN_CLASS_Q_OR_ZQINX,   "d,S",       MATCH_FCVT_L_Q|MASK_RM, MASK_FCVT_L_Q|MASK_RM, match_opcode, 0 },
-{"fcvt.l.q",  64, INSN_CLASS_Q_OR_ZQINX,   "d,S,m",     MATCH_FCVT_L_Q, MASK_FCVT_L_Q, match_opcode, 0 },
-{"fcvt.lu.q", 64, INSN_CLASS_Q_OR_ZQINX,   "d,S",       MATCH_FCVT_LU_Q|MASK_RM, MASK_FCVT_LU_Q|MASK_RM, match_opcode, 0 },
-{"fcvt.lu.q", 64, INSN_CLASS_Q_OR_ZQINX,   "d,S,m",     MATCH_FCVT_LU_Q, MASK_FCVT_LU_Q, match_opcode, 0 },
-{"fcvt.q.l",  64, INSN_CLASS_Q_OR_ZQINX,   "D,s",       MATCH_FCVT_Q_L, MASK_FCVT_Q_L|MASK_RM, match_opcode, 0 },
-{"fcvt.q.l",  64, INSN_CLASS_Q_OR_ZQINX,   "D,s,m",     MATCH_FCVT_Q_L, MASK_FCVT_Q_L, match_opcode, 0 },
-{"fcvt.q.lu", 64, INSN_CLASS_Q_OR_ZQINX,   "D,s",       MATCH_FCVT_Q_LU, MASK_FCVT_Q_LU|MASK_RM, match_opcode, 0 },
-{"fcvt.q.lu", 64, INSN_CLASS_Q_OR_ZQINX,   "D,s,m",     MATCH_FCVT_Q_LU, MASK_FCVT_Q_LU, match_opcode, 0 },
+{"fmv.q",      0, INSN_CLASS_Q,       "D,U",       MATCH_FSGNJ_Q, MASK_FSGNJ_Q, match_rs1_eq_rs2, INSN_ALIAS|INSN_F_OR_X },
+{"fmv.q",     32, INSN_CLASS_ZQINX,   "D,U",       MATCH_FSGNJ_Q, MASK_FSGNJ_Q, match_rs1_eq_rs2_zdinx_rtype_g4, INSN_ALIAS|INSN_F_OR_X },
+{"fmv.q",     64, INSN_CLASS_ZQINX,   "D,U",       MATCH_FSGNJ_Q, MASK_FSGNJ_Q, match_rs1_eq_rs2_zdinx_rtype_g2, INSN_ALIAS|INSN_F_OR_X },
+{"fneg.q",     0, INSN_CLASS_Q,       "D,U",       MATCH_FSGNJN_Q, MASK_FSGNJN_Q, match_rs1_eq_rs2, INSN_ALIAS|INSN_F_OR_X },
+{"fneg.q",    32, INSN_CLASS_ZQINX,   "D,U",       MATCH_FSGNJN_Q, MASK_FSGNJN_Q, match_rs1_eq_rs2_zdinx_rtype_g4, INSN_ALIAS|INSN_F_OR_X },
+{"fneg.q",    64, INSN_CLASS_ZQINX,   "D,U",       MATCH_FSGNJN_Q, MASK_FSGNJN_Q, match_rs1_eq_rs2_zdinx_rtype_g2, INSN_ALIAS|INSN_F_OR_X },
+{"fabs.q",     0, INSN_CLASS_Q,       "D,U",       MATCH_FSGNJX_Q, MASK_FSGNJX_Q, match_rs1_eq_rs2, INSN_ALIAS|INSN_F_OR_X },
+{"fabs.q",    32, INSN_CLASS_ZQINX,   "D,U",       MATCH_FSGNJX_Q, MASK_FSGNJX_Q, match_rs1_eq_rs2_zdinx_rtype_g4, INSN_ALIAS|INSN_F_OR_X },
+{"fabs.q",    64, INSN_CLASS_ZQINX,   "D,U",       MATCH_FSGNJX_Q, MASK_FSGNJX_Q, match_rs1_eq_rs2_zdinx_rtype_g2, INSN_ALIAS|INSN_F_OR_X },
+{"fsgnj.q",    0, INSN_CLASS_Q,       "D,S,T",     MATCH_FSGNJ_Q, MASK_FSGNJ_Q, match_opcode, INSN_F_OR_X },
+{"fsgnj.q",   32, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FSGNJ_Q, MASK_FSGNJ_Q, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fsgnj.q",   64, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FSGNJ_Q, MASK_FSGNJ_Q, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fsgnjn.q",   0, INSN_CLASS_Q,       "D,S,T",     MATCH_FSGNJN_Q, MASK_FSGNJN_Q, match_opcode, INSN_F_OR_X },
+{"fsgnjn.q",  32, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FSGNJN_Q, MASK_FSGNJN_Q, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fsgnjn.q",  64, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FSGNJN_Q, MASK_FSGNJN_Q, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fsgnjx.q",   0, INSN_CLASS_Q,       "D,S,T",     MATCH_FSGNJX_Q, MASK_FSGNJX_Q, match_opcode, INSN_F_OR_X },
+{"fsgnjx.q",  32, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FSGNJX_Q, MASK_FSGNJX_Q, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fsgnjx.q",  64, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FSGNJX_Q, MASK_FSGNJX_Q, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fadd.q",     0, INSN_CLASS_Q,       "D,S,T",     MATCH_FADD_Q|MASK_RM, MASK_FADD_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fadd.q",    32, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FADD_Q|MASK_RM, MASK_FADD_Q|MASK_RM, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fadd.q",    64, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FADD_Q|MASK_RM, MASK_FADD_Q|MASK_RM, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fadd.q",     0, INSN_CLASS_Q,       "D,S,T,m",   MATCH_FADD_Q, MASK_FADD_Q, match_opcode, INSN_F_OR_X },
+{"fadd.q",    32, INSN_CLASS_ZQINX,   "D,S,T,m",   MATCH_FADD_Q, MASK_FADD_Q, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fadd.q",    64, INSN_CLASS_ZQINX,   "D,S,T,m",   MATCH_FADD_Q, MASK_FADD_Q, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fsub.q",     0, INSN_CLASS_Q,       "D,S,T",     MATCH_FSUB_Q|MASK_RM, MASK_FSUB_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fsub.q",    32, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FSUB_Q|MASK_RM, MASK_FSUB_Q|MASK_RM, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fsub.q",    64, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FSUB_Q|MASK_RM, MASK_FSUB_Q|MASK_RM, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fsub.q",     0, INSN_CLASS_Q,       "D,S,T,m",   MATCH_FSUB_Q, MASK_FSUB_Q, match_opcode, INSN_F_OR_X },
+{"fsub.q",    32, INSN_CLASS_ZQINX,   "D,S,T,m",   MATCH_FSUB_Q, MASK_FSUB_Q, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fsub.q",    64, INSN_CLASS_ZQINX,   "D,S,T,m",   MATCH_FSUB_Q, MASK_FSUB_Q, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fmul.q",     0, INSN_CLASS_Q,       "D,S,T",     MATCH_FMUL_Q|MASK_RM, MASK_FMUL_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fmul.q",    32, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FMUL_Q|MASK_RM, MASK_FMUL_Q|MASK_RM, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fmul.q",    64, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FMUL_Q|MASK_RM, MASK_FMUL_Q|MASK_RM, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fmul.q",     0, INSN_CLASS_Q,       "D,S,T,m",   MATCH_FMUL_Q, MASK_FMUL_Q, match_opcode, INSN_F_OR_X },
+{"fmul.q",    32, INSN_CLASS_ZQINX,   "D,S,T,m",   MATCH_FMUL_Q, MASK_FMUL_Q, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fmul.q",    64, INSN_CLASS_ZQINX,   "D,S,T,m",   MATCH_FMUL_Q, MASK_FMUL_Q, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fdiv.q",     0, INSN_CLASS_Q,       "D,S,T",     MATCH_FDIV_Q|MASK_RM, MASK_FDIV_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fdiv.q",    32, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FDIV_Q|MASK_RM, MASK_FDIV_Q|MASK_RM, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fdiv.q",    64, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FDIV_Q|MASK_RM, MASK_FDIV_Q|MASK_RM, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fdiv.q",     0, INSN_CLASS_Q,       "D,S,T,m",   MATCH_FDIV_Q, MASK_FDIV_Q, match_opcode, INSN_F_OR_X },
+{"fdiv.q",    32, INSN_CLASS_ZQINX,   "D,S,T,m",   MATCH_FDIV_Q, MASK_FDIV_Q, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fdiv.q",    64, INSN_CLASS_ZQINX,   "D,S,T,m",   MATCH_FDIV_Q, MASK_FDIV_Q, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fsqrt.q",    0, INSN_CLASS_Q,       "D,S",       MATCH_FSQRT_Q|MASK_RM, MASK_FSQRT_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fsqrt.q",   32, INSN_CLASS_ZQINX,   "D,S",       MATCH_FSQRT_Q|MASK_RM, MASK_FSQRT_Q|MASK_RM, match_opcode_zdinx_itype_g4_4, INSN_F_OR_X },
+{"fsqrt.q",   64, INSN_CLASS_ZQINX,   "D,S",       MATCH_FSQRT_Q|MASK_RM, MASK_FSQRT_Q|MASK_RM, match_opcode_zdinx_itype_g2_2, INSN_F_OR_X },
+{"fsqrt.q",    0, INSN_CLASS_Q,       "D,S,m",     MATCH_FSQRT_Q, MASK_FSQRT_Q, match_opcode, INSN_F_OR_X },
+{"fsqrt.q",   32, INSN_CLASS_ZQINX,   "D,S,m",     MATCH_FSQRT_Q, MASK_FSQRT_Q, match_opcode_zdinx_itype_g4_4, INSN_F_OR_X },
+{"fsqrt.q",   64, INSN_CLASS_ZQINX,   "D,S,m",     MATCH_FSQRT_Q, MASK_FSQRT_Q, match_opcode_zdinx_itype_g2_2, INSN_F_OR_X },
+{"fmin.q",     0, INSN_CLASS_Q,       "D,S,T",     MATCH_FMIN_Q, MASK_FMIN_Q, match_opcode, INSN_F_OR_X },
+{"fmin.q",    32, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FMIN_Q, MASK_FMIN_Q, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fmin.q",    64, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FMIN_Q, MASK_FMIN_Q, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fmax.q",     0, INSN_CLASS_Q,       "D,S,T",     MATCH_FMAX_Q, MASK_FMAX_Q, match_opcode, INSN_F_OR_X },
+{"fmax.q",    32, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FMAX_Q, MASK_FMAX_Q, match_opcode_zdinx_rtype_g4, INSN_F_OR_X },
+{"fmax.q",    64, INSN_CLASS_ZQINX,   "D,S,T",     MATCH_FMAX_Q, MASK_FMAX_Q, match_opcode_zdinx_rtype_g2, INSN_F_OR_X },
+{"fmadd.q",    0, INSN_CLASS_Q,       "D,S,T,R",   MATCH_FMADD_Q|MASK_RM, MASK_FMADD_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fmadd.q",   32, INSN_CLASS_ZQINX,   "D,S,T,R",   MATCH_FMADD_Q|MASK_RM, MASK_FMADD_Q|MASK_RM, match_opcode_zdinx_r4type_g4, INSN_F_OR_X },
+{"fmadd.q",   64, INSN_CLASS_ZQINX,   "D,S,T,R",   MATCH_FMADD_Q|MASK_RM, MASK_FMADD_Q|MASK_RM, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fmadd.q",    0, INSN_CLASS_Q,       "D,S,T,R,m", MATCH_FMADD_Q, MASK_FMADD_Q, match_opcode, INSN_F_OR_X },
+{"fmadd.q",   32, INSN_CLASS_ZQINX,   "D,S,T,R,m", MATCH_FMADD_Q, MASK_FMADD_Q, match_opcode_zdinx_r4type_g4, INSN_F_OR_X },
+{"fmadd.q",   64, INSN_CLASS_ZQINX,   "D,S,T,R,m", MATCH_FMADD_Q, MASK_FMADD_Q, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fnmadd.q",   0, INSN_CLASS_Q,       "D,S,T,R",   MATCH_FNMADD_Q|MASK_RM, MASK_FNMADD_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fnmadd.q",  32, INSN_CLASS_ZQINX,   "D,S,T,R",   MATCH_FNMADD_Q|MASK_RM, MASK_FNMADD_Q|MASK_RM, match_opcode_zdinx_r4type_g4, INSN_F_OR_X },
+{"fnmadd.q",  64, INSN_CLASS_ZQINX,   "D,S,T,R",   MATCH_FNMADD_Q|MASK_RM, MASK_FNMADD_Q|MASK_RM, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fnmadd.q",   0, INSN_CLASS_Q,       "D,S,T,R,m", MATCH_FNMADD_Q, MASK_FNMADD_Q, match_opcode, INSN_F_OR_X },
+{"fnmadd.q",  32, INSN_CLASS_ZQINX,   "D,S,T,R,m", MATCH_FNMADD_Q, MASK_FNMADD_Q, match_opcode_zdinx_r4type_g4, INSN_F_OR_X },
+{"fnmadd.q",  64, INSN_CLASS_ZQINX,   "D,S,T,R,m", MATCH_FNMADD_Q, MASK_FNMADD_Q, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fmsub.q",    0, INSN_CLASS_Q,       "D,S,T,R",   MATCH_FMSUB_Q|MASK_RM, MASK_FMSUB_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fmsub.q",   32, INSN_CLASS_ZQINX,   "D,S,T,R",   MATCH_FMSUB_Q|MASK_RM, MASK_FMSUB_Q|MASK_RM, match_opcode_zdinx_r4type_g4, INSN_F_OR_X },
+{"fmsub.q",   64, INSN_CLASS_ZQINX,   "D,S,T,R",   MATCH_FMSUB_Q|MASK_RM, MASK_FMSUB_Q|MASK_RM, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fmsub.q",    0, INSN_CLASS_Q,       "D,S,T,R,m", MATCH_FMSUB_Q, MASK_FMSUB_Q, match_opcode, INSN_F_OR_X },
+{"fmsub.q",   32, INSN_CLASS_ZQINX,   "D,S,T,R,m", MATCH_FMSUB_Q, MASK_FMSUB_Q, match_opcode_zdinx_r4type_g4, INSN_F_OR_X },
+{"fmsub.q",   64, INSN_CLASS_ZQINX,   "D,S,T,R,m", MATCH_FMSUB_Q, MASK_FMSUB_Q, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fnmsub.q",   0, INSN_CLASS_Q,       "D,S,T,R",   MATCH_FNMSUB_Q|MASK_RM, MASK_FNMSUB_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fnmsub.q",  32, INSN_CLASS_ZQINX,   "D,S,T,R",   MATCH_FNMSUB_Q|MASK_RM, MASK_FNMSUB_Q|MASK_RM, match_opcode_zdinx_r4type_g4, INSN_F_OR_X },
+{"fnmsub.q",  64, INSN_CLASS_ZQINX,   "D,S,T,R",   MATCH_FNMSUB_Q|MASK_RM, MASK_FNMSUB_Q|MASK_RM, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fnmsub.q",   0, INSN_CLASS_Q,       "D,S,T,R,m", MATCH_FNMSUB_Q, MASK_FNMSUB_Q, match_opcode, INSN_F_OR_X },
+{"fnmsub.q",  32, INSN_CLASS_ZQINX,   "D,S,T,R,m", MATCH_FNMSUB_Q, MASK_FNMSUB_Q, match_opcode_zdinx_r4type_g4, INSN_F_OR_X },
+{"fnmsub.q",  64, INSN_CLASS_ZQINX,   "D,S,T,R,m", MATCH_FNMSUB_Q, MASK_FNMSUB_Q, match_opcode_zdinx_r4type_g2, INSN_F_OR_X },
+{"fcvt.w.q",   0, INSN_CLASS_Q,       "d,S",       MATCH_FCVT_W_Q|MASK_RM, MASK_FCVT_W_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.w.q",  32, INSN_CLASS_ZQINX,   "d,S",       MATCH_FCVT_W_Q|MASK_RM, MASK_FCVT_W_Q|MASK_RM, match_opcode_zdinx_itype_g1_4, INSN_F_OR_X },
+{"fcvt.w.q",  64, INSN_CLASS_ZQINX,   "d,S",       MATCH_FCVT_W_Q|MASK_RM, MASK_FCVT_W_Q|MASK_RM, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.w.q",   0, INSN_CLASS_Q,       "d,S,m",     MATCH_FCVT_W_Q, MASK_FCVT_W_Q, match_opcode, INSN_F_OR_X },
+{"fcvt.w.q",  32, INSN_CLASS_ZQINX,   "d,S,m",     MATCH_FCVT_W_Q, MASK_FCVT_W_Q, match_opcode_zdinx_itype_g1_4, INSN_F_OR_X },
+{"fcvt.w.q",  64, INSN_CLASS_ZQINX,   "d,S,m",     MATCH_FCVT_W_Q, MASK_FCVT_W_Q, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.wu.q",  0, INSN_CLASS_Q,       "d,S",       MATCH_FCVT_WU_Q|MASK_RM, MASK_FCVT_WU_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.wu.q", 32, INSN_CLASS_ZQINX,   "d,S",       MATCH_FCVT_WU_Q|MASK_RM, MASK_FCVT_WU_Q|MASK_RM, match_opcode_zdinx_itype_g1_4, INSN_F_OR_X },
+{"fcvt.wu.q", 64, INSN_CLASS_ZQINX,   "d,S",       MATCH_FCVT_WU_Q|MASK_RM, MASK_FCVT_WU_Q|MASK_RM, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.wu.q",  0, INSN_CLASS_Q,       "d,S,m",     MATCH_FCVT_WU_Q, MASK_FCVT_WU_Q, match_opcode, INSN_F_OR_X },
+{"fcvt.wu.q", 32, INSN_CLASS_ZQINX,   "d,S,m",     MATCH_FCVT_WU_Q, MASK_FCVT_WU_Q, match_opcode_zdinx_itype_g1_4, INSN_F_OR_X },
+{"fcvt.wu.q", 64, INSN_CLASS_ZQINX,   "d,S,m",     MATCH_FCVT_WU_Q, MASK_FCVT_WU_Q, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.q.w",   0, INSN_CLASS_Q,       "D,s",       MATCH_FCVT_Q_W, MASK_FCVT_Q_W|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.q.w",  32, INSN_CLASS_ZQINX,   "D,s",       MATCH_FCVT_Q_W, MASK_FCVT_Q_W|MASK_RM, match_opcode_zdinx_itype_g4_1, INSN_F_OR_X },
+{"fcvt.q.w",  64, INSN_CLASS_ZQINX,   "D,s",       MATCH_FCVT_Q_W, MASK_FCVT_Q_W|MASK_RM, match_opcode_zdinx_itype_g2_1, INSN_F_OR_X },
+{"fcvt.q.wu",  0, INSN_CLASS_Q,       "D,s",       MATCH_FCVT_Q_WU, MASK_FCVT_Q_WU|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.q.wu", 32, INSN_CLASS_ZQINX,   "D,s",       MATCH_FCVT_Q_WU, MASK_FCVT_Q_WU|MASK_RM, match_opcode_zdinx_itype_g4_1, INSN_F_OR_X },
+{"fcvt.q.wu", 64, INSN_CLASS_ZQINX,   "D,s",       MATCH_FCVT_Q_WU, MASK_FCVT_Q_WU|MASK_RM, match_opcode_zdinx_itype_g2_1, INSN_F_OR_X },
+{"fcvt.q.s",   0, INSN_CLASS_Q,       "D,S",       MATCH_FCVT_Q_S, MASK_FCVT_Q_S|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.q.s",  32, INSN_CLASS_ZQINX,   "D,S",       MATCH_FCVT_Q_S, MASK_FCVT_Q_S|MASK_RM, match_opcode_zdinx_itype_g4_1, INSN_F_OR_X },
+{"fcvt.q.s",  64, INSN_CLASS_ZQINX,   "D,S",       MATCH_FCVT_Q_S, MASK_FCVT_Q_S|MASK_RM, match_opcode_zdinx_itype_g2_1, INSN_F_OR_X },
+{"fcvt.q.d",   0, INSN_CLASS_Q,       "D,S",       MATCH_FCVT_Q_D, MASK_FCVT_Q_D|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.q.d",  32, INSN_CLASS_ZQINX,   "D,S",       MATCH_FCVT_Q_D, MASK_FCVT_Q_D|MASK_RM, match_opcode_zdinx_itype_g4_2, INSN_F_OR_X },
+{"fcvt.q.d",  64, INSN_CLASS_ZQINX,   "D,S",       MATCH_FCVT_Q_D, MASK_FCVT_Q_D|MASK_RM, match_opcode_zdinx_itype_g2_1, INSN_F_OR_X },
+{"fcvt.s.q",   0, INSN_CLASS_Q,       "D,S",       MATCH_FCVT_S_Q|MASK_RM, MASK_FCVT_S_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.s.q",  32, INSN_CLASS_ZQINX,   "D,S",       MATCH_FCVT_S_Q|MASK_RM, MASK_FCVT_S_Q|MASK_RM, match_opcode_zdinx_itype_g1_4, INSN_F_OR_X },
+{"fcvt.s.q",  64, INSN_CLASS_ZQINX,   "D,S",       MATCH_FCVT_S_Q|MASK_RM, MASK_FCVT_S_Q|MASK_RM, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.s.q",   0, INSN_CLASS_Q,       "D,S,m",     MATCH_FCVT_S_Q, MASK_FCVT_S_Q, match_opcode, INSN_F_OR_X },
+{"fcvt.s.q",  32, INSN_CLASS_ZQINX,   "D,S,m",     MATCH_FCVT_S_Q, MASK_FCVT_S_Q, match_opcode_zdinx_itype_g1_4, INSN_F_OR_X },
+{"fcvt.s.q",  64, INSN_CLASS_ZQINX,   "D,S,m",     MATCH_FCVT_S_Q, MASK_FCVT_S_Q, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.d.q",   0, INSN_CLASS_Q,       "D,S",       MATCH_FCVT_D_Q|MASK_RM, MASK_FCVT_D_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.d.q",  32, INSN_CLASS_ZQINX,   "D,S",       MATCH_FCVT_D_Q|MASK_RM, MASK_FCVT_D_Q|MASK_RM, match_opcode_zdinx_itype_g2_4, INSN_F_OR_X },
+{"fcvt.d.q",  64, INSN_CLASS_ZQINX,   "D,S",       MATCH_FCVT_D_Q|MASK_RM, MASK_FCVT_D_Q|MASK_RM, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.d.q",   0, INSN_CLASS_Q,       "D,S,m",     MATCH_FCVT_D_Q, MASK_FCVT_D_Q, match_opcode, INSN_F_OR_X },
+{"fcvt.d.q",  32, INSN_CLASS_ZQINX,   "D,S,m",     MATCH_FCVT_D_Q, MASK_FCVT_D_Q, match_opcode_zdinx_itype_g2_4, INSN_F_OR_X },
+{"fcvt.d.q",  64, INSN_CLASS_ZQINX,   "D,S,m",     MATCH_FCVT_D_Q, MASK_FCVT_D_Q, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fclass.q",   0, INSN_CLASS_Q,       "d,S",       MATCH_FCLASS_Q, MASK_FCLASS_Q, match_opcode, INSN_F_OR_X },
+{"fclass.q",  32, INSN_CLASS_ZQINX,   "d,S",       MATCH_FCLASS_Q, MASK_FCLASS_Q, match_opcode_zdinx_itype_g1_4, INSN_F_OR_X },
+{"fclass.q",  64, INSN_CLASS_ZQINX,   "d,S",       MATCH_FCLASS_Q, MASK_FCLASS_Q, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"feq.q",      0, INSN_CLASS_Q,       "d,S,T",     MATCH_FEQ_Q, MASK_FEQ_Q, match_opcode, INSN_F_OR_X },
+{"feq.q",     32, INSN_CLASS_ZQINX,   "d,S,T",     MATCH_FEQ_Q, MASK_FEQ_Q, match_opcode_zdinx_cmp_g4, INSN_F_OR_X },
+{"feq.q",     64, INSN_CLASS_ZQINX,   "d,S,T",     MATCH_FEQ_Q, MASK_FEQ_Q, match_opcode_zdinx_cmp_g2, INSN_F_OR_X },
+{"flt.q",      0, INSN_CLASS_Q,       "d,S,T",     MATCH_FLT_Q, MASK_FLT_Q, match_opcode, INSN_F_OR_X },
+{"flt.q",     32, INSN_CLASS_ZQINX,   "d,S,T",     MATCH_FLT_Q, MASK_FLT_Q, match_opcode_zdinx_cmp_g4, INSN_F_OR_X },
+{"flt.q",     64, INSN_CLASS_ZQINX,   "d,S,T",     MATCH_FLT_Q, MASK_FLT_Q, match_opcode_zdinx_cmp_g2, INSN_F_OR_X },
+{"fle.q",      0, INSN_CLASS_Q,       "d,S,T",     MATCH_FLE_Q, MASK_FLE_Q, match_opcode, INSN_F_OR_X },
+{"fle.q",     32, INSN_CLASS_ZQINX,   "d,S,T",     MATCH_FLE_Q, MASK_FLE_Q, match_opcode_zdinx_cmp_g4, INSN_F_OR_X },
+{"fle.q",     64, INSN_CLASS_ZQINX,   "d,S,T",     MATCH_FLE_Q, MASK_FLE_Q, match_opcode_zdinx_cmp_g2, INSN_F_OR_X },
+{"fgt.q",      0, INSN_CLASS_Q,       "d,T,S",     MATCH_FLT_Q, MASK_FLT_Q, match_opcode, INSN_F_OR_X },
+{"fgt.q",     32, INSN_CLASS_ZQINX,   "d,T,S",     MATCH_FLT_Q, MASK_FLT_Q, match_opcode_zdinx_cmp_g4, INSN_F_OR_X },
+{"fgt.q",     64, INSN_CLASS_ZQINX,   "d,T,S",     MATCH_FLT_Q, MASK_FLT_Q, match_opcode_zdinx_cmp_g2, INSN_F_OR_X },
+{"fge.q",      0, INSN_CLASS_Q,       "d,T,S",     MATCH_FLE_Q, MASK_FLE_Q, match_opcode, INSN_F_OR_X },
+{"fge.q",     32, INSN_CLASS_ZQINX,   "d,T,S",     MATCH_FLE_Q, MASK_FLE_Q, match_opcode_zdinx_cmp_g4, INSN_F_OR_X },
+{"fge.q",     64, INSN_CLASS_ZQINX,   "d,T,S",     MATCH_FLE_Q, MASK_FLE_Q, match_opcode_zdinx_cmp_g2, INSN_F_OR_X },
+{"fcvt.l.q",  64, INSN_CLASS_Q,       "d,S",       MATCH_FCVT_L_Q|MASK_RM, MASK_FCVT_L_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.l.q",  64, INSN_CLASS_ZQINX,   "d,S",       MATCH_FCVT_L_Q|MASK_RM, MASK_FCVT_L_Q|MASK_RM, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.l.q",  64, INSN_CLASS_Q,       "d,S,m",     MATCH_FCVT_L_Q, MASK_FCVT_L_Q, match_opcode, INSN_F_OR_X },
+{"fcvt.l.q",  64, INSN_CLASS_ZQINX,   "d,S,m",     MATCH_FCVT_L_Q, MASK_FCVT_L_Q, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.lu.q", 64, INSN_CLASS_Q,       "d,S",       MATCH_FCVT_LU_Q|MASK_RM, MASK_FCVT_LU_Q|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.lu.q", 64, INSN_CLASS_ZQINX,   "d,S",       MATCH_FCVT_LU_Q|MASK_RM, MASK_FCVT_LU_Q|MASK_RM, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.lu.q", 64, INSN_CLASS_Q,       "d,S,m",     MATCH_FCVT_LU_Q, MASK_FCVT_LU_Q, match_opcode, INSN_F_OR_X },
+{"fcvt.lu.q", 64, INSN_CLASS_ZQINX,   "d,S,m",     MATCH_FCVT_LU_Q, MASK_FCVT_LU_Q, match_opcode_zdinx_itype_g1_2, INSN_F_OR_X },
+{"fcvt.q.l",  64, INSN_CLASS_Q,       "D,s",       MATCH_FCVT_Q_L, MASK_FCVT_Q_L|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.q.l",  64, INSN_CLASS_ZQINX,   "D,s",       MATCH_FCVT_Q_L, MASK_FCVT_Q_L|MASK_RM, match_opcode_zdinx_itype_g2_1, INSN_F_OR_X },
+{"fcvt.q.l",  64, INSN_CLASS_Q,       "D,s,m",     MATCH_FCVT_Q_L, MASK_FCVT_Q_L, match_opcode, INSN_F_OR_X },
+{"fcvt.q.l",  64, INSN_CLASS_ZQINX,   "D,s,m",     MATCH_FCVT_Q_L, MASK_FCVT_Q_L, match_opcode_zdinx_itype_g2_1, INSN_F_OR_X },
+{"fcvt.q.lu", 64, INSN_CLASS_Q,       "D,s",       MATCH_FCVT_Q_LU, MASK_FCVT_Q_LU|MASK_RM, match_opcode, INSN_F_OR_X },
+{"fcvt.q.lu", 64, INSN_CLASS_ZQINX,   "D,s",       MATCH_FCVT_Q_LU, MASK_FCVT_Q_LU|MASK_RM, match_opcode_zdinx_itype_g2_1, INSN_F_OR_X },
+{"fcvt.q.lu", 64, INSN_CLASS_Q,       "D,s,m",     MATCH_FCVT_Q_LU, MASK_FCVT_Q_LU, match_opcode, INSN_F_OR_X },
+{"fcvt.q.lu", 64, INSN_CLASS_ZQINX,   "D,s,m",     MATCH_FCVT_Q_LU, MASK_FCVT_Q_LU, match_opcode_zdinx_itype_g2_1, INSN_F_OR_X },
 
 /* Compressed instructions.  */
 {"c.unimp",    0, INSN_CLASS_C,   "",          0, 0xffffU,  match_opcode, 0 },
