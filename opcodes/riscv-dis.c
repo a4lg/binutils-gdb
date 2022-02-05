@@ -42,6 +42,9 @@ static const char *default_arch = NULL;
 /* Current XLEN for the disassembler.  */
 static unsigned xlen = 0;
 
+/* Current XLEN, as specified by the `arch' option.  */
+static unsigned xlen_by_arch = 0;
+
 /* Default ISA specification version (constant as of now).  */
 static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
 
@@ -83,6 +86,9 @@ static bool is_numeric = false;
 
 /* Reset when reinitializing the CSR table is required.  */
 static bool is_init_csr = false;
+
+/* If set, a custom arch option is specified.  */
+static bool is_custom_arch = false;
 
 
 /* Initialization (for arch and options).  */
@@ -130,6 +136,7 @@ set_default_riscv_dis_options (void)
 {
   no_aliases = false;
   is_numeric = false;
+  is_custom_arch = false;
 }
 
 /* Update current architecture string
@@ -138,8 +145,11 @@ set_default_riscv_dis_options (void)
 static void
 update_riscv_dis_current_arch (const char *arch)
 {
+  xlen = 0;
   riscv_release_subset_list (&riscv_subsets);
   riscv_parse_subset (&riscv_rps_dis, arch);
+  /* Ignore XLEN by arch string if arch is the initial default value.  */
+  xlen_by_arch = (arch == initial_default_arch) ? 0 : xlen;
   init_riscv_dis_state_for_arch ();
 }
 
@@ -224,6 +234,11 @@ parse_riscv_dis_option (const char *option)
 				 option, value, name);
 	}
     }
+  else if (strcmp (option, "arch") == 0)
+    {
+      is_custom_arch = true;
+      update_riscv_dis_current_arch (value);
+    }
   else
     {
       /* xgettext:c-format */
@@ -235,6 +250,7 @@ static void
 parse_riscv_dis_options (const char *opts_in)
 {
   char *opts = xstrdup (opts_in), *opt = opts, *opt_end = opts;
+  bool prev_is_custom_arch = is_custom_arch;
 
   set_default_riscv_dis_options ();
 
@@ -246,6 +262,8 @@ parse_riscv_dis_options (const char *opts_in)
     }
 
   free (opts);
+  if (prev_is_custom_arch && !is_custom_arch)
+    update_riscv_dis_current_arch (default_arch);
 }
 
 /* Print one argument from an array.  */
@@ -759,11 +777,24 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   info->target = 0;
   info->target2 = 0;
 
-  /* If XLEN is not known, get its value from the ELF class.  */
+  /* Set XLEN with following precedence rules:
+     1. BFD architecture set by either:
+       a. -m riscv:rv[32|64] option (gdb: set arch riscv:rv[32|64])
+       b. ELF class in actual ELF header (only on RISC-V ELF)
+       This is only effective if XLEN-specific BFD architecture is
+       chosen.  If chosen BFD architecture is XLEN-neutral
+       (like riscv), BFD architecture is ignored on XLEN selection.
+     2. RISC-V ISA string set by either:
+       a. -M arch=rv[32|64]... option
+	  (gdb: set disassembler-options arch=...)
+       b. RISC-V ELF attributes (only on RISC-V ELF)
+     3. ELF class in dummy ELF header  */
   if (info->mach == bfd_mach_riscv64)
     xlen = 64;
   else if (info->mach == bfd_mach_riscv32)
     xlen = 32;
+  else if (xlen_by_arch)
+    xlen = xlen_by_arch;
   else if (info->section != NULL)
     {
       Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
@@ -1161,7 +1192,7 @@ riscv_get_disassembler (bfd *abfd)
 	}
     }
 
-  if (update_riscv_dis_default_arch (default_arch_next))
+  if (update_riscv_dis_default_arch (default_arch_next) && !is_custom_arch)
     update_riscv_dis_current_arch (default_arch_next);
   init_riscv_dis_state_for_arch_and_options ();
   return print_insn_riscv;
@@ -1192,6 +1223,7 @@ riscv_symbol_is_valid (asymbol * sym,
 typedef enum
 {
   RISCV_OPTION_ARG_NONE = -1,
+  RISCV_OPTION_ARG_ARCH,
   RISCV_OPTION_ARG_PRIV_SPEC,
 
   RISCV_OPTION_ARG_COUNT
@@ -1212,6 +1244,9 @@ static struct
   { "no-aliases",
     N_("Disassemble only into canonical instructions."),
     RISCV_OPTION_ARG_NONE },
+  { "arch=",
+    N_("Disassemble using chosen ISA and extensions."),
+    RISCV_OPTION_ARG_ARCH },
   { "priv-spec=",
     N_("Print the CSR according to the chosen privilege spec."),
     RISCV_OPTION_ARG_PRIV_SPEC }
@@ -1235,6 +1270,9 @@ disassembler_options_riscv (void)
       size_t i, priv_spec_count;
 
       args = XNEWVEC (disasm_option_arg_t, num_args + 1);
+
+      args[RISCV_OPTION_ARG_ARCH].name = "ARCH";
+      args[RISCV_OPTION_ARG_ARCH].values = NULL;
 
       args[RISCV_OPTION_ARG_PRIV_SPEC].name = "SPEC";
       priv_spec_count = PRIV_SPEC_CLASS_DRAFT - PRIV_SPEC_CLASS_NONE - 1;
