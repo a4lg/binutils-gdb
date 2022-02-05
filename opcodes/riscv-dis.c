@@ -34,8 +34,10 @@
 
 static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
 static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
+static const char *default_isa = "rv64gc";
 
 unsigned xlen = 0;
+static unsigned xlen_set_by_option = 0;
 
 static riscv_subset_list_t riscv_subsets;
 static riscv_parse_subset_t riscv_rps_dis =
@@ -71,6 +73,9 @@ set_default_riscv_dis_options (void)
   riscv_gpr_names = riscv_gpr_names_abi;
   riscv_fpr_names = riscv_fpr_names_abi;
   no_aliases = 0;
+  riscv_release_subset_list (&riscv_subsets);
+  riscv_parse_subset (&riscv_rps_dis, default_isa);
+  xlen_set_by_option = 0;
 }
 
 static bool
@@ -133,6 +138,12 @@ parse_riscv_dis_option (const char *option)
 				   "the elf privilege attribute is %s"),
 				 option, value, name);
 	}
+    }
+  else if (strcmp (option, "isa") == 0)
+    {
+      riscv_release_subset_list (&riscv_subsets);
+      riscv_parse_subset (&riscv_rps_dis, value);
+      xlen_set_by_option = xlen;
     }
   else
     {
@@ -592,11 +603,16 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   op = riscv_hash[OP_HASH_IDX (word)];
   if (op != NULL)
     {
-      /* If XLEN is not known, get its value from the ELF class.  */
+      /* Set XLEN with following precedence rules:
+	 1. -m riscv:rv[32|64] option (gdb: set arch riscv:rv[32|64])
+	 2. -M isa option (gdb: set disassembler-options isa=rv[32|64])
+	 3. ELF class in the ELF header.  */
       if (info->mach == bfd_mach_riscv64)
 	xlen = 64;
       else if (info->mach == bfd_mach_riscv32)
 	xlen = 32;
+      else if (xlen_set_by_option)
+        xlen = xlen_set_by_option;
       else if (info->section != NULL)
 	{
 	  Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
@@ -947,8 +963,6 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 disassembler_ftype
 riscv_get_disassembler (bfd *abfd)
 {
-  const char *default_arch = "rv64gc";
-
   if (abfd)
     {
       const struct elf_backend_data *ebd = get_elf_backend_data (abfd);
@@ -965,13 +979,10 @@ riscv_get_disassembler (bfd *abfd)
 						      attr[Tag_b].i,
 						      attr[Tag_c].i,
 						      &default_priv_spec);
-	      default_arch = attr[Tag_RISCV_arch].s;
+	      default_isa = attr[Tag_RISCV_arch].s;
 	    }
 	}
     }
-
-  riscv_release_subset_list (&riscv_subsets);
-  riscv_parse_subset (&riscv_rps_dis, default_arch);
   return print_insn_riscv;
 }
 
@@ -1000,6 +1011,7 @@ riscv_symbol_is_valid (asymbol * sym,
 typedef enum
 {
   RISCV_OPTION_ARG_NONE = -1,
+  RISCV_OPTION_ARG_ISA,
   RISCV_OPTION_ARG_PRIV_SPEC,
 
   RISCV_OPTION_ARG_COUNT
@@ -1020,6 +1032,9 @@ static struct
   { "no-aliases",
     N_("Disassemble only into canonical instructions."),
     RISCV_OPTION_ARG_NONE },
+  { "isa=",
+    N_("Disassemble using chosen ISA and extensions."),
+    RISCV_OPTION_ARG_ISA },
   { "priv-spec=",
     N_("Print the CSR according to the chosen privilege spec."),
     RISCV_OPTION_ARG_PRIV_SPEC }
@@ -1043,6 +1058,9 @@ disassembler_options_riscv (void)
       size_t i, priv_spec_count;
 
       args = XNEWVEC (disasm_option_arg_t, num_args + 1);
+
+      args[RISCV_OPTION_ARG_ISA].name = "ISA";
+      args[RISCV_OPTION_ARG_ISA].values = NULL;
 
       args[RISCV_OPTION_ARG_PRIV_SPEC].name = "SPEC";
       priv_spec_count = PRIV_SPEC_CLASS_DRAFT - PRIV_SPEC_CLASS_NONE - 1;
