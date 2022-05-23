@@ -2450,7 +2450,8 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      || imm_expr->X_op != O_constant
 		      || (unsigned long) imm_expr->X_add_number >= xlen)
 		    break;
-		  ip->insn_opcode |= ENCODE_CITYPE_IMM (imm_expr->X_add_number);
+		  ip->insn_opcode |=
+		    ENCODE_CITYPE_IMM (imm_expr->X_add_number & (xlen - 1));
 		rvc_imm_done:
 		  asarg = expr_end;
 		  imm_expr->X_op = O_absent;
@@ -2890,7 +2891,8 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      if ((unsigned long) imm_expr->X_add_number >= xlen)
 		as_bad (_("improper shift amount (%lu)"),
 			(unsigned long) imm_expr->X_add_number);
-	      INSERT_OPERAND (SHAMT, *ip, imm_expr->X_add_number);
+	      INSERT_OPERAND (SHAMT, *ip,
+			      imm_expr->X_add_number & (xlen - 1));
 	      imm_expr->X_op = O_absent;
 	      asarg = expr_end;
 	      continue;
