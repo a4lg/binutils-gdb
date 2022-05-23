@@ -2356,7 +2356,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	    case '\0': /* End of args.  */
 	      if (insn->pinfo != INSN_MACRO)
 		{
-		  if (!insn->match_func (insn, ip->insn_opcode))
+		  if (! insn->match_func (insn, ip->insn_opcode, xlen))
 		    break;
 
 		  /* For .insn, insn->match and insn->mask are 0.  */

@@ -429,7 +429,8 @@ struct riscv_opcode
 
   /* A function to determine if a word corresponds to this instruction.
      Usually, this computes ((word & mask) == match).  */
-  int (*match_func) (const struct riscv_opcode *op, insn_t word);
+  int (*match_func) (const struct riscv_opcode *op, insn_t word,
+		     unsigned xlen);
 
   /* For a macro, this is INSN_MACRO.  Otherwise, it is a collection
      of bits describing the instruction, notably any relevant hazard
