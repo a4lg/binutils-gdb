@@ -759,7 +759,7 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   const struct riscv_opcode **pop, **pop_end;
   const struct riscv_opcode *op, *matched_op;
   struct riscv_private_data *pd;
-  int insnlen;
+  int insnlen, masklen = -1;
 
   if (info->private_data == NULL)
     {
@@ -823,8 +823,20 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
       if (riscv_insn_support_cache[op->insn_class] < 0)
 	continue;
 
-      matched_op = op;
-      break;
+      if (!(op->pinfo & INSN_GENERICS))
+	{
+	  matched_op = op;
+	  break;
+	}
+
+      int curmasklen = __builtin_popcountll (op->mask);
+      if (matched_op == NULL || (no_aliases
+				 ? (curmasklen < masklen)
+				 : (curmasklen >= masklen)))
+	{
+	  matched_op = op;
+	  masklen = curmasklen;
+	}
     }
 
   if (matched_op != NULL)
