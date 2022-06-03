@@ -1,6 +1,6 @@
 #as: -march=rv32i_zbkb
 #source: zbkb-32.s
-#objdump: -d
+#objdump: -d -M no-aliases
 
 .*:[ 	]+file format .*
 
