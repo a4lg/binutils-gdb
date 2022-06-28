@@ -1168,6 +1168,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
   {"zmmul",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zawrs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zfb",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
   {"zfh",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfhmin",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -2361,6 +2362,14 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
 	       && riscv_subset_supports (rps, "q"))
 	      || (riscv_subset_supports (rps, "zhinxmin")
 		  && riscv_subset_supports (rps, "zqinx")));
+    case INSN_CLASS_ZFB:
+      return riscv_subset_supports (rps, "zfb");
+    case INSN_CLASS_D_AND_ZFB:
+      return riscv_subset_supports (rps, "d")
+	     && riscv_subset_supports (rps, "zfb");
+    case INSN_CLASS_Q_AND_ZFB:
+      return riscv_subset_supports (rps, "q")
+	     && riscv_subset_supports (rps, "zfb");
     case INSN_CLASS_ZBA:
       return riscv_subset_supports (rps, "zba");
     case INSN_CLASS_ZBB:
@@ -2523,6 +2532,24 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
 	return "zhinxmin";
       else
 	return _("zfhmin' and `q', or `zhinxmin' and `zqinx");
+    case INSN_CLASS_ZFB:
+      return "zfb";
+    case INSN_CLASS_D_AND_ZFB:
+      if (!riscv_subset_supports (rps, "d")
+	  && !riscv_subset_supports (rps, "zfb"))
+	return _("d' and `zfb");
+      else if (!riscv_subset_supports (rps, "d"))
+	return "d";
+      else
+	return "zfb";
+    case INSN_CLASS_Q_AND_ZFB:
+      if (!riscv_subset_supports (rps, "q")
+	  && !riscv_subset_supports (rps, "zfb"))
+	return _("q' and `zfb");
+      else if (!riscv_subset_supports (rps, "q"))
+	return "q";
+      else
+	return "zfb";
     case INSN_CLASS_ZBA:
       return "zba";
     case INSN_CLASS_ZBB:
