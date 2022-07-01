@@ -1430,6 +1430,8 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	    case 'f':
 	      switch (*++oparg)
 		{
+		case 'M': /* Fall through.  */
+		case 'm': USE_BITS (OP_MASK_RM, OP_SH_RM); break;
 		case 'v': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
 		default:
 		  goto unknown_validate_operand;
@@ -3526,6 +3528,33 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		case 'f':
 		  switch (*++oparg)
 		    {
+		    case 'M':
+		    case 'm':
+		      /* Optional rounding mode (widening conversion)
+			 'M': operand either disallowed or not recommended
+			      (considered to be non-useful to normal software).
+			 'm': operand allowed for compatibility reasons
+			      (display a warning instead).  */
+		      if (*asarg == '\0')
+			{
+			  INSERT_OPERAND (RM, *ip, 0);
+			  continue;
+			}
+		      else if (*asarg == ',' && asarg++
+			       && arg_lookup (&asarg, riscv_rm,
+					      ARRAY_SIZE (riscv_rm), &regno))
+			{
+			  INSERT_OPERAND (RM, *ip, regno);
+			  if (*oparg == 'M')
+			    as_bad (_ ("rounding mode cannot be specified "
+				       "on widening conversion"));
+			  else
+			    as_warn (
+				_ ("specifying a rounding mode is strongly "
+				   "discourged on widening conversion"));
+			  continue;
+			}
+		      break;
 		    case 'v':
 		      /* FLI.[HSDQ] value field for 'Zfa' extension.  */
 		      if (!arg_lookup (&asarg, riscv_fli_symval,
