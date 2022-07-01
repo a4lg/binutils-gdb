@@ -592,6 +592,27 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		    goto undefined_modifier;
 		  }
 		  break;
+	      case 'f':
+		switch (*++oparg)
+		  {
+		  case 'M': /* Fall through.  */
+		  case 'm':
+		    /* Optional rounding mode (widening conversion)
+		       which defaults to RNE (0b000).
+		       Display non-default rounding mode if:
+		       1. rounding mode is invalid or
+		       2. 'no-aliases' option is specified.  */
+		    if (EXTRACT_OPERAND (RM, l) == 0
+			|| (!no_aliases && riscv_rm[EXTRACT_OPERAND (RM, l)]))
+		      break;
+		    print (info->stream, dis_style_text, ",");
+		    arg_print (info, EXTRACT_OPERAND (RM, l), riscv_rm,
+			       ARRAY_SIZE (riscv_rm));
+		    break;
+		  default:
+		    goto undefined_modifier;
+		  }
+		  break;
 	      default:
 		goto undefined_modifier;
 	      }
@@ -640,6 +661,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	      }
 	  }
 	  break;
+
 	default:
 	undefined_modifier:
 	  /* xgettext:c-format */

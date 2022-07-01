@@ -1366,6 +1366,15 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		  goto unknown_validate_operand;
 		}
 	      break;
+	    case 'f':
+	      switch (*++oparg)
+		{
+		case 'M': /* Fall through.  */
+		case 'm': USE_BITS (OP_MASK_RM, OP_SH_RM); break;
+		default:
+		  goto unknown_validate_operand;
+		}
+	      break;
 	    default:
 	      goto unknown_validate_operand;
 	    }
@@ -3408,6 +3417,40 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      imm_expr->X_op = O_absent;
 		      asarg = expr_end;
 		      continue;
+		    default:
+		      goto unknown_riscv_ip_operand;
+		    }
+		  break;
+		case 'f':
+		  switch (*++oparg)
+		    {
+		    case 'M':
+		    case 'm':
+		      /* Optional rounding mode (widening conversion)
+			 'M': operand either disallowed or not recommended
+			      (considered to be non-useful to normal software).
+			 'm': operand allowed for compatibility reasons
+			      (display a warning instead).  */
+		      if (*asarg == '\0')
+			{
+			  INSERT_OPERAND (RM, *ip, 0);
+			  continue;
+			}
+		      else if (*asarg == ',' && asarg++
+			       && arg_lookup (&asarg, riscv_rm,
+					      ARRAY_SIZE (riscv_rm), &regno))
+			{
+			  INSERT_OPERAND (RM, *ip, regno);
+			  if (*oparg == 'M')
+			    as_bad (_ ("rounding mode cannot be specified "
+				       "on widening conversion"));
+			  else
+			    as_warn (
+				_ ("specifying a rounding mode is strongly "
+				   "discourged on widening conversion"));
+			  continue;
+			}
+		      break;
 		    default:
 		      goto unknown_riscv_ip_operand;
 		    }
