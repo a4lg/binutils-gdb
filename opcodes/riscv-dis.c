@@ -554,6 +554,22 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	  print (info->stream, dis_style_text, "%d", rs1);
 	  break;
 
+	case '!': /* Special handlings.  */
+	  switch (*++oparg)
+	    {
+	    case 'M': /* Fall through.  */
+	    case 'm':
+	      /* Optional rounding mode (widening conversion)
+		 which defaults to RNE (0b000).  */
+	      if (!no_aliases || EXTRACT_OPERAND (RM, l) == 0)
+		break;
+	      print (info->stream, dis_style_text, ",");
+	      arg_print (info, EXTRACT_OPERAND (RM, l), riscv_rm,
+			 ARRAY_SIZE (riscv_rm));
+	      break;
+	    }
+	  break;
+
 	default:
 	  /* xgettext:c-format */
 	  print (info->stream, dis_style_text,
