@@ -1029,6 +1029,22 @@
 .*Info: macro .*
 .*Warning: invalid CSR `minstretcfgh' for the privileged spec `1.9.1'
 .*Info: macro .*
+.*Warning: invalid CSR `mnscratch', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mnscratch', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mnepc', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mnepc', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mncause', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mncause', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mnstatus', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mnstatus', needs `smrnmi' extension
+.*Info: macro .*
 .*Warning: invalid CSR `mstateen0', needs `smstateen' extension
 .*Info: macro .*
 .*Warning: invalid CSR `mstateen0', needs `smstateen' extension
