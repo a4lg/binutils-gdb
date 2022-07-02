@@ -337,6 +337,12 @@
 	csr vsip
 	csr vsatp
 
+	# Smrnmi extension
+	csr mnscratch
+	csr mnepc
+	csr mncause
+	csr mnstatus
+
 	# Smstateen extension
 	csr mstateen0
 	csr mstateen1

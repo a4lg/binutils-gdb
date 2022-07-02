@@ -68,6 +68,7 @@ enum riscv_csr_class
   CSR_CLASS_DEBUG,	/* debug CSR */
   CSR_CLASS_H,		/* hypervisor */
   CSR_CLASS_H_32,	/* hypervisor, rv32 only */
+  CSR_CLASS_SMRNMI,		/* Smrnmi only */
   CSR_CLASS_SMSTATEEN,		/* Smstateen only */
   CSR_CLASS_SMSTATEEN_AND_H,	/* Smstateen only (with H) */
   CSR_CLASS_SMSTATEEN_32,	/* Smstateen RV32 only */
@@ -936,6 +937,9 @@ riscv_csr_address (const char *csr_name,
       break;
     case CSR_CLASS_V:
       extension = "v";
+      break;
+    case CSR_CLASS_SMRNMI:
+      extension = "smrnmi";
       break;
     case CSR_CLASS_SMSTATEEN:
     case CSR_CLASS_SMSTATEEN_AND_H:
