@@ -1,5 +1,5 @@
 #as: -march=rv32ic
-#objdump: -dr
+#objdump: -dr -M no-aliases
 
 .*:[ 	]+file format .*
 
