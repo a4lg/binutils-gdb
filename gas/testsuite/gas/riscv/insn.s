@@ -55,6 +55,7 @@ target:
 	.insn r  0x33,  0,  0, fa0, fa1, fa2
 
 	.insn r  OP_V, 0, 1, x1, x3, x2
+	.insn r  OP_P, 2, 0x51, x2, x0, x4
 
 	.insn 0x0001
 	.insn 0x00000013
