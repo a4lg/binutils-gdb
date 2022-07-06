@@ -198,7 +198,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
   fprintf_styled_ftype print = info->fprintf_styled_func;
   const char *opargStart;
 
-  if (*oparg != '\0')
+  if (*oparg != '\0' && *oparg != '~')
     print (info->stream, dis_style_text, "\t");
 
   for (; *oparg != '\0'; oparg++)
@@ -553,6 +553,9 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	case 'Z':
 	  print (info->stream, dis_style_text, "%d", rs1);
 	  break;
+
+	case '~': /* Ignored fields.  */
+	  return;
 
 	case '!': /* Operand with special handlings.  */
 	  switch (*++oparg)

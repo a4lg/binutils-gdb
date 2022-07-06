@@ -1253,6 +1253,20 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		goto unknown_validate_operand;
 	    }
 	  break;
+	case '~': /* Ignored fields (w/o defaults).  */
+	  while (*++oparg)
+	    {
+	      switch (*oparg)
+		{
+		case 'd': USE_BITS (OP_MASK_RD, OP_SH_RD); break;
+		case 's': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
+		case 'j': used_bits |= ENCODE_ITYPE_IMM (-1U); break;
+		default:
+		  goto unknown_validate_operand;
+		}
+	    }
+	  --oparg;
+	  break;
 	case '!': /* Operand with special handlings.  */
 	  switch (*++oparg)
 	    {
@@ -3272,6 +3286,22 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 				  ~ 0x1fU);
 	      imm_expr->X_op = O_absent;
 	      asarg = expr_end;
+	      continue;
+
+	    case '~': /* Ignored fields (w/o defaults).  */
+	      while (*++oparg)
+		{
+		  switch (*oparg)
+		    {
+		    case 'd': /* Ignored RD.  */
+		    case 's': /* Ignored RS1.  */
+		    case 'j': /* Ignored immediate (I-type).  */
+		      break;
+		    default:
+		      goto unknown_riscv_ip_operand;
+		    }
+		}
+	      --oparg;
 	      continue;
 
 	    case '!': /* Operand with special handlings.  */
