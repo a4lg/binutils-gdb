@@ -1415,6 +1415,8 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		case 'd': USE_BITS (OP_MASK_RD, OP_SH_RD); break;
 		case 's': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
 		case 'j': used_bits |= ENCODE_ITYPE_IMM (-1U); break;
+		/* fence: fm field.  */
+		case 'f': USE_BITS (OP_MASK_FM, OP_SH_FM); break;
 		default:
 		  goto unknown_validate_operand;
 		}
@@ -3534,6 +3536,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    case 'd': /* Ignored RD.  */
 		    case 's': /* Ignored RS1.  */
 		    case 'j': /* Ignored immediate (I-type).  */
+		    case 'f': /* Ignored fence fm field.  */
 		      break;
 		    default:
 		      goto unknown_riscv_ip_operand;
