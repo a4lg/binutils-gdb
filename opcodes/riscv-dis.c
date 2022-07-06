@@ -226,7 +226,8 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
   fprintf_styled_ftype print = info->fprintf_styled_func;
   const char *opargStart;
 
-  if (*oparg != '\0')
+#define OPARG_IS_END(offset) (oparg[offset] == '\0' || oparg[offset] == '\\')
+  if (!OPARG_IS_END(0))
     print (info->stream, dis_style_text, "\t");
 
   for (; *oparg != '\0'; oparg++)
@@ -425,7 +426,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	case '0':
 	  /* Only print constant 0 if it is the last argument.  */
-	  if (!oparg[1])
+	  if (OPARG_IS_END(1))
 	    print (info->stream, dis_style_immediate, "0");
 	  break;
 
@@ -695,6 +696,9 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	      goto undefined_modifier;
 	    }
 	  break;
+
+	case '\\': /* Ignored fields.  */
+	  return;
 
 	default:
 	undefined_modifier:
