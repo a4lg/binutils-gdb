@@ -466,7 +466,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sw",          0, INSN_CLASS_I, "t,A,s",     0, (int) M_SW, match_never, INSN_MACRO },
 {"fence",       0, INSN_CLASS_I, "",          MATCH_FENCE|MASK_PRED|MASK_SUCC, MASK_FENCE|MASK_RD|MASK_RS1|MASK_IMM, match_opcode, INSN_ALIAS },
 {"fence",       0, INSN_CLASS_I, "P,Q",       MATCH_FENCE, MASK_FENCE|MASK_RD|MASK_RS1|(MASK_IMM & ~MASK_PRED & ~MASK_SUCC), match_opcode, 0 },
-{"fence.i",     0, INSN_CLASS_ZIFENCEI, "",   MATCH_FENCE_I, MASK_FENCE|MASK_RD|MASK_RS1|MASK_IMM, match_opcode, 0 },
+{"fence.i",     0, INSN_CLASS_ZIFENCEI, "\\dsj", MATCH_FENCE_I, MASK_FENCE_I, match_opcode, 0 },
 {"fence.tso",   0, INSN_CLASS_I, "",          MATCH_FENCE_TSO, MASK_FENCE_TSO|MASK_RD|MASK_RS1, match_opcode, 0 },
 {"rdcycle",     0, INSN_CLASS_I, "d",         MATCH_RDCYCLE, MASK_RDCYCLE, match_opcode, INSN_ALIAS },
 {"rdinstret",   0, INSN_CLASS_I, "d",         MATCH_RDINSTRET, MASK_RDINSTRET, match_opcode, INSN_ALIAS },
