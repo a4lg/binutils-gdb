@@ -411,6 +411,14 @@
 .*Warning: invalid CSR `vsip', needs `h' extension
 .*Warning: invalid CSR `vsatp', needs `h' extension
 .*Warning: invalid CSR `vsatp', needs `h' extension
+.*Warning: invalid CSR `mnscratch', needs `smrnmi' extension
+.*Warning: invalid CSR `mnscratch', needs `smrnmi' extension
+.*Warning: invalid CSR `mnepc', needs `smrnmi' extension
+.*Warning: invalid CSR `mnepc', needs `smrnmi' extension
+.*Warning: invalid CSR `mncause', needs `smrnmi' extension
+.*Warning: invalid CSR `mncause', needs `smrnmi' extension
+.*Warning: invalid CSR `mnstatus', needs `smrnmi' extension
+.*Warning: invalid CSR `mnstatus', needs `smrnmi' extension
 .*Warning: invalid CSR `mstateen0', needs `smstateen' extension
 .*Warning: invalid CSR `mstateen0', needs `smstateen' extension
 .*Warning: invalid CSR `mstateen1', needs `smstateen' extension

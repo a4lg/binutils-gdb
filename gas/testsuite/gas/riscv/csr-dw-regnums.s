@@ -307,6 +307,11 @@ _start:
 	.cfi_offset vstval, 2316
 	.cfi_offset vsip, 2320
 	.cfi_offset vsatp, 2560
+	# Smrnmi extension
+	.cfi_offset mnscratch, 7424
+	.cfi_offset mnepc, 7428
+	.cfi_offset mncause, 7432
+	.cfi_offset mnstatus, 7440
 	# Smstateen extension
 	.cfi_offset mstateen0, 3120
 	.cfi_offset mstateen1, 3124

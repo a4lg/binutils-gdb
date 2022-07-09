@@ -313,6 +313,10 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4675 \(vstval\) at cfa\+2316
   DW_CFA_offset_extended_sf: r4676 \(vsip\) at cfa\+2320
   DW_CFA_offset_extended_sf: r4736 \(vsatp\) at cfa\+2560
+  DW_CFA_offset_extended_sf: r5952 \(mnscratch\) at cfa\+7424
+  DW_CFA_offset_extended_sf: r5953 \(mnepc\) at cfa\+7428
+  DW_CFA_offset_extended_sf: r5954 \(mncause\) at cfa\+7432
+  DW_CFA_offset_extended_sf: r5956 \(mnstatus\) at cfa\+7440
   DW_CFA_offset_extended_sf: r4876 \(mstateen0\) at cfa\+3120
   DW_CFA_offset_extended_sf: r4877 \(mstateen1\) at cfa\+3124
   DW_CFA_offset_extended_sf: r4878 \(mstateen2\) at cfa\+3128
