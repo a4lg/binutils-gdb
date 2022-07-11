@@ -39,9 +39,14 @@ static const char *initial_default_arch = "rv64gc";
    (as specified by the ELF attributes or `initial_default_arch').  */
 static const char *default_arch = NULL;
 
+/* Current XLEN for the disassembler.  */
 static unsigned xlen = 0;
 
+/* Default ISA specification version (constant as of now).  */
 static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
+
+/* Default privileged specification
+   (as specified by the ELF attributes or the `priv-spec' option).  */
 static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
 
 static riscv_subset_list_t riscv_subsets;
@@ -66,6 +71,7 @@ static int last_map_symbol = -1;
 static bfd_vma last_stop_offset = 0;
 static enum riscv_seg_mstate last_map_state;
 
+/* Register names as used by the disassembler.  */
 static const char * const *riscv_gpr_names;
 static const char * const *riscv_fpr_names;
 
@@ -779,7 +785,7 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
       /* Is this instruction restricted to a certain value of XLEN?  */
       if ((op->xlen_requirement != 0) && (op->xlen_requirement != xlen))
 	continue;
-
+      /* Is this instruction supported by the current architecture?  */
       if (!riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class))
 	continue;
 
