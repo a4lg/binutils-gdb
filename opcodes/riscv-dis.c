@@ -65,6 +65,31 @@ static const char * const *riscv_fpr_names;
 /* If set, disassemble as most general instruction.  */
 static int no_aliases;
 
+/* Initialization (for arch and options).  */
+
+static void set_default_riscv_dis_options (void);
+static void build_riscv_opcodes_hash_table (void);
+
+static void
+init_riscv_dis_state_for_arch (void)
+{
+}
+
+static void
+init_riscv_dis_state_for_arch_and_options (void)
+{
+  static bool init = false;
+  if (!init)
+    {
+      set_default_riscv_dis_options ();
+      build_riscv_opcodes_hash_table ();
+      init = true;
+    }
+  /* If arch has Zfinx extension, use GPR to disassemble.  */
+  if (riscv_subset_supports (&riscv_rps_dis, "zfinx"))
+    riscv_fpr_names = riscv_gpr_names;
+}
+
 static void
 set_default_riscv_dis_options (void)
 {
@@ -633,15 +658,8 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 {
   const struct riscv_opcode **pop, **pop_end;
   const struct riscv_opcode *op, *matched_op;
-  static bool init = 0;
   struct riscv_private_data *pd;
   int insnlen;
-
-  if (!init)
-    {
-      build_riscv_opcodes_hash_table ();
-      init = 1;
-    }
 
   if (info->private_data == NULL)
     {
@@ -714,10 +732,6 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   if (matched_op != NULL)
     {
       op = matched_op;
-
-      /* If arch has Zfinx extension, use GPR to disassemble.  */
-      if (riscv_subset_supports (&riscv_rps_dis, "zfinx"))
-	riscv_fpr_names = riscv_gpr_names;
 
       (*info->fprintf_styled_func) (info->stream, dis_style_mnemonic,
 				    "%s", op->name);
@@ -1015,9 +1029,8 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
       parse_riscv_dis_options (info->disassembler_options);
       /* Avoid repeatedly parsing the options.  */
       info->disassembler_options = NULL;
+      init_riscv_dis_state_for_arch_and_options ();
     }
-  else if (riscv_gpr_names == NULL)
-    set_default_riscv_dis_options ();
 
   mstate = riscv_search_mapping_symbol (memaddr, info);
   /* Save the last mapping state.  */
@@ -1081,6 +1094,8 @@ riscv_get_disassembler (bfd *abfd)
 
   riscv_release_subset_list (&riscv_subsets);
   riscv_parse_subset (&riscv_rps_dis, default_arch);
+  init_riscv_dis_state_for_arch ();
+  init_riscv_dis_state_for_arch_and_options ();
   return print_insn_riscv;
 }
 
