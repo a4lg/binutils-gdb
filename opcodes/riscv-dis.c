@@ -75,6 +75,9 @@ static enum riscv_seg_mstate last_map_state;
 static const char * const *riscv_gpr_names;
 static const char * const *riscv_fpr_names;
 
+/* Instruction class support cache.  */
+static signed char riscv_insn_class_support_cache[NUM_INSN_CLASSES];
+
 /* If set, disassemble as most general instruction.  */
 static bool no_aliases = false;
 
@@ -96,6 +99,9 @@ static void
 init_riscv_dis_state_for_arch (void)
 {
   is_arch_changed = true;
+  /* Clear instruction support cache.  */
+  for (size_t i = 0; i < NUM_INSN_CLASSES; i++)
+    riscv_insn_class_support_cache[i] = 0;
 }
 
 static void
@@ -786,7 +792,14 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
       if ((op->xlen_requirement != 0) && (op->xlen_requirement != xlen))
 	continue;
       /* Is this instruction supported by the current architecture?  */
-      if (!riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class))
+      if (riscv_insn_class_support_cache[op->insn_class] == 0)
+	{
+	  riscv_insn_class_support_cache[op->insn_class]
+	      = riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class)
+		    ? +1
+		    : -1;
+	}
+      if (riscv_insn_class_support_cache[op->insn_class] < 0)
 	continue;
 
       matched_op = op;
