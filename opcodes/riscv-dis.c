@@ -72,6 +72,10 @@ static const char * const *riscv_fpr_names;
 /* If set, disassemble as most general instruction.  */
 static int no_aliases;
 
+/* If set, disassemble with numeric registers.  */
+static bool is_numeric = false;
+
+
 /* Initialization (for arch and options).  */
 
 static void set_default_riscv_dis_options (void);
@@ -95,6 +99,9 @@ init_riscv_dis_state_for_arch_and_options (void)
       build_riscv_opcodes_hash_table ();
       init = true;
     }
+  /* Set register names to disassemble.  */
+  riscv_gpr_names = is_numeric ? riscv_gpr_names_numeric : riscv_gpr_names_abi;
+  riscv_fpr_names = is_numeric ? riscv_fpr_names_numeric : riscv_fpr_names_abi;
   /* If arch has Zfinx extension, use GPR to disassemble.  */
   if (riscv_subset_supports (&riscv_rps_dis, "zfinx"))
     riscv_fpr_names = riscv_gpr_names;
@@ -105,9 +112,8 @@ init_riscv_dis_state_for_arch_and_options (void)
 static void
 set_default_riscv_dis_options (void)
 {
-  riscv_gpr_names = riscv_gpr_names_abi;
-  riscv_fpr_names = riscv_fpr_names_abi;
   no_aliases = 0;
+  is_numeric = false;
 }
 
 /* Update current architecture string
@@ -150,10 +156,7 @@ parse_riscv_dis_option_without_args (const char *option)
   if (strcmp (option, "no-aliases") == 0)
     no_aliases = 1;
   else if (strcmp (option, "numeric") == 0)
-    {
-      riscv_gpr_names = riscv_gpr_names_numeric;
-      riscv_fpr_names = riscv_fpr_names_numeric;
-    }
+    is_numeric = true;
   else
     return false;
   return true;
