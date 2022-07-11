@@ -75,6 +75,9 @@ static int no_aliases;
 /* If set, disassemble with numeric registers.  */
 static bool is_numeric = false;
 
+/* Reset when reinitializing the CSR table is required.  */
+static bool is_init_csr = false;
+
 
 /* Initialization (for arch and options).  */
 
@@ -93,11 +96,14 @@ static void
 init_riscv_dis_state_for_arch_and_options (void)
 {
   static bool init = false;
+  static enum riscv_spec_class prev_default_priv_spec;
   if (!init)
     {
       set_default_riscv_dis_options ();
       build_riscv_opcodes_hash_table ();
       init = true;
+      /* Save initial options.  */
+      prev_default_priv_spec = default_priv_spec;
     }
   /* Set register names to disassemble.  */
   riscv_gpr_names = is_numeric ? riscv_gpr_names_numeric : riscv_gpr_names_abi;
@@ -105,7 +111,11 @@ init_riscv_dis_state_for_arch_and_options (void)
   /* If arch has Zfinx extension, use GPR to disassemble.  */
   if (riscv_subset_supports (&riscv_rps_dis, "zfinx"))
     riscv_fpr_names = riscv_gpr_names;
+  /* Reset CSR hash table if either `arch' or `priv-spec' option changes.  */
+  if (is_arch_changed || prev_default_priv_spec != default_priv_spec)
+    is_init_csr = false;
   /* Save previous options and mark them "unchanged".  */
+  prev_default_priv_spec = default_priv_spec;
   is_arch_changed = false;
 }
 
@@ -586,10 +596,9 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	case 'E':
 	  {
 	    static const char *riscv_csr_hash[4096]; /* Total 2^12 CSRs.  */
-	    static bool init_csr = false;
 	    unsigned int csr = EXTRACT_OPERAND (CSR, l);
 
-	    if (!init_csr)
+	    if (!is_init_csr)
 	      {
 		unsigned int i;
 		for (i = 0; i < 4096; i++)
@@ -610,6 +619,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		DECLARE_CSR (name, num, class, define_version, abort_version)
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
+		is_init_csr = true;
 	      }
 
 	    if (riscv_csr_hash[csr] != NULL)
