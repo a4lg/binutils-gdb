@@ -70,7 +70,7 @@ static const char * const *riscv_gpr_names;
 static const char * const *riscv_fpr_names;
 
 /* If set, disassemble as most general instruction.  */
-static int no_aliases;
+static bool no_aliases = false;
 
 /* If set, disassemble with numeric registers.  */
 static bool is_numeric = false;
@@ -122,7 +122,7 @@ init_riscv_dis_state_for_arch_and_options (void)
 static void
 set_default_riscv_dis_options (void)
 {
-  no_aliases = 0;
+  no_aliases = false;
   is_numeric = false;
 }
 
@@ -164,7 +164,7 @@ static bool
 parse_riscv_dis_option_without_args (const char *option)
 {
   if (strcmp (option, "no-aliases") == 0)
-    no_aliases = 1;
+    no_aliases = true;
   else if (strcmp (option, "numeric") == 0)
     is_numeric = true;
   else
