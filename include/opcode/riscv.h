@@ -519,6 +519,8 @@ enum riscv_seg_mstate
 
 extern const char * const riscv_gpr_names_numeric[NGPR];
 extern const char * const riscv_gpr_names_abi[NGPR];
+extern const char * const riscv_gpr_names_rve_numeric[NGPR];
+extern const char * const riscv_gpr_names_rve_abi[NGPR];
 extern const char * const riscv_fpr_names_numeric[NFPR];
 extern const char * const riscv_fpr_names_abi[NFPR];
 extern const char * const riscv_vecr_names_numeric[NVECR];
