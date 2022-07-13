@@ -314,8 +314,12 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		     (unsigned)(EXTRACT_CITYPE_IMM (l) & (RISCV_BIGIMM_REACH-1)));
 	      break;
 	    case '>':
-	      print (info->stream, dis_style_immediate, "0x%x",
-		     (unsigned)EXTRACT_CITYPE_IMM (l) & 0x3f);
+	      if (((unsigned)EXTRACT_CITYPE_IMM (l) & 0x3fU) >= xlen)
+		print (info->stream, dis_style_text, "invalid0x%x",
+		       (unsigned)EXTRACT_CITYPE_IMM (l) & 0x3fU);
+	      else
+		print (info->stream, dis_style_immediate, "0x%x",
+		       (unsigned)EXTRACT_CITYPE_IMM (l) & 0x3fU);
 	      break;
 	    case '<':
 	      print (info->stream, dis_style_immediate, "0x%x",
@@ -510,8 +514,12 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	  break;
 
 	case '>':
-	  print (info->stream, dis_style_immediate, "0x%x",
-		 EXTRACT_OPERAND (SHAMT, l));
+	  if (EXTRACT_OPERAND (SHAMT, l) >= xlen)
+	    print (info->stream, dis_style_text, "invalid0x%x",
+		   EXTRACT_OPERAND (SHAMT, l));
+	  else
+	    print (info->stream, dis_style_immediate, "0x%x",
+		   EXTRACT_OPERAND (SHAMT, l));
 	  break;
 
 	case '<':
