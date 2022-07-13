@@ -132,65 +132,78 @@ const char * const riscv_vma[2] =
 #define MASK_VMASK (OP_MASK_VMASK << OP_SH_VMASK)
 
 static int
-match_opcode (const struct riscv_opcode *op, insn_t insn)
+match_opcode (const struct riscv_opcode *op, insn_t insn,
+	      unsigned xlen ATTRIBUTE_UNUSED)
 {
   return ((insn ^ op->match) & op->mask) == 0;
 }
 
 static int
 match_never (const struct riscv_opcode *op ATTRIBUTE_UNUSED,
-	     insn_t insn ATTRIBUTE_UNUSED)
+	     insn_t insn ATTRIBUTE_UNUSED,
+	     unsigned xlen ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 static int
-match_rs1_eq_rs2 (const struct riscv_opcode *op, insn_t insn)
+match_rs1_eq_rs2 (const struct riscv_opcode *op, insn_t insn,
+		  unsigned xlen)
 {
   int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
   int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
-  return match_opcode (op, insn) && rs1 == rs2;
+  return match_opcode (op, insn, xlen) && rs1 == rs2;
 }
 
 static int
-match_rd_nonzero (const struct riscv_opcode *op, insn_t insn)
+match_rd_nonzero (const struct riscv_opcode *op, insn_t insn,
+		  unsigned xlen)
 {
-  return match_opcode (op, insn) && ((insn & MASK_RD) != 0);
+  return match_opcode (op, insn, xlen) && ((insn & MASK_RD) != 0);
 }
 
 static int
-match_c_add (const struct riscv_opcode *op, insn_t insn)
+match_shamt (const struct riscv_opcode *op, insn_t insn, unsigned xlen)
 {
-  return match_rd_nonzero (op, insn) && ((insn & MASK_CRS2) != 0);
+  unsigned shamt = (insn & MASK_SHAMT) >> OP_SH_SHAMT;
+  return match_opcode (op, insn, xlen) && shamt < xlen;
+}
+
+static int
+match_c_add (const struct riscv_opcode *op, insn_t insn, unsigned xlen)
+{
+  return match_rd_nonzero (op, insn, xlen) && ((insn & MASK_CRS2) != 0);
 }
 
 /* We don't allow mv zero,X to become a c.mv hint, so we need a separate
    matching function for this.  */
 
 static int
-match_c_add_with_hint (const struct riscv_opcode *op, insn_t insn)
+match_c_add_with_hint (const struct riscv_opcode *op, insn_t insn,
+		       unsigned xlen)
 {
-  return match_opcode (op, insn) && ((insn & MASK_CRS2) != 0);
+  return match_opcode (op, insn, xlen) && ((insn & MASK_CRS2) != 0);
 }
 
 static int
-match_c_nop (const struct riscv_opcode *op, insn_t insn)
+match_c_nop (const struct riscv_opcode *op, insn_t insn, unsigned xlen)
 {
-  return (match_opcode (op, insn)
+  return (match_opcode (op, insn, xlen)
 	  && (((insn & MASK_RD) >> OP_SH_RD) == 0));
 }
 
 static int
-match_c_addi16sp (const struct riscv_opcode *op, insn_t insn)
+match_c_addi16sp (const struct riscv_opcode *op, insn_t insn,
+		  unsigned xlen)
 {
-  return (match_opcode (op, insn)
+  return (match_opcode (op, insn, xlen)
 	  && (((insn & MASK_RD) >> OP_SH_RD) == 2));
 }
 
 static int
-match_c_lui (const struct riscv_opcode *op, insn_t insn)
+match_c_lui (const struct riscv_opcode *op, insn_t insn, unsigned xlen)
 {
-  return (match_rd_nonzero (op, insn)
+  return (match_rd_nonzero (op, insn, xlen)
 	  && (((insn & MASK_RD) >> OP_SH_RD) != 2)
 	  && EXTRACT_CITYPE_LUI_IMM (insn) != 0);
 }
@@ -199,71 +212,82 @@ match_c_lui (const struct riscv_opcode *op, insn_t insn)
    matching function for this.  */
 
 static int
-match_c_lui_with_hint (const struct riscv_opcode *op, insn_t insn)
+match_c_lui_with_hint (const struct riscv_opcode *op, insn_t insn,
+		       unsigned xlen)
 {
-  return (match_opcode (op, insn)
+  return (match_opcode (op, insn, xlen)
 	  && (((insn & MASK_RD) >> OP_SH_RD) != 2)
 	  && EXTRACT_CITYPE_LUI_IMM (insn) != 0);
 }
 
 static int
-match_c_addi4spn (const struct riscv_opcode *op, insn_t insn)
+match_c_addi4spn (const struct riscv_opcode *op, insn_t insn,
+		  unsigned xlen)
 {
-  return match_opcode (op, insn) && EXTRACT_CIWTYPE_ADDI4SPN_IMM (insn) != 0;
+  return match_opcode (op, insn, xlen)
+	 && EXTRACT_CIWTYPE_ADDI4SPN_IMM (insn) != 0;
 }
 
 /* This requires a non-zero shift.  A zero rd is a hint, so is allowed.  */
 
 static int
-match_c_slli (const struct riscv_opcode *op, insn_t insn)
+match_c_slli (const struct riscv_opcode *op, insn_t insn, unsigned xlen)
 {
-  return match_opcode (op, insn) && EXTRACT_CITYPE_IMM (insn) != 0;
+  return match_opcode (op, insn, xlen)
+	 && EXTRACT_CITYPE_IMM (insn) != 0
+	 && (EXTRACT_CITYPE_IMM (insn) & (RISCV_RVC_IMM_REACH - 1)) < xlen;
 }
 
 /* This requires a non-zero rd, and a non-zero shift.  */
 
 static int
-match_slli_as_c_slli (const struct riscv_opcode *op, insn_t insn)
+match_slli_as_c_slli (const struct riscv_opcode *op, insn_t insn,
+		      unsigned xlen)
 {
-  return match_rd_nonzero (op, insn) && EXTRACT_CITYPE_IMM (insn) != 0;
+  return match_rd_nonzero (op, insn, xlen)
+	 && EXTRACT_CITYPE_IMM (insn) != 0
+	 && (EXTRACT_CITYPE_IMM (insn) & (RISCV_RVC_IMM_REACH - 1)) < xlen;
 }
 
 /* This requires a zero shift.  A zero rd is a hint, so is allowed.  */
 
 static int
-match_c_slli64 (const struct riscv_opcode *op, insn_t insn)
+match_c_slli64 (const struct riscv_opcode *op, insn_t insn, unsigned xlen)
 {
-  return match_opcode (op, insn) && EXTRACT_CITYPE_IMM (insn) == 0;
+  return match_opcode (op, insn, xlen) && EXTRACT_CITYPE_IMM (insn) == 0;
 }
 
 /* This is used for both srli and srai.  This requires a non-zero shift.
    A zero rd is not possible.  */
 
 static int
-match_srxi_as_c_srxi (const struct riscv_opcode *op, insn_t insn)
+match_srxi_as_c_srxi (const struct riscv_opcode *op, insn_t insn,
+		      unsigned xlen)
 {
-  return match_opcode (op, insn) && EXTRACT_CITYPE_IMM (insn) != 0;
+  return match_opcode (op, insn, xlen)
+	 && EXTRACT_CITYPE_IMM (insn) != 0
+	 && (EXTRACT_CITYPE_IMM (insn) & (RISCV_RVC_IMM_REACH - 1)) < xlen;
 }
 
 static int
 match_vs1_eq_vs2 (const struct riscv_opcode *op,
-		  insn_t insn)
+		  insn_t insn, unsigned xlen)
 {
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
 
-  return match_opcode (op, insn) && vs1 == vs2;
+  return match_opcode (op, insn, xlen) && vs1 == vs2;
 }
 
 static int
 match_vd_eq_vs1_eq_vs2 (const struct riscv_opcode *op,
-			insn_t insn)
+			insn_t insn, unsigned xlen)
 {
   int vd =  (insn & MASK_VD) >> OP_SH_VD;
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
 
-  return match_opcode (op, insn) && vd == vs1 && vs1 == vs2;
+  return match_opcode (op, insn, xlen) && vd == vs1 && vs1 == vs2;
 }
 
 const struct riscv_opcode riscv_opcodes[] =
@@ -359,20 +383,20 @@ const struct riscv_opcode riscv_opcodes[] =
 {"la.tls.ie",   0, INSN_CLASS_I, "d,A",       0, (int) M_LA_TLS_IE, match_never, INSN_MACRO },
 {"neg",         0, INSN_CLASS_I, "d,t",       MATCH_SUB, MASK_SUB|MASK_RS1, match_opcode, INSN_ALIAS }, /* sub 0  */
 {"slli",        0, INSN_CLASS_C, "d,CU,C>",   MATCH_C_SLLI, MASK_C_SLLI, match_slli_as_c_slli, INSN_ALIAS },
-{"slli",        0, INSN_CLASS_I, "d,s,>",     MATCH_SLLI, MASK_SLLI, match_opcode, 0 },
+{"slli",        0, INSN_CLASS_I, "d,s,>",     MATCH_SLLI, MASK_SLLI, match_shamt, 0 },
 {"sll",         0, INSN_CLASS_C, "d,CU,C>",   MATCH_C_SLLI, MASK_C_SLLI, match_slli_as_c_slli, INSN_ALIAS },
 {"sll",         0, INSN_CLASS_I, "d,s,t",     MATCH_SLL, MASK_SLL, match_opcode, 0 },
-{"sll",         0, INSN_CLASS_I, "d,s,>",     MATCH_SLLI, MASK_SLLI, match_opcode, INSN_ALIAS },
+{"sll",         0, INSN_CLASS_I, "d,s,>",     MATCH_SLLI, MASK_SLLI, match_shamt, INSN_ALIAS },
 {"srli",        0, INSN_CLASS_C, "Cs,Cw,C>",  MATCH_C_SRLI, MASK_C_SRLI, match_srxi_as_c_srxi, INSN_ALIAS },
-{"srli",        0, INSN_CLASS_I, "d,s,>",     MATCH_SRLI, MASK_SRLI, match_opcode, 0 },
+{"srli",        0, INSN_CLASS_I, "d,s,>",     MATCH_SRLI, MASK_SRLI, match_shamt, 0 },
 {"srl",         0, INSN_CLASS_C, "Cs,Cw,C>",  MATCH_C_SRLI, MASK_C_SRLI, match_srxi_as_c_srxi, INSN_ALIAS },
 {"srl",         0, INSN_CLASS_I, "d,s,t",     MATCH_SRL, MASK_SRL, match_opcode, 0 },
-{"srl",         0, INSN_CLASS_I, "d,s,>",     MATCH_SRLI, MASK_SRLI, match_opcode, INSN_ALIAS },
+{"srl",         0, INSN_CLASS_I, "d,s,>",     MATCH_SRLI, MASK_SRLI, match_shamt, INSN_ALIAS },
 {"srai",        0, INSN_CLASS_C, "Cs,Cw,C>",  MATCH_C_SRAI, MASK_C_SRAI, match_srxi_as_c_srxi, INSN_ALIAS },
-{"srai",        0, INSN_CLASS_I, "d,s,>",     MATCH_SRAI, MASK_SRAI, match_opcode, 0 },
+{"srai",        0, INSN_CLASS_I, "d,s,>",     MATCH_SRAI, MASK_SRAI, match_shamt, 0 },
 {"sra",         0, INSN_CLASS_C, "Cs,Cw,C>",  MATCH_C_SRAI, MASK_C_SRAI, match_srxi_as_c_srxi, INSN_ALIAS },
 {"sra",         0, INSN_CLASS_I, "d,s,t",     MATCH_SRA, MASK_SRA, match_opcode, 0 },
-{"sra",         0, INSN_CLASS_I, "d,s,>",     MATCH_SRAI, MASK_SRAI, match_opcode, INSN_ALIAS },
+{"sra",         0, INSN_CLASS_I, "d,s,>",     MATCH_SRAI, MASK_SRAI, match_shamt, INSN_ALIAS },
 {"sub",         0, INSN_CLASS_C, "Cs,Cw,Ct",  MATCH_C_SUB, MASK_C_SUB, match_opcode, INSN_ALIAS },
 {"sub",         0, INSN_CLASS_I, "d,s,t",     MATCH_SUB, MASK_SUB, match_opcode, 0 },
 {"lb",          0, INSN_CLASS_I, "d,o(s)",    MATCH_LB, MASK_LB, match_opcode, INSN_DREF|INSN_1_BYTE },
@@ -951,9 +975,9 @@ const struct riscv_opcode riscv_opcodes[] =
 {"orn",        0, INSN_CLASS_ZBB_OR_ZBKB,  "d,s,t", MATCH_ORN, MASK_ORN, match_opcode, 0 },
 {"xnor",       0, INSN_CLASS_ZBB_OR_ZBKB,  "d,s,t", MATCH_XNOR, MASK_XNOR, match_opcode, 0 },
 {"rol",        0, INSN_CLASS_ZBB_OR_ZBKB,  "d,s,t", MATCH_ROL, MASK_ROL, match_opcode, 0 },
-{"rori",       0, INSN_CLASS_ZBB_OR_ZBKB,  "d,s,>", MATCH_RORI, MASK_RORI, match_opcode, 0 },
+{"rori",       0, INSN_CLASS_ZBB_OR_ZBKB,  "d,s,>", MATCH_RORI, MASK_RORI, match_shamt, 0 },
 {"ror",        0, INSN_CLASS_ZBB_OR_ZBKB,  "d,s,t", MATCH_ROR, MASK_ROR, match_opcode, 0 },
-{"ror",        0, INSN_CLASS_ZBB_OR_ZBKB,  "d,s,>", MATCH_RORI, MASK_RORI, match_opcode, INSN_ALIAS },
+{"ror",        0, INSN_CLASS_ZBB_OR_ZBKB,  "d,s,>", MATCH_RORI, MASK_RORI, match_shamt, INSN_ALIAS },
 {"rev8",      32, INSN_CLASS_ZBB_OR_ZBKB,  "d,s",   MATCH_GREVI | MATCH_SHAMT_REV8_32, MASK_GREVI | MASK_SHAMT, match_opcode, 0 },
 {"rev8",      64, INSN_CLASS_ZBB_OR_ZBKB,  "d,s",   MATCH_GREVI | MATCH_SHAMT_REV8_64, MASK_GREVI | MASK_SHAMT, match_opcode, 0 },
 {"rolw",      64, INSN_CLASS_ZBB_OR_ZBKB,  "d,s,t", MATCH_ROLW, MASK_ROLW, match_opcode, 0 },
@@ -971,7 +995,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"zext.w",    64, INSN_CLASS_ZBA,  "d,s",   MATCH_ADD_UW, MASK_ADD_UW | MASK_RS2, match_opcode, INSN_ALIAS },
 {"zext.w",    64, INSN_CLASS_I, "d,s",       0, (int) M_ZEXTW, match_never, INSN_MACRO },
 {"add.uw",    64, INSN_CLASS_ZBA,  "d,s,t", MATCH_ADD_UW, MASK_ADD_UW, match_opcode, 0 },
-{"slli.uw",   64, INSN_CLASS_ZBA,  "d,s,>", MATCH_SLLI_UW, MASK_SLLI_UW, match_opcode, 0 },
+{"slli.uw",   64, INSN_CLASS_ZBA,  "d,s,>", MATCH_SLLI_UW, MASK_SLLI_UW, match_shamt, 0 },
 
 /* Zbc or zbkc instructions.  */
 {"clmul",      0, INSN_CLASS_ZBC_OR_ZBKC,  "d,s,t", MATCH_CLMUL, MASK_CLMUL, match_opcode, 0 },
@@ -979,18 +1003,18 @@ const struct riscv_opcode riscv_opcodes[] =
 {"clmulr",     0, INSN_CLASS_ZBC,  "d,s,t", MATCH_CLMULR, MASK_CLMULR, match_opcode, 0 },
 
 /* Zbs instructions.  */
-{"bclri",     0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BCLRI, MASK_BCLRI, match_opcode, 0 },
-{"bseti",     0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BSETI, MASK_BSETI, match_opcode, 0 },
-{"binvi",     0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BINVI, MASK_BINVI, match_opcode, 0 },
-{"bexti",     0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BEXTI, MASK_BEXTI, match_opcode, 0 },
+{"bclri",     0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BCLRI, MASK_BCLRI, match_shamt, 0 },
+{"bseti",     0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BSETI, MASK_BSETI, match_shamt, 0 },
+{"binvi",     0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BINVI, MASK_BINVI, match_shamt, 0 },
+{"bexti",     0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BEXTI, MASK_BEXTI, match_shamt, 0 },
 {"bclr",      0, INSN_CLASS_ZBS,   "d,s,t",  MATCH_BCLR, MASK_BCLR, match_opcode, 0 },
-{"bclr",      0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BCLRI, MASK_BCLRI, match_opcode, INSN_ALIAS },
+{"bclr",      0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BCLRI, MASK_BCLRI, match_shamt, INSN_ALIAS },
 {"bset",      0, INSN_CLASS_ZBS,   "d,s,t",  MATCH_BSET, MASK_BSET, match_opcode, 0 },
-{"bset",      0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BSETI, MASK_BSETI, match_opcode, INSN_ALIAS },
+{"bset",      0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BSETI, MASK_BSETI, match_shamt, INSN_ALIAS },
 {"binv",      0, INSN_CLASS_ZBS,   "d,s,t",  MATCH_BINV, MASK_BINV, match_opcode, 0 },
-{"binv",      0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BINVI, MASK_BINVI, match_opcode, INSN_ALIAS },
+{"binv",      0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BINVI, MASK_BINVI, match_shamt, INSN_ALIAS },
 {"bext",      0, INSN_CLASS_ZBS,   "d,s,t",  MATCH_BEXT, MASK_BEXT, match_opcode, 0 },
-{"bext",      0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BEXTI, MASK_BEXTI, match_opcode, INSN_ALIAS },
+{"bext",      0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BEXTI, MASK_BEXTI, match_shamt, INSN_ALIAS },
 
 /* Zbkx instructions.  */
 {"xperm4",     0, INSN_CLASS_ZBKX,  "d,s,t",  MATCH_XPERM4, MASK_XPERM4, match_opcode, 0 },
