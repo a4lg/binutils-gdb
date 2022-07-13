@@ -32,10 +32,17 @@
 #include <stdint.h>
 #include <ctype.h>
 
-static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
-static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
+/* Default ISA string (if no ISA string is available).  */
+static const char *initial_default_arch = "rv64gc";
+
+/* Default ISA string
+   (as specified by the ELF attributes or `initial_default_arch').  */
+static const char *default_arch = NULL;
 
 unsigned xlen = 0;
+
+static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
+static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
 
 static riscv_subset_list_t riscv_subsets;
 static riscv_parse_subset_t riscv_rps_dis =
@@ -70,9 +77,12 @@ static int no_aliases;
 static void set_default_riscv_dis_options (void);
 static void build_riscv_opcodes_hash_table (void);
 
+static bool is_arch_changed = false;
+
 static void
 init_riscv_dis_state_for_arch (void)
 {
+  is_arch_changed = true;
 }
 
 static void
@@ -88,6 +98,8 @@ init_riscv_dis_state_for_arch_and_options (void)
   /* If arch has Zfinx extension, use GPR to disassemble.  */
   if (riscv_subset_supports (&riscv_rps_dis, "zfinx"))
     riscv_fpr_names = riscv_gpr_names;
+  /* Save previous options and mark them "unchanged".  */
+  is_arch_changed = false;
 }
 
 static void
@@ -97,6 +109,40 @@ set_default_riscv_dis_options (void)
   riscv_fpr_names = riscv_fpr_names_abi;
   no_aliases = 0;
 }
+
+/* Update current architecture string
+   and reinitialize the disassembler state.  */
+
+static void
+update_riscv_dis_current_arch (const char *arch)
+{
+  riscv_release_subset_list (&riscv_subsets);
+  riscv_parse_subset (&riscv_rps_dis, arch);
+  init_riscv_dis_state_for_arch ();
+}
+
+/* Update default architecture string.
+   Return true if a default arch string change is detected. */
+
+static bool
+update_riscv_dis_default_arch (const char *arch)
+{
+  /* Do nothing if default arch string is unchanged.  */
+  if (arch == initial_default_arch)
+    {
+      if (default_arch == initial_default_arch)
+	return false;
+    }
+  else if (default_arch != NULL && strcmp (default_arch, arch) == 0)
+    return false;
+  /* Save new default arch string
+     (either initial_default_arch or a copy of the arch string).  */
+  if (default_arch != initial_default_arch)
+    free ((void *)default_arch);
+  default_arch = (arch != initial_default_arch) ? xstrdup (arch) : arch;
+  return true;
+}
+
 
 static bool
 parse_riscv_dis_option_without_args (const char *option)
@@ -1073,7 +1119,7 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 disassembler_ftype
 riscv_get_disassembler (bfd *abfd)
 {
-  const char *default_arch = "rv64gc";
+  const char *default_arch_next = initial_default_arch;
 
   if (abfd && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
@@ -1088,13 +1134,16 @@ riscv_get_disassembler (bfd *abfd)
 						  attr[Tag_b].i,
 						  attr[Tag_c].i,
 						  &default_priv_spec);
-	  default_arch = attr[Tag_RISCV_arch].s;
+	  default_arch_next = attr[Tag_RISCV_arch].s;
+	  /* For ELF files with (somehow) no ISA string
+	     in the attributes, use the default.  */
+	  if (!default_arch_next)
+	    default_arch_next = initial_default_arch;
 	}
     }
 
-  riscv_release_subset_list (&riscv_subsets);
-  riscv_parse_subset (&riscv_rps_dis, default_arch);
-  init_riscv_dis_state_for_arch ();
+  if (update_riscv_dis_default_arch (default_arch_next))
+    update_riscv_dis_current_arch (default_arch_next);
   init_riscv_dis_state_for_arch_and_options ();
   return print_insn_riscv;
 }
