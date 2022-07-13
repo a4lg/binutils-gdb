@@ -39,7 +39,7 @@ static const char *initial_default_arch = "rv64gc";
    (as specified by the ELF attributes or `initial_default_arch').  */
 static const char *default_arch = NULL;
 
-unsigned xlen = 0;
+static unsigned xlen = 0;
 
 static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
 static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
@@ -64,7 +64,7 @@ struct riscv_private_data
 /* Used for mapping symbols.  */
 static int last_map_symbol = -1;
 static bfd_vma last_stop_offset = 0;
-enum riscv_seg_mstate last_map_state;
+static enum riscv_seg_mstate last_map_state;
 
 static const char * const *riscv_gpr_names;
 static const char * const *riscv_fpr_names;
