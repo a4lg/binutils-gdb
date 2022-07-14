@@ -14,7 +14,7 @@ proc sim_arch {} {
     while { [file dirname $arch] != "." } {
 	set arch [file dirname $arch]
     }
-    return "$arch"
+    return [file tail $arch]
 }
 
 # Initialize the testrun.
