@@ -368,8 +368,10 @@ enum riscv_insn_class
   INSN_CLASS_ZIFENCEI,
   INSN_CLASS_ZIHINTPAUSE,
   INSN_CLASS_F_OR_ZFINX,
-  INSN_CLASS_D_OR_ZDINX,
-  INSN_CLASS_Q_OR_ZQINX,
+  INSN_CLASS_D_OR_ZDINX,  /* Diagnostics only.  */
+  INSN_CLASS_Q_OR_ZQINX,  /* Diagnostics only.  */
+  INSN_CLASS_ZDINX,
+  INSN_CLASS_ZQINX,
   INSN_CLASS_ZFH_OR_ZHINX,
   INSN_CLASS_ZFHMIN,
   INSN_CLASS_ZFHMIN_OR_ZHINXMIN,
@@ -466,6 +468,10 @@ struct riscv_opcode
 #define INSN_4_BYTE		0x00000030
 #define INSN_8_BYTE		0x00000040
 #define INSN_16_BYTE		0x00000050
+
+/* Instruction has different entry that shares the name but differs
+   in register operands (FPR or GPR) used.  */
+#define INSN_F_OR_X		0x00000080
 
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */
