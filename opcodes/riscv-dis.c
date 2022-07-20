@@ -47,7 +47,7 @@ static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
 
 /* Default privileged specification
    (as specified by the ELF attributes or the `priv-spec' option).  */
-static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
+static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_DRAFT - 1;
 
 static riscv_subset_list_t riscv_subsets;
 static riscv_parse_subset_t riscv_rps_dis =
@@ -84,6 +84,12 @@ static bool is_numeric = false;
 /* Reset when reinitializing the CSR table is required.  */
 static bool is_init_csr = false;
 
+/* Current privileged specification version.  */
+static enum riscv_spec_class priv_spec = PRIV_SPEC_CLASS_DRAFT - 1;
+
+/* If set, a custom privileged specification is specified.  */
+static bool is_custom_priv_spec = false;
+
 
 /* Initialization (for arch and options).  */
 
@@ -102,14 +108,14 @@ static void
 init_riscv_dis_state_for_arch_and_options (void)
 {
   static bool init = false;
-  static enum riscv_spec_class prev_default_priv_spec;
+  static enum riscv_spec_class prev_priv_spec;
   if (!init)
     {
       set_default_riscv_dis_options ();
       build_riscv_opcodes_hash_table ();
       init = true;
       /* Save initial options.  */
-      prev_default_priv_spec = default_priv_spec;
+      prev_priv_spec = priv_spec;
     }
   /* Set register names to disassemble.  */
   riscv_gpr_names = is_numeric ? riscv_gpr_names_numeric : riscv_gpr_names_abi;
@@ -118,10 +124,10 @@ init_riscv_dis_state_for_arch_and_options (void)
   if (riscv_subset_supports (&riscv_rps_dis, "zfinx"))
     riscv_fpr_names = riscv_gpr_names;
   /* Reset CSR hash table if either `arch' or `priv-spec' option changes.  */
-  if (is_arch_changed || prev_default_priv_spec != default_priv_spec)
+  if (is_arch_changed || prev_priv_spec != priv_spec)
     is_init_csr = false;
   /* Save previous options and mark them "unchanged".  */
-  prev_default_priv_spec = default_priv_spec;
+  prev_priv_spec = priv_spec;
   is_arch_changed = false;
 }
 
@@ -130,6 +136,7 @@ set_default_riscv_dis_options (void)
 {
   no_aliases = false;
   is_numeric = false;
+  is_custom_priv_spec = false;
 }
 
 /* Update current architecture string
@@ -207,21 +214,18 @@ parse_riscv_dis_option (const char *option)
   value = equal + 1;
   if (strcmp (option, "priv-spec") == 0)
     {
-      enum riscv_spec_class priv_spec = PRIV_SPEC_CLASS_NONE;
-      const char *name = NULL;
-
-      RISCV_GET_PRIV_SPEC_CLASS (value, priv_spec);
-      if (priv_spec == PRIV_SPEC_CLASS_NONE)
-	opcodes_error_handler (_("unknown privileged spec set by %s=%s"),
-			       option, value);
-      else if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
-	default_priv_spec = priv_spec;
-      else if (default_priv_spec != priv_spec)
+      enum riscv_spec_class priv_spec_new = PRIV_SPEC_CLASS_NONE;
+      RISCV_GET_PRIV_SPEC_CLASS (value, priv_spec_new);
+      if (priv_spec_new == PRIV_SPEC_CLASS_NONE)
 	{
-	  RISCV_GET_PRIV_SPEC_NAME (name, default_priv_spec);
-	  opcodes_error_handler (_("mis-matched privilege spec set by %s=%s, "
-				   "the elf privilege attribute is %s"),
-				 option, value, name);
+	  opcodes_error_handler (_ ("unknown privileged spec set by %s=%s."
+				    "not overriding"),
+				 option, value);
+	}
+      else
+	{
+	  is_custom_priv_spec = true;
+	  priv_spec = priv_spec_new;
 	}
     }
   else
@@ -235,6 +239,7 @@ static void
 parse_riscv_dis_options (const char *opts_in)
 {
   char *opts = xstrdup (opts_in), *opt = opts, *opt_end = opts;
+  bool prev_is_custom_priv_spec = is_custom_priv_spec;
 
   set_default_riscv_dis_options ();
 
@@ -246,6 +251,8 @@ parse_riscv_dis_options (const char *opts_in)
     }
 
   free (opts);
+  if (prev_is_custom_priv_spec && !is_custom_priv_spec)
+    priv_spec = default_priv_spec;
 }
 
 /* Print one argument from an array.  */
@@ -610,16 +617,12 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		for (i = 0; i < 4096; i++)
 		  riscv_csr_hash[i] = NULL;
 
-		/* Set to the newest privileged version.  */
-		if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
-		  default_priv_spec = PRIV_SPEC_CLASS_DRAFT - 1;
-
 #define DECLARE_CSR(name, num, class, define_version, abort_version)	\
 		if (riscv_csr_hash[num] == NULL 			\
 		    && ((define_version == PRIV_SPEC_CLASS_NONE 	\
 			 && abort_version == PRIV_SPEC_CLASS_NONE)	\
-			|| (default_priv_spec >= define_version 	\
-			    && default_priv_spec < abort_version)))	\
+			|| (priv_spec >= define_version 	\
+			    && priv_spec < abort_version)))	\
 		  riscv_csr_hash[num] = #name;
 #define DECLARE_CSR_ALIAS(name, num, class, define_version, abort_version) \
 		DECLARE_CSR (name, num, class, define_version, abort_version)
@@ -1158,11 +1161,16 @@ riscv_get_disassembler (bfd *abfd)
 	     in the attributes, use the default.  */
 	  if (!default_arch_next)
 	    default_arch_next = initial_default_arch;
+	  /* By default, set to the newest privileged version.  */
+	  if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
+	    default_priv_spec = PRIV_SPEC_CLASS_DRAFT - 1;
 	}
     }
 
   if (update_riscv_dis_default_arch (default_arch_next))
     update_riscv_dis_current_arch (default_arch_next);
+  if (!is_custom_priv_spec)
+    priv_spec = default_priv_spec;
   init_riscv_dis_state_for_arch_and_options ();
   return print_insn_riscv;
 }
