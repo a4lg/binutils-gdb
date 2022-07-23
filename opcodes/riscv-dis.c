@@ -32,6 +32,9 @@
 #include <stdint.h>
 #include <ctype.h>
 
+/* Default architecture string (if not available).  */
+static const char *const initial_default_arch = "rv64gc";
+
 /* Current XLEN for the disassembler.  */
 static unsigned xlen = 0;
 
@@ -48,14 +51,36 @@ static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
    (as specified by the ELF attributes or the `priv-spec' option).  */
 static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
 
-static riscv_subset_list_t riscv_subsets;
+/* RISC-V disassembler architecture context type.  */
+typedef struct
+{
+  const char *arch_str;
+  const char *default_arch;
+  riscv_subset_list_t subsets;
+  unsigned xlen;
+  bool no_xlen_if_default;
+} riscv_dis_arch_context_t;
+
+/* Context: default (either initial_default_arch or ELF attribute).  */
+static riscv_dis_arch_context_t dis_arch_context_default
+    = { NULL, initial_default_arch, {}, 0, true };
+
+/* Context: override (mapping symbols with ISA string). */
+static riscv_dis_arch_context_t dis_arch_context_override
+    = { NULL, NULL, {}, 0, false };
+
+/* Pointer to the current disassembler architecture context.  */
+static riscv_dis_arch_context_t *dis_arch_context_current
+    = &dis_arch_context_default;
+
+/* RISC-V ISA string parser structure (current).  */
 static riscv_parse_subset_t riscv_rps_dis =
 {
-  &riscv_subsets,	/* subset_list.  */
-  opcodes_error_handler,/* error_handler.  */
-  &xlen,		/* xlen.  */
-  &default_isa_spec,	/* isa_spec.  */
-  false,		/* check_unknown_prefixed_ext.  */
+  &(dis_arch_context_default.subsets),	/* subset_list.  */
+  opcodes_error_handler,		/* error_handler.  */
+  &(dis_arch_context_default.xlen),	/* xlen.  */
+  &default_isa_spec,			/* isa_spec.  */
+  false,				/* check_unknown_prefixed_ext.  */
 };
 
 /* Private data structure for the RISC-V disassembler.  */
@@ -74,6 +99,7 @@ static bfd_vma last_stop_offset = 0;
 static bfd_vma last_map_symbol_boundary = 0;
 static enum riscv_seg_mstate last_map_state = MAP_NONE;
 static asection *last_map_section = NULL;
+static bool from_last_map_symbol = false;
 
 /* Register names as used by the disassembler.  */
 static const char (*riscv_gpr_names)[NRC];
@@ -84,6 +110,75 @@ static bool no_aliases = false;
 
 /* If set, disassemble with numeric register names.  */
 static bool is_numeric = false;
+
+
+/* Set current disassembler context (dis_arch_context_current).
+   Return true if successfully updated.  */
+
+static bool
+set_riscv_current_dis_arch_context (riscv_dis_arch_context_t* context)
+{
+  if (context == dis_arch_context_current)
+    return false;
+  dis_arch_context_current = context;
+  riscv_rps_dis.subset_list = &(context->subsets);
+  riscv_rps_dis.xlen = &(context->xlen);
+  return true;
+}
+
+/* Update riscv_dis_arch_context_t by an ISA string.
+   Return true if the architecture is updated by arch.  */
+
+static bool
+set_riscv_dis_arch_context (riscv_dis_arch_context_t *context,
+			    const char *arch)
+{
+  /* Check whether the architecture is changed and
+     return false if the architecture will not be changed.  */
+  if (context->arch_str)
+    {
+      if (context->default_arch && arch == context->default_arch)
+	return false;
+      if (strcmp (context->arch_str, arch) == 0)
+	return false;
+    }
+  /* Update architecture string.  */
+  if (context->arch_str != context->default_arch)
+    free ((void *) context->arch_str);
+  context->arch_str = (arch != context->default_arch)
+			    ? xstrdup (arch)
+			    : context->default_arch;
+  /* Update other contents (subset list and XLEN).  */
+  riscv_subset_list_t *prev_subsets = riscv_rps_dis.subset_list;
+  unsigned *prev_xlen = riscv_rps_dis.xlen;
+  riscv_rps_dis.subset_list = &(context->subsets);
+  riscv_rps_dis.xlen = &(context->xlen);
+  context->xlen = 0;
+  riscv_release_subset_list (&context->subsets);
+  /* ISA mapping string may be numbered, suffixed with '.n'. Do not
+     consider this as part of the ISA string.  */
+  char *suffix = strchr (context->arch_str, '.');
+  if (suffix)
+    *suffix = '\0';
+  riscv_parse_subset (&riscv_rps_dis, context->arch_str);
+  riscv_rps_dis.subset_list = prev_subsets;
+  riscv_rps_dis.xlen = prev_xlen;
+  /* Special handling on the default architecture.  */
+  if (context->no_xlen_if_default && arch == context->default_arch)
+    context->xlen = 0;
+  return true;
+}
+
+/* Free memory allocated for riscv_dis_arch_context_t.  */
+
+static void
+free_riscv_dis_arch_context (riscv_dis_arch_context_t* context)
+{
+  riscv_release_subset_list (&context->subsets);
+  if (context->default_arch != context->arch_str)
+    free ((void *) context->arch_str);
+  context->arch_str = NULL;
+}
 
 
 /* Guess and update current XLEN.  */
@@ -98,9 +193,13 @@ update_riscv_dis_xlen (struct disassemble_info *info)
        This is only effective if XLEN-specific BFD machine architecture is
        chosen.  If XLEN-neutral (like riscv), BFD machine architecture is
        ignored on XLEN selection.
-     2. ELF class in dummy ELF header.  */
+     2. Non-default RISC-V architecture string set by either an ELF
+	attribute or a mapping symbol with ISA string.
+     3. ELF class in dummy ELF header.  */
   if (xlen_by_mach != 0)
     xlen = xlen_by_mach;
+  else if (dis_arch_context_current->xlen != 0)
+    xlen = dis_arch_context_current->xlen;
   else if (xlen_by_elf != 0)
     xlen = xlen_by_elf;
   else if (info != NULL && info->section != NULL)
@@ -110,11 +209,24 @@ update_riscv_dis_xlen (struct disassemble_info *info)
     }
 }
 
+/* Initialization (for arch).  */
+
+static bool is_arch_changed = false;
+
+static void
+init_riscv_dis_state_for_arch (void)
+{
+  is_arch_changed = true;
+}
+
 /* Initialization (for arch and options).  */
 
 static void
 init_riscv_dis_state_for_arch_and_options (void)
 {
+  /* If the architecture string is changed, update XLEN.  */
+  if (is_arch_changed)
+    update_riscv_dis_xlen (NULL);
   /* Set GPR register names to disassemble.  */
   riscv_gpr_names = is_numeric ? riscv_gpr_names_numeric : riscv_gpr_names_abi;
   /* Set FPR register names to disassemble.  */
@@ -122,6 +234,25 @@ init_riscv_dis_state_for_arch_and_options (void)
       = !riscv_subset_supports (&riscv_rps_dis, "zfinx")
 	    ? (is_numeric ? riscv_fpr_names_numeric : riscv_fpr_names_abi)
 	    : riscv_gpr_names;
+  /* Save previous options and mark them "unchanged".  */
+  is_arch_changed = false;
+}
+
+/* Update architecture for disassembler with its context.
+   Call initialization functions if either:
+   -  the architecture for current context is changed or
+   -  context is updated to a new one.  */
+
+static void
+update_riscv_dis_arch (riscv_dis_arch_context_t *context, const char *arch)
+{
+  if ((set_riscv_dis_arch_context (context, arch)
+       && dis_arch_context_current == context)
+      || set_riscv_current_dis_arch_context (context))
+    {
+      init_riscv_dis_state_for_arch ();
+      init_riscv_dis_state_for_arch_and_options ();
+    }
 }
 
 
@@ -902,7 +1033,8 @@ riscv_get_map_state_by_name (const char *name, const char** arch)
 static bool
 riscv_get_map_state (int n,
 		     enum riscv_seg_mstate *state,
-		     struct disassemble_info *info)
+		     struct disassemble_info *info,
+		     bool update)
 {
   const char *name, *arch = NULL;
 
@@ -916,25 +1048,25 @@ riscv_get_map_state (int n,
   if (newstate == MAP_NONE)
     return false;
   *state = newstate;
-  if (arch)
-    {
-      riscv_release_subset_list (&riscv_subsets);
-      /* ISA mapping string may be numbered, suffixed with '.n'. Do not
-	 consider this as part of the ISA string.  */
-      char *suffix = strchr (arch, '.');
-      if (suffix)
+  if (newstate == MAP_INSN && update)
+  {
+    if (arch)
       {
-	int suffix_index = (int)(suffix - arch);
-	char *name_substr = xmalloc (suffix_index + 1);
-	strncpy (name_substr, arch, suffix_index);
-	name_substr[suffix_index] = '\0';
-	riscv_parse_subset (&riscv_rps_dis, name_substr);
-	free (name_substr);
+	/* Override the architecture.  */
+	update_riscv_dis_arch (&dis_arch_context_override, arch);
       }
-      else
-	riscv_parse_subset (&riscv_rps_dis, arch);
-      init_riscv_dis_state_for_arch_and_options ();
-    }
+    else if (!from_last_map_symbol
+	     && set_riscv_current_dis_arch_context (&dis_arch_context_default))
+      {
+	/* Revert to the default architecture and call init functions if:
+	   - there's no ISA string in the mapping symbol,
+	   - mapping symbol is not reused and
+	   - current disassembler context is changed to the default one.
+	   This is a shortcut path to avoid full update_riscv_dis_arch.  */
+	init_riscv_dis_state_for_arch ();
+	init_riscv_dis_state_for_arch_and_options ();
+      }
+  }
   return true;
 }
 
@@ -946,7 +1078,6 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
 			     struct disassemble_info *info)
 {
   enum riscv_seg_mstate mstate;
-  bool from_last_map_symbol;
   bool found = false;
   int symbol = -1;
   int n;
@@ -994,7 +1125,7 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
       /* We have searched all possible symbols in the range.  */
       if (addr > memaddr)
 	break;
-      if (riscv_get_map_state (n, &mstate, info))
+      if (riscv_get_map_state (n, &mstate, info, true))
 	{
 	  symbol = n;
 	  found = true;
@@ -1021,7 +1152,7 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
 	  if (addr < (info->section ? info->section->vma : 0))
 	    break;
 	  /* Stop searching once we find the closed mapping symbol.  */
-	  if (riscv_get_map_state (n, &mstate, info))
+	  if (riscv_get_map_state (n, &mstate, info, true))
 	    {
 	      symbol = n;
 	      found = true;
@@ -1087,7 +1218,7 @@ riscv_data_length (bfd_vma memaddr,
 	{
 	  bfd_vma addr = bfd_asymbol_value (info->symtab[n]);
 	  if (addr > memaddr
-	      && riscv_get_map_state (n, &m, info))
+	      && riscv_get_map_state (n, &m, info, false))
 	    {
 	      if (addr - memaddr < length)
 		length = addr - memaddr;
@@ -1246,7 +1377,7 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 disassembler_ftype
 riscv_get_disassembler (bfd *abfd)
 {
-  const char *default_arch = "rv64gc";
+  const char *default_arch = initial_default_arch;
 
   if (abfd && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
@@ -1262,12 +1393,14 @@ riscv_get_disassembler (bfd *abfd)
 						  attr[Tag_c].i,
 						  &default_priv_spec);
 	  default_arch = attr[Tag_RISCV_arch].s;
+	  /* For ELF files with (somehow) no architecture string
+	     in the attributes, use the default value.  */
+	  if (!default_arch)
+	    default_arch = initial_default_arch;
 	}
     }
 
-  riscv_release_subset_list (&riscv_subsets);
-  riscv_parse_subset (&riscv_rps_dis, default_arch);
-  init_riscv_dis_state_for_arch_and_options ();
+  update_riscv_dis_arch (&dis_arch_context_default, default_arch);
   return print_insn_riscv;
 }
 
@@ -1465,5 +1598,6 @@ with the -M switch (multiple options should be separated by commas):\n"));
 
 void disassemble_free_riscv (struct disassemble_info *info ATTRIBUTE_UNUSED)
 {
-  riscv_release_subset_list (&riscv_subsets);
+  free_riscv_dis_arch_context (&dis_arch_context_default);
+  free_riscv_dis_arch_context (&dis_arch_context_override);
 }
