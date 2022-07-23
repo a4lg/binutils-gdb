@@ -91,6 +91,9 @@ static bool no_aliases = false;
 /* If set, disassemble with numeric register names.  */
 static bool is_numeric = false;
 
+/* Instruction support cache.  */
+static signed char riscv_insn_support_cache[NUM_INSN_CLASSES];
+
 
 /* Initialize private data of the disassemble_info.  */
 
@@ -126,6 +129,9 @@ static void
 init_riscv_dis_state_for_arch (void)
 {
   is_arch_changed = true;
+  /* Clear instruction support cache.  */
+  for (size_t i = 0; i < NUM_INSN_CLASSES; i++)
+    riscv_insn_support_cache[i] = 0;
 }
 
 static void
@@ -855,7 +861,14 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
       if ((op->xlen_requirement != 0) && (op->xlen_requirement != xlen))
 	continue;
       /* Is this instruction supported by the current architecture?  */
-      if (!riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class))
+      if (riscv_insn_support_cache[op->insn_class] == 0)
+	{
+	  riscv_insn_support_cache[op->insn_class]
+	      = riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class)
+		    ? +1
+		    : -1;
+	}
+      if (riscv_insn_support_cache[op->insn_class] < 0)
 	continue;
 
       matched_op = op;
