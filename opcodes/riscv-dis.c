@@ -35,6 +35,9 @@
 /* Default architecture string (if not available).  */
 static const char *const initial_default_arch = "rv64gc";
 
+/* If set, a custom architecture string is specified.  */
+static bool is_custom_arch = false;
+
 /* Current XLEN for the disassembler.  */
 static unsigned xlen = 0;
 
@@ -183,8 +186,10 @@ update_riscv_dis_xlen (struct disassemble_info *info)
        This is only effective if XLEN-specific BFD machine architecture is
        chosen.  If XLEN-neutral (like riscv), BFD machine architecture is
        ignored on XLEN selection.
-     2. Non-default RISC-V architecture string set by either an ELF
-	attribute or a mapping symbol with ISA string.
+     2. Non-default RISC-V architecture string set by either:
+       a. -M arch=... option (GDB: set disassembler-options arch=...),
+       b. A mapping symbol with ISA string or
+       c. An ELF attribute
      3. ELF class in dummy ELF header.  */
   if (xlen_by_mach != 0)
     xlen = xlen_by_mach;
@@ -294,6 +299,7 @@ set_default_riscv_dis_options (void)
   no_aliases = false;
   is_numeric = false;
   is_custom_priv_spec = false;
+  is_custom_arch = false;
 }
 
 /* Parse RISC-V disassembler option (without arguments).  */
@@ -354,6 +360,11 @@ parse_riscv_dis_option (const char *option)
 	  is_custom_priv_spec = true;
 	  priv_spec = priv_spec_new;
 	}
+    }
+  else if (strcmp (option, "arch") == 0)
+    {
+      is_custom_arch = true;
+      update_riscv_dis_arch (&dis_arch_context_override, value);
     }
   else
     {
@@ -1018,6 +1029,9 @@ riscv_get_map_state (int n,
   *state = newstate;
   if (newstate == MAP_INSN && update)
   {
+    /* Skip if a custom architecture is specified.  */
+    if (is_custom_arch)
+      return true;
     if (arch)
       {
 	/* Override the architecture.  */
@@ -1304,7 +1318,10 @@ riscv_get_disassembler (bfd *abfd)
 	}
     }
 
-  update_riscv_dis_arch (&dis_arch_context_default, default_arch);
+  if (is_custom_arch)
+    set_riscv_dis_arch_context (&dis_arch_context_default, default_arch);
+  else
+    update_riscv_dis_arch (&dis_arch_context_default, default_arch);
   return print_insn_riscv;
 }
 
@@ -1355,6 +1372,7 @@ riscv_symbol_is_valid (asymbol * sym,
 typedef enum
 {
   RISCV_OPTION_ARG_NONE = -1,
+  RISCV_OPTION_ARG_ARCH,
   RISCV_OPTION_ARG_PRIV_SPEC,
 
   RISCV_OPTION_ARG_COUNT
@@ -1372,6 +1390,9 @@ static struct
   { "numeric",
     N_("Print numeric register names, rather than ABI names."),
     RISCV_OPTION_ARG_NONE },
+  { "arch=",
+    N_("Disassemble using specified ISA and extensions."),
+    RISCV_OPTION_ARG_ARCH },
   { "no-aliases",
     N_("Disassemble only into canonical instructions."),
     RISCV_OPTION_ARG_NONE },
@@ -1398,6 +1419,9 @@ disassembler_options_riscv (void)
       size_t i, priv_spec_count;
 
       args = XNEWVEC (disasm_option_arg_t, num_args + 1);
+
+      args[RISCV_OPTION_ARG_ARCH].name = "ARCH";
+      args[RISCV_OPTION_ARG_ARCH].values = NULL;
 
       args[RISCV_OPTION_ARG_PRIV_SPEC].name = "SPEC";
       priv_spec_count = PRIV_SPEC_CLASS_DRAFT - PRIV_SPEC_CLASS_NONE - 1;
