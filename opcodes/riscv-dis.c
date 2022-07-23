@@ -586,7 +586,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 static int
 riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 {
-  const struct riscv_opcode *op;
+  const struct riscv_opcode *op, *matched_op;
   static bool init = false;
   static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
   struct riscv_private_data *pd;
@@ -642,6 +642,7 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   info->target = 0;
   info->target2 = 0;
 
+  matched_op = NULL;
   op = riscv_hash[OP_HASH_IDX (word)];
   if (op != NULL)
     {
@@ -675,49 +676,56 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 	  if (!riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class))
 	    continue;
 
-	  /* It's a match.  */
-	  (*info->fprintf_styled_func) (info->stream, dis_style_mnemonic,
-					"%s", op->name);
-	  print_insn_args (op->args, word, memaddr, info);
-
-	  /* Try to disassemble multi-instruction addressing sequences.  */
-	  if (pd->to_print_addr)
-	    {
-	      info->target = pd->print_addr;
-	      (*info->fprintf_styled_func)
-		(info->stream, dis_style_comment_start, " # ");
-	      (*info->print_address_func) (info->target, info);
-	      pd->to_print_addr = false;
-	    }
-
-	  /* Finish filling out insn_info fields.  */
-	  switch (op->pinfo & INSN_TYPE)
-	    {
-	    case INSN_BRANCH:
-	      info->insn_type = dis_branch;
-	      break;
-	    case INSN_CONDBRANCH:
-	      info->insn_type = dis_condbranch;
-	      break;
-	    case INSN_JSR:
-	      info->insn_type = dis_jsr;
-	      break;
-	    case INSN_DREF:
-	      info->insn_type = dis_dref;
-	      break;
-	    default:
-	      break;
-	    }
-
-	  if (op->pinfo & INSN_DATA_SIZE)
-	    {
-	      int size = ((op->pinfo & INSN_DATA_SIZE)
-			  >> INSN_DATA_SIZE_SHIFT);
-	      info->data_size = 1 << (size - 1);
-	    }
-
-	  return insnlen;
+	  matched_op = op;
+	  break;
 	}
+    }
+
+  if (matched_op != NULL)
+    {
+      /* There is a match.  */
+      op = matched_op;
+
+      (*info->fprintf_styled_func) (info->stream, dis_style_mnemonic,
+				    "%s", op->name);
+      print_insn_args (op->args, word, memaddr, info);
+
+      /* Try to disassemble multi-instruction addressing sequences.  */
+      if (pd->to_print_addr)
+	{
+	  info->target = pd->print_addr;
+	  (*info->fprintf_styled_func) (info->stream, dis_style_comment_start,
+					" # ");
+	  (*info->print_address_func) (info->target, info);
+	  pd->to_print_addr = false;
+	}
+
+      /* Finish filling out insn_info fields.  */
+      switch (op->pinfo & INSN_TYPE)
+	{
+	case INSN_BRANCH:
+	  info->insn_type = dis_branch;
+	  break;
+	case INSN_CONDBRANCH:
+	  info->insn_type = dis_condbranch;
+	  break;
+	case INSN_JSR:
+	  info->insn_type = dis_jsr;
+	  break;
+	case INSN_DREF:
+	  info->insn_type = dis_dref;
+	  break;
+	default:
+	  break;
+	}
+
+      if (op->pinfo & INSN_DATA_SIZE)
+	{
+	  int size = ((op->pinfo & INSN_DATA_SIZE) >> INSN_DATA_SIZE_SHIFT);
+	  info->data_size = 1 << (size - 1);
+	}
+
+      return insnlen;
     }
 
   /* We did not find a match, so just print the instruction bits.  */
