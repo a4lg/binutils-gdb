@@ -32,11 +32,21 @@
 #include <stdint.h>
 #include <ctype.h>
 
+/* Default architecture string (if not available).  */
+static const char *initial_default_arch = "rv64gc";
+
+/* Default architecture string
+   (as specified by the ELF attributes or `initial_default_arch').  */
+static const char *default_arch = NULL;
+
 /* Current XLEN for the disassembler.  */
 static unsigned xlen = 0;
 
 /* XLEN as inferred by the machine architecture.  */
 static unsigned xlen_by_mach = 0;
+
+/* XLEN as inferred by the architecture string.  */
+static unsigned xlen_by_arch = 0;
 
 /* XLEN as inferred by ELF header.  */
 static unsigned xlen_by_elf = 0;
@@ -80,6 +90,9 @@ static bool no_aliases = false;
 
 /* If set, disassemble with numeric register names.  */
 static bool is_numeric = false;
+
+static void init_riscv_dis_state_for_arch (void);
+static void init_riscv_dis_state_for_arch_and_options (void);
 
 static void
 set_default_riscv_dis_options (void)
@@ -168,6 +181,43 @@ parse_riscv_dis_options (const char *opts_in)
   free (opts);
 }
 
+/* Update current architecture string
+   and reinitialize the disassembler state.  */
+
+static void
+update_riscv_dis_current_arch (const char *arch)
+{
+  xlen = 0;
+  riscv_release_subset_list (&riscv_subsets);
+  riscv_parse_subset (&riscv_rps_dis, arch);
+  xlen_by_arch = (arch == initial_default_arch) ? 0 : xlen;
+  init_riscv_dis_state_for_arch ();
+  /* xlen is readjusted by the next call to
+     init_riscv_dis_state_for_arch_and_options.  */
+}
+
+/* Update default architecture string.
+   Return true if a default arch string change is detected.  */
+
+static bool
+update_riscv_dis_default_arch (const char* arch)
+{
+  /* Do nothing if default arch string is unchanged. */
+  if (arch == initial_default_arch)
+    {
+      if (default_arch == initial_default_arch)
+	return false;
+    }
+  else if (default_arch != NULL && strcmp (default_arch, arch) == 0)
+    return false;
+  /* Save new default arch string
+     (either initial_default_arch or a copy of the arch string).  */
+  if (default_arch != initial_default_arch)
+    free ((void *)default_arch);
+  default_arch = (arch != initial_default_arch) ? xstrdup (arch) : arch;
+  return true;
+}
+
 /* Guess and update current XLEN.  */
 
 static void
@@ -180,9 +230,12 @@ update_riscv_dis_xlen (struct disassemble_info *info)
        This is only effective if XLEN-specific BFD machine architecture is
        chosen.  If XLEN-neutral (like riscv), BFD machine architecture is
        ignored on XLEN selection.
-     2. ELF class in dummy ELF header.  */
+     2. Non-default RISC-V architecture string set by the ELF attributes.
+     3. ELF class in dummy ELF header.  */
   if (xlen_by_mach != 0)
     xlen = xlen_by_mach;
+  else if (xlen_by_arch != 0)
+    xlen = xlen_by_arch;
   else if (xlen_by_elf != 0)
     xlen = xlen_by_elf;
   else if (info != NULL && info->section != NULL)
@@ -194,9 +247,20 @@ update_riscv_dis_xlen (struct disassemble_info *info)
 
 /* Initialization (for arch and options).  */
 
+static bool is_arch_changed = false;
+
+static void
+init_riscv_dis_state_for_arch (void)
+{
+  is_arch_changed = true;
+}
+
 static void
 init_riscv_dis_state_for_arch_and_options (void)
 {
+  /* If the architecture string is changed, update XLEN.  */
+  if (is_arch_changed)
+    update_riscv_dis_xlen (NULL);
   /* Set GPR register names to disassemble.  */
   riscv_gpr_names = is_numeric ? riscv_gpr_names_numeric : riscv_gpr_names_abi;
   /* Set FPR register names to disassemble.  */
@@ -204,6 +268,8 @@ init_riscv_dis_state_for_arch_and_options (void)
       = !riscv_subset_supports (&riscv_rps_dis, "zfinx")
 	    ? (is_numeric ? riscv_fpr_names_numeric : riscv_fpr_names_abi)
 	    : riscv_gpr_names;
+  /* Save previous options and mark them "unchanged".  */
+  is_arch_changed = false;
 }
 
 /* Print one argument from an array.  */
@@ -1047,7 +1113,7 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 disassembler_ftype
 riscv_get_disassembler (bfd *abfd)
 {
-  const char *default_arch = "rv64gc";
+  const char *default_arch_next = initial_default_arch;
 
   if (abfd && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
@@ -1062,12 +1128,16 @@ riscv_get_disassembler (bfd *abfd)
 						  attr[Tag_b].i,
 						  attr[Tag_c].i,
 						  &default_priv_spec);
-	  default_arch = attr[Tag_RISCV_arch].s;
+	  default_arch_next = attr[Tag_RISCV_arch].s;
+	  /* For ELF files with (somehow) no architecture string
+	     in the attributes, use the default value.  */
+	  if (!default_arch_next)
+	    default_arch_next = initial_default_arch;
 	}
     }
 
-  riscv_release_subset_list (&riscv_subsets);
-  riscv_parse_subset (&riscv_rps_dis, default_arch);
+  if (update_riscv_dis_default_arch (default_arch_next))
+    update_riscv_dis_current_arch (default_arch_next);
   init_riscv_dis_state_for_arch_and_options ();
   return print_insn_riscv;
 }
@@ -1081,6 +1151,7 @@ disassemble_init_riscv (struct disassemble_info *info)
   /* Clear previous XLEN and guess by mach.  */
   xlen = 0;
   xlen_by_mach = 0;
+  xlen_by_arch = 0;
   xlen_by_elf = 0;
   if (info->mach == bfd_mach_riscv64)
     xlen_by_mach = 64;
