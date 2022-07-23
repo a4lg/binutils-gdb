@@ -550,6 +550,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		DECLARE_CSR (name, num, class, define_version, abort_version)
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
+		init_csr = true;
 	      }
 
 	    if (riscv_csr_hash[csr] != NULL)
