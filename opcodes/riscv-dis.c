@@ -35,6 +35,12 @@
 /* Current XLEN for the disassembler.  */
 static unsigned xlen = 0;
 
+/* XLEN as inferred by the machine architecture.  */
+static unsigned xlen_by_mach = 0;
+
+/* XLEN as inferred by ELF header.  */
+static unsigned xlen_by_elf = 0;
+
 /* Default ISA specification version (constant as of now).  */
 static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
 
@@ -72,15 +78,55 @@ static const char * const *riscv_fpr_names;
 /* If set, disassemble as most general instruction.  */
 static bool no_aliases = false;
 
+/* If set, disassemble with numeric register names.  */
+static bool is_numeric = false;
+
+
+/* Initialization (for arch and options).  */
+
+static void
+init_riscv_dis_state_for_arch_and_options (void)
+{
+  /* Set GPR register names to disassemble.  */
+  riscv_gpr_names = is_numeric ? riscv_gpr_names_numeric : riscv_gpr_names_abi;
+  /* Set FPR register names to disassemble.  */
+  riscv_fpr_names
+      = !riscv_subset_supports (&riscv_rps_dis, "zfinx")
+	    ? (is_numeric ? riscv_fpr_names_numeric : riscv_fpr_names_abi)
+	    : riscv_gpr_names;
+}
+
+/* Guess and update current XLEN.  */
+
+static void
+update_riscv_dis_xlen (struct disassemble_info *info)
+{
+  /* Set XLEN with following precedence rules:
+     1. BFD machine architecture set by either:
+       a. -m riscv:rv[32|64] option (GDB: set arch riscv:rv[32|64])
+       b. ELF class in actual ELF header (only on RISC-V ELF)
+       This is only effective if XLEN-specific BFD machine architecture is
+       chosen.  If XLEN-neutral (like riscv), BFD machine architecture is
+       ignored on XLEN selection.
+     2. ELF class in dummy ELF header.  */
+  if (xlen_by_mach != 0)
+    xlen = xlen_by_mach;
+  else if (xlen_by_elf != 0)
+    xlen = xlen_by_elf;
+  else if (info != NULL && info->section != NULL)
+    {
+      Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
+      xlen = xlen_by_elf = ehdr->e_ident[EI_CLASS] == ELFCLASS64 ? 64 : 32;
+    }
+}
 
 /* Set default RISC-V disassembler options.  */
 
 static void
 set_default_riscv_dis_options (void)
 {
-  riscv_gpr_names = riscv_gpr_names_abi;
-  riscv_fpr_names = riscv_fpr_names_abi;
   no_aliases = false;
+  is_numeric = false;
 }
 
 /* Parse RISC-V disassembler option (without arguments).  */
@@ -91,10 +137,7 @@ parse_riscv_dis_option_without_args (const char *option)
   if (strcmp (option, "no-aliases") == 0)
     no_aliases = true;
   else if (strcmp (option, "numeric") == 0)
-    {
-      riscv_gpr_names = riscv_gpr_names_numeric;
-      riscv_fpr_names = riscv_fpr_names_numeric;
-    }
+    is_numeric = true;
   else
     return false;
   return true;
@@ -161,8 +204,6 @@ static void
 parse_riscv_dis_options (const char *opts_in)
 {
   char *opts = xstrdup (opts_in), *opt = opts, *opt_end = opts;
-
-  set_default_riscv_dis_options ();
 
   for ( ; opt_end != NULL; opt = opt_end + 1)
     {
@@ -657,21 +698,6 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   op = riscv_hash[OP_HASH_IDX (word)];
   if (op != NULL)
     {
-      /* If XLEN is not known, get its value from the ELF class.  */
-      if (info->mach == bfd_mach_riscv64)
-	xlen = 64;
-      else if (info->mach == bfd_mach_riscv32)
-	xlen = 32;
-      else if (info->section != NULL)
-	{
-	  Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
-	  xlen = ehdr->e_ident[EI_CLASS] == ELFCLASS64 ? 64 : 32;
-	}
-
-      /* If arch has the Zfinx extension, replace FPR with GPR.  */
-      if (riscv_subset_supports (&riscv_rps_dis, "zfinx"))
-	riscv_fpr_names = riscv_gpr_names;
-
       for (; op->name; op++)
 	{
 	  /* Does the opcode match?  */
@@ -988,14 +1014,9 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
   enum riscv_seg_mstate mstate;
   int (*riscv_disassembler) (bfd_vma, insn_t, struct disassemble_info *);
 
-  if (info->disassembler_options != NULL)
-    {
-      parse_riscv_dis_options (info->disassembler_options);
-      /* Avoid repeatedly parsing the options.  */
-      info->disassembler_options = NULL;
-    }
-  else if (riscv_gpr_names == NULL)
-    set_default_riscv_dis_options ();
+  /* Guess and update XLEN if we haven't determined it yet.  */
+  if (xlen == 0)
+    update_riscv_dis_xlen (info);
 
   mstate = riscv_search_mapping_symbol (memaddr, info);
 
@@ -1057,7 +1078,30 @@ riscv_get_disassembler (bfd *abfd)
 
   riscv_release_subset_list (&riscv_subsets);
   riscv_parse_subset (&riscv_rps_dis, default_arch);
+  init_riscv_dis_state_for_arch_and_options ();
   return print_insn_riscv;
+}
+
+/* Initialize disassemble_info and parse options.  */
+
+void
+disassemble_init_riscv (struct disassemble_info *info)
+{
+  info->symbol_is_valid = riscv_symbol_is_valid;
+  /* Clear previous XLEN and guess by mach.  */
+  xlen = 0;
+  xlen_by_mach = 0;
+  xlen_by_elf = 0;
+  if (info->mach == bfd_mach_riscv64)
+    xlen_by_mach = 64;
+  else if (info->mach == bfd_mach_riscv32)
+    xlen_by_mach = 32;
+  update_riscv_dis_xlen (info);
+  /* Parse disassembler options.  */
+  set_default_riscv_dis_options ();
+  if (info->disassembler_options != NULL)
+    parse_riscv_dis_options (info->disassembler_options);
+  init_riscv_dis_state_for_arch_and_options ();
 }
 
 /* Prevent use of the fake labels that are generated as part of the DWARF
