@@ -392,6 +392,7 @@ extern bool arm_symbol_is_valid (asymbol *, struct disassemble_info *);
 extern bool csky_symbol_is_valid (asymbol *, struct disassemble_info *);
 extern bool riscv_symbol_is_valid (asymbol *, struct disassemble_info *);
 extern void disassemble_init_powerpc (struct disassemble_info *);
+extern void disassemble_init_riscv (struct disassemble_info *);
 extern void disassemble_init_s390 (struct disassemble_info *);
 extern void disassemble_init_wasm32 (struct disassemble_info *);
 extern void disassemble_init_nds32 (struct disassemble_info *);
