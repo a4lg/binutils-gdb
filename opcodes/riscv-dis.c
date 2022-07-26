@@ -332,7 +332,12 @@ init_riscv_dis_state_for_arch_and_options (void)
   if (is_arch_changed)
     update_riscv_dis_xlen (NULL);
   /* Set GPR register names to disassemble.  */
-  riscv_gpr_names = is_numeric ? riscv_gpr_names_numeric : riscv_gpr_names_abi;
+  riscv_gpr_names
+      = !riscv_subset_supports (&riscv_rps_dis, "e")
+	    ? (is_numeric ? riscv_gpr_names_numeric
+			  : riscv_gpr_names_abi)
+	    : (is_numeric ? riscv_gpr_names_rve_numeric
+			  : riscv_gpr_names_rve_abi);
   /* Set FPR register names to disassemble.  */
   riscv_fpr_names
       = !riscv_subset_supports (&riscv_rps_dis, "zfinx")
