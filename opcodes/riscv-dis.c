@@ -564,6 +564,65 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
     }
 }
 
+/* Build a hash table for disassembler to shorten the search time.
+   We sort pointers to riscv_opcodes entries to be even faster.
+   Hash index is computed by masking the instruction with...
+   - 0x03 (OP_MASK_OP2) for real 16-bit instructions
+   - 0x7f (OP_MASK_OP)  for all other instructions.  */
+
+#define OP_HASH_LEN (OP_MASK_OP + 1)
+#define OP_HASH_IDX(i)                                                        \
+  ((i) & (((i & OP_MASK_OP2) != OP_MASK_OP2) ? OP_MASK_OP2 : OP_MASK_OP))
+static const struct riscv_opcode **riscv_hash[OP_HASH_LEN + 1];
+static const struct riscv_opcode **riscv_opcodes_sorted;
+
+static int
+compare_opcodes (const void *ap, const void *bp)
+{
+  const struct riscv_opcode *a = *(const struct riscv_opcode **) ap;
+  const struct riscv_opcode *b = *(const struct riscv_opcode **) bp;
+  int ai = (int) OP_HASH_IDX (a->match);
+  int bi = (int) OP_HASH_IDX (b->match);
+  if (ai != bi)
+    return ai - bi;
+  /* Stable sort (on riscv_opcodes entry order) is required.  */
+  if (a < b)
+    return -1;
+  if (a > b)
+    return +1;
+  return 0;
+}
+
+static void
+build_riscv_opcodes_hash_table (void)
+{
+  const struct riscv_opcode *op;
+  const struct riscv_opcode **pop, **pop_end;
+  size_t len = 0;
+
+  /* Sort pointers to riscv_opcodes entries (except macros).  */
+  for (op = riscv_opcodes; op->name; op++)
+    if (op->pinfo != INSN_MACRO)
+      len++;
+  riscv_opcodes_sorted = xcalloc (len, sizeof (struct riscv_opcode *));
+  pop_end = riscv_opcodes_sorted;
+  for (op = riscv_opcodes; op->name; op++)
+    if (op->pinfo != INSN_MACRO)
+      *pop_end++ = op;
+  qsort (riscv_opcodes_sorted, len, sizeof (struct riscv_opcode *),
+	 compare_opcodes);
+
+  /* Initialize faster hash table.  */
+  pop = riscv_opcodes_sorted;
+  for (unsigned i = 0; i < OP_HASH_LEN; i++)
+    {
+      riscv_hash[i] = pop;
+      while (pop != pop_end && OP_HASH_IDX ((*pop)->match) == i)
+	pop++;
+    }
+  riscv_hash[OP_HASH_LEN] = pop_end;
+}
+
 /* Print the RISC-V instruction at address MEMADDR in debugged memory,
    on using INFO.  Returns length of the instruction, in bytes.
    BIGENDIAN must be 1 if this is big-endian code, 0 if
@@ -572,21 +631,15 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 static int
 riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 {
-  const struct riscv_opcode *op;
+  const struct riscv_opcode **pop, **pop_end;
+  const struct riscv_opcode *op, *matched_op;
   static bool init = 0;
-  static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
   struct riscv_private_data *pd;
   int insnlen;
 
-#define OP_HASH_IDX(i) ((i) & (riscv_insn_length (i) == 2 ? 0x3 : OP_MASK_OP))
-
-  /* Build a hash table to shorten the search time.  */
-  if (! init)
+  if (!init)
     {
-      for (op = riscv_opcodes; op->name; op++)
-	if (!riscv_hash[OP_HASH_IDX (op->match)])
-	  riscv_hash[OP_HASH_IDX (op->match)] = op;
-
+      build_riscv_opcodes_hash_table ();
       init = 1;
     }
 
@@ -623,82 +676,89 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   info->target = 0;
   info->target2 = 0;
 
-  op = riscv_hash[OP_HASH_IDX (word)];
-  if (op != NULL)
+  /* If XLEN is not known, get its value from the ELF class.  */
+  if (info->mach == bfd_mach_riscv64)
+    xlen = 64;
+  else if (info->mach == bfd_mach_riscv32)
+    xlen = 32;
+  else if (info->section != NULL)
     {
-      /* If XLEN is not known, get its value from the ELF class.  */
-      if (info->mach == bfd_mach_riscv64)
-	xlen = 64;
-      else if (info->mach == bfd_mach_riscv32)
-	xlen = 32;
-      else if (info->section != NULL)
-	{
-	  Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
-	  xlen = ehdr->e_ident[EI_CLASS] == ELFCLASS64 ? 64 : 32;
-	}
+      Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
+      xlen = ehdr->e_ident[EI_CLASS] == ELFCLASS64 ? 64 : 32;
+    }
 
-      /* If arch has ZFINX flags, use gpr for disassemble.  */
-      if(riscv_subset_supports (&riscv_rps_dis, "zfinx"))
+  matched_op = NULL;
+  pop     = riscv_hash[OP_HASH_IDX (word)];
+  pop_end = riscv_hash[OP_HASH_IDX (word) + 1];
+  for (; pop != pop_end; pop++)
+    {
+      op = *pop;
+      /* Does the opcode match?  */
+      if (!(op->match_func) (op, word))
+	continue;
+      /* Is this a pseudo-instruction and may we print it as such?  */
+      if (no_aliases && (op->pinfo & INSN_ALIAS))
+	continue;
+      /* Is this instruction restricted to a certain value of XLEN?  */
+      if ((op->xlen_requirement != 0) && (op->xlen_requirement != xlen))
+	continue;
+
+      if (!riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class))
+	continue;
+
+      matched_op = op;
+      break;
+    }
+
+  /* There is a match.  */
+  if (matched_op != NULL)
+    {
+      op = matched_op;
+
+      /* If arch has Zfinx extension, use GPR to disassemble.  */
+      if (riscv_subset_supports (&riscv_rps_dis, "zfinx"))
 	riscv_fpr_names = riscv_gpr_names;
 
-      for (; op->name; op++)
+      (*info->fprintf_styled_func) (info->stream, dis_style_mnemonic,
+				    "%s", op->name);
+      print_insn_args (op->args, word, memaddr, info);
+
+      /* Try to disassemble multi-instruction addressing sequences.  */
+      if (pd->print_addr != (bfd_vma) - 1)
 	{
-	  /* Does the opcode match?  */
-	  if (! (op->match_func) (op, word))
-	    continue;
-	  /* Is this a pseudo-instruction and may we print it as such?  */
-	  if (no_aliases && (op->pinfo & INSN_ALIAS))
-	    continue;
-	  /* Is this instruction restricted to a certain value of XLEN?  */
-	  if ((op->xlen_requirement != 0) && (op->xlen_requirement != xlen))
-	    continue;
-
-	  if (!riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class))
-	    continue;
-
-	  /* It's a match.  */
-	  (*info->fprintf_styled_func) (info->stream, dis_style_mnemonic,
-					"%s", op->name);
-	  print_insn_args (op->args, word, memaddr, info);
-
-	  /* Try to disassemble multi-instruction addressing sequences.  */
-	  if (pd->print_addr != (bfd_vma)-1)
-	    {
-	      info->target = pd->print_addr;
-	      (*info->fprintf_styled_func)
-		(info->stream, dis_style_comment_start, " # ");
-	      (*info->print_address_func) (info->target, info);
-	      pd->print_addr = -1;
-	    }
-
-	  /* Finish filling out insn_info fields.  */
-	  switch (op->pinfo & INSN_TYPE)
-	    {
-	    case INSN_BRANCH:
-	      info->insn_type = dis_branch;
-	      break;
-	    case INSN_CONDBRANCH:
-	      info->insn_type = dis_condbranch;
-	      break;
-	    case INSN_JSR:
-	      info->insn_type = dis_jsr;
-	      break;
-	    case INSN_DREF:
-	      info->insn_type = dis_dref;
-	      break;
-	    default:
-	      break;
-	    }
-
-	  if (op->pinfo & INSN_DATA_SIZE)
-	    {
-	      int size = ((op->pinfo & INSN_DATA_SIZE)
-			  >> INSN_DATA_SIZE_SHIFT);
-	      info->data_size = 1 << (size - 1);
-	    }
-
-	  return insnlen;
+	  info->target = pd->print_addr;
+	  (*info->fprintf_styled_func)
+	    (info->stream, dis_style_comment_start, " # ");
+	  (*info->print_address_func) (info->target, info);
+	  pd->print_addr = -1;
 	}
+
+      /* Finish filling out insn_info fields.  */
+      switch (op->pinfo & INSN_TYPE)
+	{
+	case INSN_BRANCH:
+	  info->insn_type = dis_branch;
+	  break;
+	case INSN_CONDBRANCH:
+	  info->insn_type = dis_condbranch;
+	  break;
+	case INSN_JSR:
+	  info->insn_type = dis_jsr;
+	  break;
+	case INSN_DREF:
+	  info->insn_type = dis_dref;
+	  break;
+	default:
+	  break;
+	}
+
+      if (op->pinfo & INSN_DATA_SIZE)
+	{
+	  int size = ((op->pinfo & INSN_DATA_SIZE) >> INSN_DATA_SIZE_SHIFT);
+	  info->data_size = 1 << (size - 1);
+	}
+
+      return insnlen;
     }
 
   /* We did not find a match, so just print the instruction bits.  */
