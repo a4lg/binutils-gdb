@@ -1,0 +1,129 @@
+# Copyright 2022 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test RISC-V disassembler options.
+
+if {![istarget "riscv*-*-*"]} {
+    verbose "Skipping ${gdb_test_file_name}."
+    return
+}
+
+standard_testfile .s
+set objfile [standard_output_file ${testfile}.o]
+
+set compile_flags { \
+    "additional_flags=-march=rv64i_zicsr -mabi=lp64" \
+    "additional_flags=-Xassembler -mpriv-spec=1.11" \
+    }
+
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object \
+      ${compile_flags}] != "" } {
+    untested "could not compile test program"
+    return
+}
+
+clean_restart ${objfile}
+
+proc riscv_set_disassembler_options { opts } {
+    gdb_test_no_output "set disassembler-options $opts"
+    gdb_test "show disassembler-options" \
+	"The current disassembler options are '$opts'\r\n.*" \
+	"show disassembler-options: $opts"
+}
+
+# We can disable disassembly using alias instructions.
+riscv_set_disassembler_options "no-aliases"
+gdb_test_sequence "disassemble test_func" "option: no-aliases" {
+    "Dump of assembler code for function test_func:\r\n"
+    "\[^:\]+:\taddi\ta0,zero,1\r\n"
+    "\[^:\]+:\tcsrrs\ta0,0x3d0,zero\r\n"
+    "\[^:\]+:\t\\.4byte\t0x62000073\r\n"
+    "\[^:\]+:\tjalr\tzero,0\\(ra\\)\r\n"
+    "End of assembler dump\."
+}
+
+# We can disassemble using numeric register names.
+riscv_set_disassembler_options "numeric"
+gdb_test_sequence "disassemble test_func" "option: numeric" {
+    "Dump of assembler code for function test_func:\r\n"
+    "\[^:\]+:\tli\tx10,1\r\n"
+    "\[^:\]+:\tcsrr\tx10,0x3d0\r\n"
+    "\[^:\]+:\t\\.4byte\t0x62000073\r\n"
+    "\[^:\]+:\tret\r\n"
+    "End of assembler dump\."
+}
+
+# We can switch to the privileged specification 1.11.
+riscv_set_disassembler_options "priv-spec=1.11"
+gdb_test_sequence "disassemble test_func" "privileged specification 1.11 CSRs" {
+    "Dump of assembler code for function test_func:\r\n"
+    "\[^:\]+:\tli\ta0,1\r\n"
+    "\[^:\]+:\tcsrr\ta0,0x3d0\r\n"
+    "\[^:\]+:\t\\.4byte\t0x62000073\r\n"
+    "\[^:\]+:\tret\r\n"
+    "End of assembler dump\."
+}
+
+# We can switch to the privileged specification 1.12.
+riscv_set_disassembler_options "priv-spec=1.12"
+gdb_test_sequence "disassemble test_func" "privileged specification 1.12 CSRs" {
+    "Dump of assembler code for function test_func:\r\n"
+    "\[^:\]+:\tli\ta0,1\r\n"
+    "\[^:\]+:\tcsrr\ta0,pmpaddr32\r\n"
+    "\[^:\]+:\t\\.4byte\t0x62000073\r\n"
+    "\[^:\]+:\tret\r\n"
+    "End of assembler dump\."
+}
+
+# We can enable the 'H'-extension support.
+riscv_set_disassembler_options "arch=rv64gch"
+gdb_test_sequence "disassemble test_func" "'H'-extension" {
+    "Dump of assembler code for function test_func:\r\n"
+    "\[^:\]+:\tli\ta0,1\r\n"
+    "\[^:\]+:\tcsrr\ta0,0x3d0\r\n"
+    "\[^:\]+:\thfence\\.gvma\r\n"
+    "\[^:\]+:\tret\r\n"
+    "End of assembler dump\."
+}
+
+# We can set multiple comma-separated options
+riscv_set_disassembler_options "arch=rv64gch,priv-spec=1.12,no-aliases,numeric"
+gdb_test_sequence "disassemble test_func" "multiple options" {
+    "Dump of assembler code for function test_func:\r\n"
+    "\[^:\]+:\taddi\tx10,x0,1\r\n"
+    "\[^:\]+:\tcsrrs\tx10,pmpaddr32,x0\r\n"
+    "\[^:\]+:\thfence\\.gvma\tx0,x0\r\n"
+    "\[^:\]+:\tjalr\tx0,0\\(x1\\)\r\n"
+    "End of assembler dump\."
+}
+
+# Once we set empty disassembler option, we can restore the default one.
+# Defaults:
+# - enable aliases
+# - ABI register names
+# - priv-spec=1.11
+# - arch=rv64i_zicsr
+gdb_test_no_output "set disassembler-options" "set NULL disassembler-options"
+gdb_test "show disassembler-options" \
+    "The current disassembler options are ''\r\n.*" \
+    "show NULL disassembler-options"
+gdb_test_sequence "disassemble test_func" "restore to default" {
+    "Dump of assembler code for function test_func:\r\n"
+    "\[^:\]+:\tli\ta0,1\r\n"
+    "\[^:\]+:\tcsrr\ta0,0x3d0\r\n"
+    "\[^:\]+:\t\\.4byte\t0x62000073\r\n"
+    "\[^:\]+:\tret\r\n"
+    "End of assembler dump\."
+}
