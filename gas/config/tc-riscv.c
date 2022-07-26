@@ -1253,6 +1253,31 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		goto unknown_validate_operand;
 	    }
 	  break;
+	case '~': /* Ignored fields (w/o defaults).  */
+	  while (*++oparg)
+	    {
+	      switch (*oparg)
+		{
+		case 'd': USE_BITS (OP_MASK_RD, OP_SH_RD); break;
+		case 's': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
+		case 'j': used_bits |= ENCODE_ITYPE_IMM (-1U); break;
+		/* fence: fm field.  */
+		case 'f': USE_BITS (OP_MASK_FM, OP_SH_FM); break;
+		default:
+		  goto unknown_validate_operand;
+		}
+	    }
+	  --oparg;
+	  break;
+	case '!': /* Operand with special handlings.  */
+	  switch (*++oparg)
+	    {
+	    case 'M': /* Fall through.  */
+	    case 'm': USE_BITS (OP_MASK_RM, OP_SH_RM); break;
+	    default:
+	      goto unknown_validate_operand;
+	    }
+	  break;
 	default:
 	unknown_validate_operand:
 	  as_bad (_("internal: bad RISC-V opcode "
@@ -3264,6 +3289,57 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      imm_expr->X_op = O_absent;
 	      asarg = expr_end;
 	      continue;
+
+	    case '~': /* Ignored fields (w/o defaults).  */
+	      while (*++oparg)
+		{
+		  switch (*oparg)
+		    {
+		    case 'd': /* Ignored RD.  */
+		    case 's': /* Ignored RS1.  */
+		    case 'j': /* Ignored immediate (I-type).  */
+		    case 'f': /* Ignored fence fm field.  */
+		      break;
+		    default:
+		      goto unknown_riscv_ip_operand;
+		    }
+		}
+	      --oparg;
+	      continue;
+
+	    case '!': /* Operand with special handlings.  */
+	      switch (*++oparg)
+		{
+		case 'M':
+		case 'm':
+		  /* Optional rounding mode (widening conversion)
+		     'M': operand either disallowed or not recommended
+			  (considered to be non-useful to regular software).
+		     'm': operand allowed for compatibility reasons
+			  (display a warning instead).  */
+		  if (*asarg == '\0')
+		    {
+		      INSERT_OPERAND (RM, *ip, 0);
+		      continue;
+		    }
+		  else if (*asarg == ',' && asarg++
+			   && arg_lookup (&asarg, riscv_rm,
+					  ARRAY_SIZE (riscv_rm), &regno))
+		    {
+		      INSERT_OPERAND (RM, *ip, regno);
+		      if (*oparg == 'M')
+			as_bad (_ ("rounding mode cannot be specified "
+				   "on widening conversion"));
+		      else
+			as_warn (_ ("specifying a rounding mode is strongly "
+				    "discourged on widening conversion"));
+		      continue;
+		    }
+		  break;
+		default:
+		  goto unknown_riscv_ip_operand;
+		}
+	      break;
 
 	    default:
 	    unknown_riscv_ip_operand:

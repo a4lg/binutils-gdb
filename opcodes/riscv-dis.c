@@ -162,9 +162,11 @@ parse_riscv_dis_options (const char *opts_in)
 
 static void
 arg_print (struct disassemble_info *info, unsigned long val,
-	   const char* const* array, size_t size)
+	   const char *const *array, size_t size, const char *default_val)
 {
-  const char *s = val >= size || array[val] == NULL ? "unknown" : array[val];
+  const char *s = val >= size || array[val] == NULL
+		      ? (default_val == NULL ? "unknown" : default_val)
+		      : array[val];
   (*info->fprintf_styled_func) (info->stream, dis_style_text, "%s", s);
 }
 
@@ -198,7 +200,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
   fprintf_styled_ftype print = info->fprintf_styled_func;
   const char *opargStart;
 
-  if (*oparg != '\0')
+  if (*oparg != '\0' && *oparg != '~')
     print (info->stream, dis_style_text, "\t");
 
   for (; *oparg != '\0'; oparg++)
@@ -413,17 +415,17 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	case 'm':
 	  arg_print (info, EXTRACT_OPERAND (RM, l),
-		     riscv_rm, ARRAY_SIZE (riscv_rm));
+		     riscv_rm, ARRAY_SIZE (riscv_rm), NULL);
 	  break;
 
 	case 'P':
 	  arg_print (info, EXTRACT_OPERAND (PRED, l),
-		     riscv_pred_succ, ARRAY_SIZE (riscv_pred_succ));
+		     riscv_pred_succ, ARRAY_SIZE (riscv_pred_succ), "none");
 	  break;
 
 	case 'Q':
 	  arg_print (info, EXTRACT_OPERAND (SUCC, l),
-		     riscv_pred_succ, ARRAY_SIZE (riscv_pred_succ));
+		     riscv_pred_succ, ARRAY_SIZE (riscv_pred_succ), "none");
 	  break;
 
 	case 'o':
@@ -552,6 +554,25 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	case 'Z':
 	  print (info->stream, dis_style_text, "%d", rs1);
+	  break;
+
+	case '~': /* Ignored fields.  */
+	  return;
+
+	case '!': /* Operand with special handlings.  */
+	  switch (*++oparg)
+	    {
+	    case 'M': /* Fall through.  */
+	    case 'm':
+	      /* Optional rounding mode (widening conversion)
+		 which defaults to RNE (0b000).  */
+	      if (!no_aliases || EXTRACT_OPERAND (RM, l) == 0)
+		break;
+	      print (info->stream, dis_style_text, ",");
+	      arg_print (info, EXTRACT_OPERAND (RM, l), riscv_rm,
+			 ARRAY_SIZE (riscv_rm), NULL);
+	      break;
+	    }
 	  break;
 
 	default:
