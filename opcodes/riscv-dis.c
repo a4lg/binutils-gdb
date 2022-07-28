@@ -172,7 +172,7 @@ arg_print (struct disassemble_info *info, unsigned long val,
 
 static void
 maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset,
-		     int wide)
+		     bool is_addiw)
 {
   if (pd->hi_addr[base_reg] != (bfd_vma)-1)
     {
@@ -187,9 +187,13 @@ maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset,
     return;
   pd->to_print_addr = true;
 
-  /* Sign-extend a 32-bit value to a 64-bit value.  */
-  if (wide)
+  /* On ADDIW, Sign-extend a 32-bit value to a 64-bit value.  */
+  if (is_addiw)
     pd->print_addr = (bfd_vma)(int32_t) pd->print_addr;
+
+  /* Fit into a 32-bit value on RV32.  */
+  if (xlen == 32)
+    pd->print_addr = (bfd_vma)(uint32_t)pd->print_addr;
 }
 
 /* Print insn arguments for 32/64-bit code.  */
@@ -239,10 +243,10 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    case 'o':
 	    case 'j':
 	      if (((l & MASK_C_ADDI) == MATCH_C_ADDI) && rd != 0)
-		maybe_print_address (pd, rd, EXTRACT_CITYPE_IMM (l), 0);
+		maybe_print_address (pd, rd, EXTRACT_CITYPE_IMM (l), false);
 	      if (info->mach == bfd_mach_riscv64
 		  && ((l & MASK_C_ADDIW) == MATCH_C_ADDIW) && rd != 0)
-		maybe_print_address (pd, rd, EXTRACT_CITYPE_IMM (l), 1);
+		maybe_print_address (pd, rd, EXTRACT_CITYPE_IMM (l), true);
 	      print (info->stream, dis_style_immediate, "%d",
 		     (int)EXTRACT_CITYPE_IMM (l));
 	      break;
@@ -402,7 +406,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	case 'b':
 	case 's':
 	  if ((l & MASK_JALR) == MATCH_JALR)
-	    maybe_print_address (pd, rs1, 0, 0);
+	    maybe_print_address (pd, rs1, 0, false);
 	  print (info->stream, dis_style_register, "%s", riscv_gpr_names[rs1]);
 	  break;
 
@@ -432,21 +436,21 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	  break;
 
 	case 'o':
-	  maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), 0);
+	  maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), false);
 	  /* Fall through.  */
 	case 'j':
 	  if (((l & MASK_ADDI) == MATCH_ADDI && rs1 != 0)
 	      || (l & MASK_JALR) == MATCH_JALR)
-	    maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), 0);
+	    maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), false);
 	  if (info->mach == bfd_mach_riscv64
 	      && ((l & MASK_ADDIW) == MATCH_ADDIW) && rs1 != 0)
-	    maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), 1);
+	    maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), true);
 	  print (info->stream, dis_style_immediate, "%d",
 		 (int)EXTRACT_ITYPE_IMM (l));
 	  break;
 
 	case 'q':
-	  maybe_print_address (pd, rs1, EXTRACT_STYPE_IMM (l), 0);
+	  maybe_print_address (pd, rs1, EXTRACT_STYPE_IMM (l), false);
 	  print (info->stream, dis_style_address_offset, "%d",
 		 (int)EXTRACT_STYPE_IMM (l));
 	  break;
