@@ -984,18 +984,16 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
 
   /* Decide whether to print the data or instruction by default, in case
      we can not find the corresponding mapping symbols.  */
-  mstate = MAP_DATA;
-  if ((info->section
-       && info->section->flags & SEC_CODE)
-      || !info->section)
-    mstate = MAP_INSN;
+  mstate = MAP_INSN;
+  if (info->section && (info->section->flags & SEC_CODE) == 0)
+    mstate = MAP_DATA;
 
   if (info->symtab_size == 0
       || bfd_asymbol_flavour (*info->symtab) != bfd_target_elf_flavour)
     return mstate;
 
   /* Reset the last_map_symbol if we start to dump a new section.  */
-  if (memaddr <= 0)
+  if (memaddr == 0)
     last_map_symbol = -1;
 
   /* If the last stop offset is different from the current one, then
@@ -1047,7 +1045,6 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
 	  if (riscv_get_map_state (n, &mstate, info))
 	    {
 	      symbol = n;
-	      found = true;
 	      break;
 	    }
 	}
