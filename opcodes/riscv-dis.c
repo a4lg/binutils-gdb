@@ -862,30 +862,30 @@ riscv_get_map_state (int n,
     return false;
 
   name = bfd_asymbol_name(info->symtab[n]);
-  if (strcmp (name, "$x") == 0)
-    *state = MAP_INSN;
-  else if (strcmp (name, "$d") == 0)
-    *state = MAP_DATA;
-  else if (strncmp (name, "$xrv", 4) == 0)
+  if (startswith (name, "$x"))
     {
-      *state = MAP_INSN;
-      riscv_release_subset_list (&riscv_subsets);
-
-      /* ISA mapping string may be numbered, suffixed with '.n'. Do not
-	 consider this as part of the ISA string.  */
-      char *suffix = strchr (name, '.');
-      if (suffix)
+      if (startswith (name + 2, "rv"))
 	{
-	  int suffix_index = (int)(suffix - name);
-	  char *name_substr = xmalloc (suffix_index + 1);
-	  strncpy (name_substr, name, suffix_index);
-	  name_substr[suffix_index] = '\0';
-	  riscv_parse_subset (&riscv_rps_dis, name_substr + 2);
-	  free (name_substr);
+	  riscv_release_subset_list (&riscv_subsets);
+	  /* ISA mapping string may be numbered, suffixed with '.n'. Do not
+	     consider this as part of the ISA string.  */
+	  char *suffix = strchr (name, '.');
+	  if (suffix)
+	  {
+	    int suffix_index = (int)(suffix - name);
+	    char *name_substr = xmalloc (suffix_index + 1);
+	    strncpy (name_substr, name, suffix_index);
+	    name_substr[suffix_index] = '\0';
+	    riscv_parse_subset (&riscv_rps_dis, name_substr + 2);
+	    free (name_substr);
+	  }
+	  else
+	    riscv_parse_subset (&riscv_rps_dis, name + 2);
 	}
-      else
-	riscv_parse_subset (&riscv_rps_dis, name + 2);
+      *state = MAP_INSN;
     }
+  else if (startswith (name, "$d"))
+    *state = MAP_DATA;
   else
     return false;
 
