@@ -824,16 +824,17 @@ riscv_get_map_state (int n,
     return false;
 
   name = bfd_asymbol_name(info->symtab[n]);
-  if (strcmp (name, "$x") == 0)
-    *state = MAP_INSN;
-  else if (strcmp (name, "$d") == 0)
-    *state = MAP_DATA;
-  else if (strncmp (name, "$xrv", 4) == 0)
+  if (startswith (name, "$x"))
     {
+      if (startswith (name + 2, "rv"))
+	{
+	  riscv_release_subset_list (&riscv_subsets);
+	  riscv_parse_subset (&riscv_rps_dis, name + 2);
+	}
       *state = MAP_INSN;
-      riscv_release_subset_list (&riscv_subsets);
-      riscv_parse_subset (&riscv_rps_dis, name + 2);
     }
+  else if (startswith (name, "$d"))
+    *state = MAP_DATA;
   else
     return false;
 
