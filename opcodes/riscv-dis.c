@@ -846,6 +846,24 @@ riscv_disassemble_insn (bfd_vma memaddr,
   return insnlen;
 }
 
+/* Return new mapping state if a given symbol name is of mapping symbols',
+   MAP_NONE otherwise.  If arch is not NULL and name denotes a mapping symbol
+   with ISA string, *arch is updated to the ISA string.  */
+
+static enum riscv_seg_mstate
+riscv_get_map_state_by_name (const char *name, const char** arch)
+{
+  if (startswith (name, "$x"))
+    {
+      if (arch && startswith (name + 2, "rv"))
+	*arch = name + 2;
+      return MAP_INSN;
+    }
+  else if (startswith (name, "$d"))
+    return MAP_DATA;
+  return MAP_NONE;
+}
+
 /* Return true if we find the suitable mapping symbol,
    and also update the STATE.  Otherwise, return false.  */
 
@@ -854,41 +872,36 @@ riscv_get_map_state (int n,
 		     enum riscv_seg_mstate *state,
 		     struct disassemble_info *info)
 {
-  const char *name;
+  const char *name, *arch = NULL;
 
   /* If the symbol is in a different section, ignore it.  */
   if (info->section != NULL
       && info->section != info->symtab[n]->section)
     return false;
 
-  name = bfd_asymbol_name(info->symtab[n]);
-  if (startswith (name, "$x"))
-    {
-      if (startswith (name + 2, "rv"))
-	{
-	  riscv_release_subset_list (&riscv_subsets);
-	  /* ISA mapping string may be numbered, suffixed with '.n'. Do not
-	     consider this as part of the ISA string.  */
-	  char *suffix = strchr (name, '.');
-	  if (suffix)
-	  {
-	    int suffix_index = (int)(suffix - name);
-	    char *name_substr = xmalloc (suffix_index + 1);
-	    strncpy (name_substr, name, suffix_index);
-	    name_substr[suffix_index] = '\0';
-	    riscv_parse_subset (&riscv_rps_dis, name_substr + 2);
-	    free (name_substr);
-	  }
-	  else
-	    riscv_parse_subset (&riscv_rps_dis, name + 2);
-	}
-      *state = MAP_INSN;
-    }
-  else if (startswith (name, "$d"))
-    *state = MAP_DATA;
-  else
+  name = bfd_asymbol_name (info->symtab[n]);
+  enum riscv_seg_mstate newstate = riscv_get_map_state_by_name (name, &arch);
+  if (newstate == MAP_NONE)
     return false;
-
+  *state = newstate;
+  if (arch)
+    {
+      riscv_release_subset_list (&riscv_subsets);
+      /* ISA mapping string may be numbered, suffixed with '.n'. Do not
+	 consider this as part of the ISA string.  */
+      char *suffix = strchr (arch, '.');
+      if (suffix)
+      {
+	int suffix_index = (int)(suffix - arch);
+	char *name_substr = xmalloc (suffix_index + 1);
+	strncpy (name_substr, name, suffix_index);
+	name_substr[suffix_index] = '\0';
+	riscv_parse_subset (&riscv_rps_dis, name_substr);
+	free (name_substr);
+      }
+      else
+	riscv_parse_subset (&riscv_rps_dis, arch);
+    }
   return true;
 }
 
