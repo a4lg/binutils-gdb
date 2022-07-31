@@ -238,6 +238,29 @@ init_riscv_dis_state_for_arch_and_options (void)
   is_arch_changed = false;
 }
 
+/* Initialize private data of the disassemble_info.  */
+
+static void
+init_riscv_dis_private_data (struct disassemble_info *info)
+{
+  struct riscv_private_data *pd;
+
+  pd = info->private_data = xcalloc (1, sizeof (struct riscv_private_data));
+  pd->gp = 0;
+  pd->print_addr = 0;
+  for (int i = 0; i < (int)ARRAY_SIZE (pd->hi_addr); i++)
+    pd->hi_addr[i] = -1;
+  pd->to_print_addr = false;
+  pd->has_gp = false;
+
+  for (int i = 0; i < info->symtab_size; i++)
+    if (strcmp (bfd_asymbol_name (info->symtab[i]), RISCV_GP_SYMBOL) == 0)
+      {
+	pd->gp = bfd_asymbol_value (info->symtab[i]);
+	pd->has_gp = true;
+      }
+}
+
 /* Update architecture for disassembler with its context.
    Call initialization functions if either:
    -  the architecture for current context is changed or
@@ -1290,34 +1313,6 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
   return info->bytes_per_chunk;
 }
 
-static bool
-riscv_init_disasm_info (struct disassemble_info *info)
-{
-  int i;
-
-  struct riscv_private_data *pd =
-	xcalloc (1, sizeof (struct riscv_private_data));
-  pd->gp = 0;
-  pd->print_addr = 0;
-  for (i = 0; i < (int) ARRAY_SIZE (pd->hi_addr); i++)
-    pd->hi_addr[i] = -1;
-  pd->to_print_addr = false;
-  pd->has_gp = false;
-
-  for (i = 0; i < info->symtab_size; i++)
-    {
-      asymbol *sym = info->symtab[i];
-      if (strcmp (bfd_asymbol_name (sym), RISCV_GP_SYMBOL) == 0)
-	{
-	  pd->gp = bfd_asymbol_value (sym);
-	  pd->has_gp = true;
-	}
-    }
-
-  info->private_data = pd;
-  return true;
-}
-
 int
 print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 {
@@ -1329,12 +1324,13 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
   int (*riscv_disassembler) (bfd_vma, insn_t, const bfd_byte *,
 			     struct disassemble_info *);
 
+  /* Initialize the private data.  */
+  if (info->private_data == NULL)
+    init_riscv_dis_private_data (info);
+
   /* Guess and update XLEN if we haven't determined it yet.  */
   if (xlen == 0)
     update_riscv_dis_xlen (info);
-
-  if (info->private_data == NULL && !riscv_init_disasm_info (info))
-    return -1;
 
   mstate = riscv_search_mapping_symbol (memaddr, info);
   /* Save the last mapping state.  */
