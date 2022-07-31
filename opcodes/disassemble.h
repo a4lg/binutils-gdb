@@ -105,6 +105,8 @@ extern disassembler_ftype csky_get_disassembler (bfd *);
 extern disassembler_ftype rl78_get_disassembler (bfd *);
 extern disassembler_ftype riscv_get_disassembler (bfd *);
 
+extern void riscv_free_disassemble_info (disassemble_info *);
+
 extern void ATTRIBUTE_NORETURN opcodes_assert (const char *, int);
 
 #define OPCODES_ASSERT(x) \
