@@ -68,19 +68,27 @@ static riscv_parse_subset_t riscv_rps_dis =
   false,		/* check_unknown_prefixed_ext.  */
 };
 
+struct riscv_mapping_sym
+{
+  uintptr_t section;
+  bfd_vma address;
+  int index;
+  enum riscv_seg_mstate mstate;
+};
+
 struct riscv_private_data
 {
   bfd_vma gp;
   bfd_vma print_addr;
   bfd_vma hi_addr[OP_MASK_RD + 1];
+  bfd_vma expected_next_addr;
   void* last_section;
+  struct riscv_mapping_sym *mapping_syms;
+  struct riscv_mapping_sym *last_mapping_sym;
+  size_t mapping_syms_size;
   bool to_print_addr;
   bool has_gp;
 };
-
-/* Used for mapping symbols.  */
-static int last_map_symbol = -1;
-static bfd_vma last_stop_offset = 0;
 
 /* Register names as used by the disassembler.  */
 static const char * const *riscv_gpr_names;
@@ -935,41 +943,61 @@ riscv_get_map_state_by_name (const char *name)
   return MAP_NONE;
 }
 
-/* Return true if we find the suitable mapping symbol,
-   and also update the STATE.  Otherwise, return false.  */
+/* Search for the suitable mapping symbol and update the state if found.  */
 
 static bool
-riscv_get_map_state (int n,
-		     enum riscv_seg_mstate *state,
-		     struct disassemble_info *info)
+riscv_search_mapping_sym (bfd_vma memaddr,
+			  enum riscv_seg_mstate *state,
+			  struct disassemble_info *info)
 {
-  const char *name;
-
-  /* If the symbol is in a different section, ignore it.  */
-  if (info->section != NULL
-      && info->section != info->symtab[n]->section)
-    return false;
-
-  name = bfd_asymbol_name (info->symtab[n]);
-  enum riscv_seg_mstate newstate = riscv_get_map_state_by_name (name);
-  if (newstate == MAP_NONE)
-    return false;
-  *state = newstate;
+  struct riscv_private_data *pd = info->private_data;
+  /* Do a binary search to find the last mapping symbol (which does not
+     violate upper address and section boundaries) that may be suitable
+     for a given section and address.  */
+  size_t low = 1, len = pd->mapping_syms_size;
+  while (len != 0)
+    {
+      size_t half = len / 2;
+      size_t mid = low + half;
+      bool is_mid_in_bound
+	  = info->section
+		? (pd->mapping_syms[mid].section < (uintptr_t)info->section
+		   || (pd->mapping_syms[mid].section == (uintptr_t)info->section
+		       && pd->mapping_syms[mid].address <= memaddr))
+		: pd->mapping_syms[mid].address <= memaddr;
+      if (is_mid_in_bound)
+	{
+	  len -= half + 1;
+	  low = mid + 1;
+	}
+      else
+	len = half;
+    }
+  struct riscv_mapping_sym *msym = pd->mapping_syms + low - 1;
+  /* The result may violate lower address and/or section boundaries.
+     Check if the result of a binary search is actually suitable.  */
+  if ((info->section && (uintptr_t)info->section != msym->section)
+      || msym->mstate == MAP_NONE)
+    {
+      pd->last_mapping_sym = NULL;
+      return false;
+    }
+  /* Update the state.  */
+  pd->last_mapping_sym = msym;
+  *state = msym->mstate;
   return true;
 }
 
-/* Check the sorted symbol table (sorted by the symbol value), find the
-   suitable mapping symbols.  */
+/* Check the sorted mapping symbol table (sorted by the address and the
+   section) and find the suitable mapping symbol.  Reuse the last mapping
+   symbol as possible.  */
 
 static enum riscv_seg_mstate
 riscv_search_mapping_symbol (bfd_vma memaddr,
 			     struct disassemble_info *info)
 {
   enum riscv_seg_mstate mstate;
-  bool from_last_map_symbol;
-  bool found = false;
-  int symbol = -1;
-  int n;
+  struct riscv_private_data *pd = info->private_data;
 
   /* Decide whether to print the data or instruction by default, in case
      we can not find the corresponding mapping symbols.  */
@@ -981,67 +1009,32 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
       || bfd_asymbol_flavour (*info->symtab) != bfd_target_elf_flavour)
     return mstate;
 
-  /* Reset the last_map_symbol if we start to dump a new section.  */
-  if (memaddr == 0)
-    last_map_symbol = -1;
-
-  /* If the last stop offset is different from the current one, then
-     don't use the last_map_symbol to search.  We usually reset the
-     info->stop_offset when handling a new section.  */
-  from_last_map_symbol = (last_map_symbol >= 0
-			  && info->stop_offset == last_stop_offset);
-
-  /* Start scanning at the start of the function, or wherever
-     we finished last time.  */
-  n = info->symtab_pos + 1;
-  if (from_last_map_symbol && n >= last_map_symbol)
-    n = last_map_symbol;
-
-  /* Find the suitable mapping symbol to dump.  */
-  for (; n < info->symtab_size; n++)
+  if (pd->last_mapping_sym != NULL
+      && memaddr == pd->expected_next_addr)
     {
-      bfd_vma addr = bfd_asymbol_value (info->symtab[n]);
-      /* We have searched all possible symbols in the range.  */
-      if (addr > memaddr)
-	break;
-      if (riscv_get_map_state (n, &mstate, info))
+      /* Reuse the last mapping symbol.  */
+      mstate = pd->last_mapping_sym->mstate;
+      /* Do a forward linear search to find the next mapping symbol.  */
+      struct riscv_mapping_sym *msym = pd->last_mapping_sym + 1;
+      while (true)
 	{
-	  symbol = n;
-	  found = true;
-	  /* Do not stop searching, in case there are some mapping
-	     symbols have the same value, but have different names.
-	     Use the last one.  */
-	}
-    }
-
-  /* We can not find the suitable mapping symbol above.  Therefore, we
-     look forwards and try to find it again, but don't go pass the start
-     of the section.  Otherwise a data section without mapping symbols
-     can pick up a text mapping symbol of a preceeding section.  */
-  if (!found)
-    {
-      n = info->symtab_pos;
-      if (from_last_map_symbol && n >= last_map_symbol)
-	n = last_map_symbol;
-
-      for (; n >= 0; n--)
-	{
-	  bfd_vma addr = bfd_asymbol_value (info->symtab[n]);
-	  /* We have searched all possible symbols in the range.  */
-	  if (addr < (info->section ? info->section->vma : 0))
+	  /* Break if we reached to the end.  */
+	  if (msym->mstate == MAP_NONE)
 	    break;
-	  /* Stop searching once we find the closed mapping symbol.  */
-	  if (riscv_get_map_state (n, &mstate, info))
-	    {
-	      symbol = n;
-	      break;
-	    }
+	  /* For section symbols, only test symbols in the same section.  */
+	  if (info->section && (uintptr_t)info->section != msym->section)
+	    break;
+	  /* Don't go beyond memaddr.  */
+	  if (memaddr < msym->address)
+	    break;
+	  /* Update the mapping symbol.  */
+	  mstate = msym->mstate;
+	  pd->last_mapping_sym = msym++;
 	}
     }
-
-  /* Save the information for next use.  */
-  last_map_symbol = symbol;
-  last_stop_offset = info->stop_offset;
+  else
+    /* Can't reuse the mapping symbol.  Do a binary search.  */
+    riscv_search_mapping_sym (memaddr, &mstate, info);
 
   return mstate;
 }
@@ -1054,25 +1047,21 @@ riscv_data_length (bfd_vma memaddr,
 {
   bfd_vma length;
   bool found = false;
+  struct riscv_private_data *pd = info->private_data;
 
   length = 4;
   if (info->symtab_size != 0
       && bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour
-      && last_map_symbol >= 0)
+      && pd->last_mapping_sym != NULL)
     {
-      int n;
-      enum riscv_seg_mstate m = MAP_NONE;
-      for (n = last_map_symbol + 1; n < info->symtab_size; n++)
+      /* Get the next mapping symbol and adjust the length.  */
+      struct riscv_mapping_sym *msym = pd->last_mapping_sym + 1;
+      if (msym->mstate != MAP_NONE
+	  && (!info->section || (uintptr_t)info->section == msym->section))
 	{
-	  bfd_vma addr = bfd_asymbol_value (info->symtab[n]);
-	  if (addr > memaddr
-	      && riscv_get_map_state (n, &m, info))
-	    {
-	      if (addr - memaddr < length)
-		length = addr - memaddr;
-	      found = true;
-	      break;
-	    }
+	  if (msym->address - memaddr < length)
+	    length = msym->address - memaddr;
+	  found = true;
 	}
     }
   if (!found)
@@ -1135,6 +1124,35 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
   return info->bytes_per_chunk;
 }
 
+/* Compare two mapping symbols (sort by original index).  */
+
+static int
+compare_mapping_syms_without_section (const void *ap, const void *bp)
+{
+  const struct riscv_mapping_sym *a = ap;
+  const struct riscv_mapping_sym *b = bp;
+  return a->index - b->index;
+}
+
+/* Compare two mapping symbols (sort by section, address and
+   original index for a stable sort).  */
+
+static int
+compare_mapping_syms_with_section (const void* ap, const void* bp)
+{
+  const struct riscv_mapping_sym *a = ap;
+  const struct riscv_mapping_sym *b = bp;
+  if (a->section < b->section)
+    return -1;
+  else if (a->section > b->section)
+    return +1;
+  else if (a->address < b->address)
+    return -1;
+  else if (a->address > b->address)
+    return +1;
+  return compare_mapping_syms_without_section (a, b);
+}
+
 /* Initialize disassemble_info.private_data.  */
 
 static void
@@ -1147,16 +1165,60 @@ init_riscv_dis_private_data (struct disassemble_info *info)
   pd->print_addr = 0;
   for (int i = 0; i < (int)ARRAY_SIZE (pd->hi_addr); i++)
     pd->hi_addr[i] = -1;
+  pd->expected_next_addr = 0;
   pd->last_section = NULL;
+  pd->mapping_syms = NULL;
+  pd->last_mapping_sym = NULL;
+  pd->mapping_syms_size = 0;
   pd->to_print_addr = false;
   pd->has_gp = false;
 
+  size_t n_mapping_syments = 2;  /* including sentinel nodes.  */
+
   for (int i = 0; i < info->symtab_size; i++)
-    if (strcmp (bfd_asymbol_name (info->symtab[i]), RISCV_GP_SYMBOL) == 0)
-      {
-	pd->gp = bfd_asymbol_value (info->symtab[i]);
-	pd->has_gp = true;
-      }
+    {
+      if (strcmp (bfd_asymbol_name (info->symtab[i]), RISCV_GP_SYMBOL) == 0)
+	{
+	  pd->gp = bfd_asymbol_value (info->symtab[i]);
+	  pd->has_gp = true;
+	}
+      if (riscv_get_map_state_by_name (bfd_asymbol_name (info->symtab[i]))
+	  != MAP_NONE)
+	{
+	  n_mapping_syments++;
+	}
+    }
+
+  if (info->symtab_size != 0
+      && bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour)
+    {
+	struct riscv_mapping_sym *msym = pd->mapping_syms
+	    = xcalloc (n_mapping_syments, sizeof (struct riscv_mapping_sym));
+	/* Head sentinel entry.  */
+	msym->index = -1;
+	msym->mstate = MAP_NONE;
+	msym++;
+	/* Mapping symbols.  */
+	for (int i = 0; i < info->symtab_size; i++)
+	  {
+	    enum riscv_seg_mstate state = riscv_get_map_state_by_name (
+		bfd_asymbol_name (info->symtab[i]));
+	    if (state == MAP_NONE)
+	      continue;
+	    msym->section = (uintptr_t)info->symtab[i]->section;
+	    msym->address = bfd_asymbol_value (info->symtab[i]);
+	    msym->index = i;
+	    msym->mstate = state;
+	    msym++;
+	  }
+	/* Tail sentinel entry.  */
+	msym->index = -1;
+	msym->mstate = MAP_NONE;
+
+	pd->mapping_syms_size = n_mapping_syments - 2;
+	/* Mapping symbols are now ordered for section == NULL.
+	   will be qsorted on the first non-NULL section.  */
+    }
 }
 
 /* Initialize private data when the section to disassemble is changed.  */
@@ -1165,7 +1227,35 @@ static void
 init_riscv_dis_private_data_for_section (struct disassemble_info *info)
 {
   struct riscv_private_data *pd = info->private_data;
+
+  /* Clear the last mapping symbol because we start to dump a new section.  */
+  pd->last_mapping_sym = NULL;
+
+  /* Sort the mapping symbols depending on the current section
+     (depending on whether the current section is NULL or not).  */
+  if (pd->last_section == NULL && info->section != NULL)
+  {
+    qsort (pd->mapping_syms + 1, pd->mapping_syms_size,
+	   sizeof (struct riscv_mapping_sym),
+	   compare_mapping_syms_with_section);
+  }
+  else if(pd->last_section != NULL && info->section == NULL)
+  {
+    qsort (pd->mapping_syms + 1, pd->mapping_syms_size,
+	   sizeof (struct riscv_mapping_sym),
+	   compare_mapping_syms_without_section);
+  }
+
   pd->last_section = info->section;
+}
+
+void
+riscv_free_disassemble_info (struct disassemble_info *info)
+{
+  if (!info)
+    return;
+  struct riscv_private_data *pd = info->private_data;
+  free (pd->mapping_syms);
 }
 
 int
@@ -1192,6 +1282,7 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
   if (xlen == 0)
     update_riscv_dis_xlen (info);
 
+  /* Update default state (data or code) for the disassembler.  */
   mstate = riscv_search_mapping_symbol (memaddr, info);
 
   /* Set the size to dump.  */
@@ -1225,7 +1316,10 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
     }
   insn = (insn_t) bfd_get_bits (packet, dump_size * 8, false);
 
-  return (*riscv_disassembler) (memaddr, insn, info);
+  /* Print, save the next expected address and return current size.  */
+  status = (*riscv_disassembler) (memaddr, insn, info);
+  pd->expected_next_addr = memaddr + status;
+  return status;
 }
 
 disassembler_ftype
