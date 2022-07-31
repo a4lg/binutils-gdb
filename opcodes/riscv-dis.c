@@ -900,6 +900,19 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   return insnlen;
 }
 
+/* Return new mapping state if a given symbol name is of mapping symbols',
+   MAP_NONE otherwise.  */
+
+static enum riscv_seg_mstate
+riscv_get_map_state_by_name (const char *name)
+{
+  if (strcmp (name, "$x") == 0)
+    return MAP_INSN;
+  else if (strcmp (name, "$d") == 0)
+    return MAP_DATA;
+  return MAP_NONE;
+}
+
 /* Return true if we find the suitable mapping symbol,
    and also update the STATE.  Otherwise, return false.  */
 
@@ -915,14 +928,11 @@ riscv_get_map_state (int n,
       && info->section != info->symtab[n]->section)
     return false;
 
-  name = bfd_asymbol_name(info->symtab[n]);
-  if (strcmp (name, "$x") == 0)
-    *state = MAP_INSN;
-  else if (strcmp (name, "$d") == 0)
-    *state = MAP_DATA;
-  else
+  name = bfd_asymbol_name (info->symtab[n]);
+  enum riscv_seg_mstate newstate = riscv_get_map_state_by_name (name);
+  if (newstate == MAP_NONE)
     return false;
-
+  *state = newstate;
   return true;
 }
 
