@@ -73,6 +73,7 @@ struct riscv_private_data
   bfd_vma gp;
   bfd_vma print_addr;
   bfd_vma hi_addr[OP_MASK_RD + 1];
+  void* last_section;
   bool to_print_addr;
   bool has_gp;
 };
@@ -1114,6 +1115,7 @@ init_riscv_dis_private_data (struct disassemble_info *info)
   pd->print_addr = 0;
   for (int i = 0; i < (int)ARRAY_SIZE (pd->hi_addr); i++)
     pd->hi_addr[i] = -1;
+  pd->last_section = NULL;
   pd->to_print_addr = false;
   pd->has_gp = false;
 
@@ -1124,6 +1126,15 @@ init_riscv_dis_private_data (struct disassemble_info *info)
 	pd->has_gp = true;
 	break;
       }
+}
+
+/* Initialize private data when the section to disassemble is changed.  */
+
+static void
+init_riscv_dis_private_data_for_section (struct disassemble_info *info)
+{
+  struct riscv_private_data *pd = info->private_data;
+  pd->last_section = info->section;
 }
 
 int
@@ -1137,7 +1148,13 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
   int (*riscv_disassembler) (bfd_vma, insn_t, struct disassemble_info *);
 
   if (info->private_data == NULL)
-    init_riscv_dis_private_data (info);
+    {
+      init_riscv_dis_private_data (info);
+      init_riscv_dis_private_data_for_section (info);
+    }
+  else if (info->section
+	   != ((struct riscv_private_data *)info->private_data)->last_section)
+    init_riscv_dis_private_data_for_section (info);
 
   mstate = riscv_search_mapping_symbol (memaddr, info);
 
