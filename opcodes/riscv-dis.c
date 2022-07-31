@@ -880,9 +880,9 @@ riscv_get_map_state (int n,
     return false;
 
   name = bfd_asymbol_name(info->symtab[n]);
-  if (strcmp (name, "$x") == 0)
+  if (startswith (name, "$x"))
     *state = MAP_INSN;
-  else if (strcmp (name, "$d") == 0)
+  else if (startswith (name, "$d"))
     *state = MAP_DATA;
   else
     return false;
