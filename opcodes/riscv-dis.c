@@ -616,6 +616,7 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 	  {
 	    pd->gp = bfd_asymbol_value (info->symtab[i]);
 	    pd->has_gp = true;
+	    break;
 	  }
     }
   else
