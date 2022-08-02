@@ -472,7 +472,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	  break;
 
 	case 'y':
-	  print (info->stream, dis_style_text, "0x%x",
+	  print (info->stream, dis_style_immediate, "0x%x",
 		 (int)EXTRACT_OPERAND (BS, l));
 	  break;
 
@@ -541,17 +541,17 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    if (riscv_csr_hash[csr] != NULL)
 	      print (info->stream, dis_style_text, "%s", riscv_csr_hash[csr]);
 	    else
-	      print (info->stream, dis_style_text, "0x%x", csr);
+	      print (info->stream, dis_style_immediate, "0x%x", csr);
 	    break;
 	  }
 
 	case 'Y':
-	  print (info->stream, dis_style_text, "0x%x",
+	  print (info->stream, dis_style_immediate, "0x%x",
 		 (int) EXTRACT_OPERAND (RNUM, l));
 	  break;
 
 	case 'Z':
-	  print (info->stream, dis_style_text, "%d", rs1);
+	  print (info->stream, dis_style_immediate, "%d", rs1);
 	  break;
 
 	default:
@@ -907,7 +907,7 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
       (*info->fprintf_styled_func)
 	(info->stream, dis_style_assembler_directive, ".byte\t");
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, "0x%02llx",
+	(info->stream, dis_style_immediate, "0x%02llx",
 	 (unsigned long long) data);
       break;
     case 2:
