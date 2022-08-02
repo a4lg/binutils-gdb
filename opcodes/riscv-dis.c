@@ -32,10 +32,31 @@
 #include <stdint.h>
 #include <ctype.h>
 
-static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
-static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
+/* Default architecture string (if not available).  */
+static const char *initial_default_arch = "rv64gc";
 
-unsigned xlen = 0;
+/* Default architecture string
+   (as specified by the ELF attributes or `initial_default_arch').  */
+static const char *default_arch = NULL;
+
+/* Current XLEN for the disassembler.  */
+static unsigned xlen = 0;
+
+/* XLEN as inferred by the machine architecture.  */
+static unsigned xlen_by_mach = 0;
+
+/* XLEN as inferred by the architecture string.  */
+static unsigned xlen_by_arch = 0;
+
+/* XLEN as inferred by ELF header.  */
+static unsigned xlen_by_elf = 0;
+
+/* Default ISA specification version (constant as of now).  */
+static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
+
+/* Default privileged specification
+   (as specified by the ELF attributes or the `priv-spec' option).  */
+static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
 
 static riscv_subset_list_t riscv_subsets;
 static riscv_parse_subset_t riscv_rps_dis =
@@ -57,32 +78,37 @@ struct riscv_private_data
 /* Used for mapping symbols.  */
 static int last_map_symbol = -1;
 static bfd_vma last_stop_offset = 0;
-enum riscv_seg_mstate last_map_state;
 
+/* Register names as used by the disassembler.  */
 static const char * const *riscv_gpr_names;
 static const char * const *riscv_fpr_names;
 
 /* If set, disassemble as most general instruction.  */
-static int no_aliases;
+static bool no_aliases = false;
+
+/* If set, disassemble with numeric register names.  */
+static bool is_numeric = false;
+
+/* Instruction support cache.  */
+static signed char riscv_insn_support_cache[NUM_INSN_CLASSES];
+
+static void init_riscv_dis_state_for_arch (void);
+static void init_riscv_dis_state_for_arch_and_options (void);
 
 static void
 set_default_riscv_dis_options (void)
 {
-  riscv_gpr_names = riscv_gpr_names_abi;
-  riscv_fpr_names = riscv_fpr_names_abi;
-  no_aliases = 0;
+  no_aliases = false;
+  is_numeric = false;
 }
 
 static bool
 parse_riscv_dis_option_without_args (const char *option)
 {
   if (strcmp (option, "no-aliases") == 0)
-    no_aliases = 1;
+    no_aliases = true;
   else if (strcmp (option, "numeric") == 0)
-    {
-      riscv_gpr_names = riscv_gpr_names_numeric;
-      riscv_fpr_names = riscv_fpr_names_numeric;
-    }
+    is_numeric = true;
   else
     return false;
   return true;
@@ -146,8 +172,6 @@ parse_riscv_dis_options (const char *opts_in)
 {
   char *opts = xstrdup (opts_in), *opt = opts, *opt_end = opts;
 
-  set_default_riscv_dis_options ();
-
   for ( ; opt_end != NULL; opt = opt_end + 1)
     {
       if ((opt_end = strchr (opt, ',')) != NULL)
@@ -156,6 +180,165 @@ parse_riscv_dis_options (const char *opts_in)
     }
 
   free (opts);
+}
+
+/* Update current architecture string
+   and reinitialize the disassembler state.  */
+
+static void
+update_riscv_dis_current_arch (const char *arch)
+{
+  xlen = 0;
+  riscv_release_subset_list (&riscv_subsets);
+  riscv_parse_subset (&riscv_rps_dis, arch);
+  xlen_by_arch = (arch == initial_default_arch) ? 0 : xlen;
+  init_riscv_dis_state_for_arch ();
+  /* xlen is readjusted by the next call to
+     init_riscv_dis_state_for_arch_and_options.  */
+}
+
+/* Update default architecture string.
+   Return true if a default arch string change is detected.  */
+
+static bool
+update_riscv_dis_default_arch (const char* arch)
+{
+  /* Do nothing if default arch string is unchanged. */
+  if (arch == initial_default_arch)
+    {
+      if (default_arch == initial_default_arch)
+	return false;
+    }
+  else if (default_arch != NULL && strcmp (default_arch, arch) == 0)
+    return false;
+  /* Save new default arch string
+     (either initial_default_arch or a copy of the arch string).  */
+  if (default_arch != initial_default_arch)
+    free ((void *)default_arch);
+  default_arch = (arch != initial_default_arch) ? xstrdup (arch) : arch;
+  return true;
+}
+
+/* Guess and update current XLEN.  */
+
+static void
+update_riscv_dis_xlen (struct disassemble_info *info)
+{
+  /* Set XLEN with following precedence rules:
+     1. BFD machine architecture set by either:
+       a. -m riscv:rv[32|64] option (GDB: set arch riscv:rv[32|64])
+       b. ELF class in actual ELF header (only on RISC-V ELF)
+       This is only effective if XLEN-specific BFD machine architecture is
+       chosen.  If XLEN-neutral (like riscv), BFD machine architecture is
+       ignored on XLEN selection.
+     2. Non-default RISC-V architecture string set by the ELF attributes
+     3. ELF class in dummy ELF header.  */
+   if (xlen_by_mach != 0)
+    xlen = xlen_by_mach;
+  else if (xlen_by_arch != 0)
+    xlen = xlen_by_arch;
+  else if (xlen_by_elf != 0)
+    xlen = xlen_by_elf;
+  else if (info != NULL && info->section != NULL)
+    {
+      Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
+      xlen = xlen_by_elf = ehdr->e_ident[EI_CLASS] == ELFCLASS64 ? 64 : 32;
+    }
+}
+
+/* Build a hash table for the disassembler to shorten the search time.
+   We sort riscv_opcodes entry pointers for further performance.
+   Hash index is computed by masking the instruction with...
+   - 0x03 (OP_MASK_OP2) for real 16-bit instructions
+   - 0x7f (OP_MASK_OP)  for all other instructions.  */
+
+#define OP_HASH_LEN (OP_MASK_OP + 1)
+#define OP_HASH_IDX(i)                                                        \
+  ((i) & (((i & OP_MASK_OP2) != OP_MASK_OP2) ? OP_MASK_OP2 : OP_MASK_OP))
+static const struct riscv_opcode **riscv_hash[OP_HASH_LEN + 1];
+static const struct riscv_opcode **riscv_opcodes_sorted;
+
+static int
+compare_opcodes (const void *ap, const void *bp)
+{
+  const struct riscv_opcode *a = *(const struct riscv_opcode **) ap;
+  const struct riscv_opcode *b = *(const struct riscv_opcode **) bp;
+  int ai = (int) OP_HASH_IDX (a->match);
+  int bi = (int) OP_HASH_IDX (b->match);
+  if (ai != bi)
+    return ai - bi;
+  /* Stable sort (on riscv_opcodes entry order) is required.  */
+  if (a < b)
+    return -1;
+  if (a > b)
+    return +1;
+  return 0;
+}
+
+static void
+build_riscv_opcodes_hash_table (void)
+{
+  const struct riscv_opcode *op;
+  const struct riscv_opcode **pop, **pop_end;
+  size_t len = 0;
+
+  /* Sort riscv_opcodes entry pointers (except macros).  */
+  for (op = riscv_opcodes; op->name; op++)
+    if (op->pinfo != INSN_MACRO)
+      len++;
+  riscv_opcodes_sorted = xcalloc (len, sizeof (struct riscv_opcode *));
+  pop_end = riscv_opcodes_sorted;
+  for (op = riscv_opcodes; op->name; op++)
+    if (op->pinfo != INSN_MACRO)
+      *pop_end++ = op;
+  qsort (riscv_opcodes_sorted, len, sizeof (struct riscv_opcode *),
+	 compare_opcodes);
+
+  /* Initialize faster hash table.  */
+  pop = riscv_opcodes_sorted;
+  for (unsigned i = 0; i < OP_HASH_LEN; i++)
+    {
+      riscv_hash[i] = pop;
+      while (pop != pop_end && OP_HASH_IDX ((*pop)->match) == i)
+	pop++;
+    }
+  riscv_hash[OP_HASH_LEN] = pop_end;
+}
+
+/* Initialization (for arch and options).  */
+
+static bool is_arch_changed = false;
+
+static void
+init_riscv_dis_state_for_arch (void)
+{
+  is_arch_changed = true;
+  /* Clear instruction support cache.  */
+  for (size_t i = 0; i < NUM_INSN_CLASSES; i++)
+    riscv_insn_support_cache[i] = 0;
+}
+
+static void
+init_riscv_dis_state_for_arch_and_options (void)
+{
+  static bool init = false;
+  if (!init)
+    {
+      build_riscv_opcodes_hash_table ();
+      init = true;
+    }
+  /* If the architecture string is changed, update XLEN.  */
+  if (is_arch_changed)
+    update_riscv_dis_xlen (NULL);
+  /* Set GPR register names to disassemble.  */
+  riscv_gpr_names = is_numeric ? riscv_gpr_names_numeric : riscv_gpr_names_abi;
+  /* Set FPR register names to disassemble.  */
+  riscv_fpr_names
+      = !riscv_subset_supports (&riscv_rps_dis, "zfinx")
+	    ? (is_numeric ? riscv_fpr_names_numeric : riscv_fpr_names_abi)
+	    : riscv_gpr_names;
+  /* Save previous options and mark them "unchanged".  */
+  is_arch_changed = false;
 }
 
 /* Print one argument from an array.  */
@@ -235,7 +418,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    case 'j':
 	      if (((l & MASK_C_ADDI) == MATCH_C_ADDI) && rd != 0)
 		maybe_print_address (pd, rd, EXTRACT_CITYPE_IMM (l), 0);
-	      if (info->mach == bfd_mach_riscv64
+	      if (xlen > 32
 		  && ((l & MASK_C_ADDIW) == MATCH_C_ADDIW) && rd != 0)
 		maybe_print_address (pd, rd, EXTRACT_CITYPE_IMM (l), 1);
 	      print (info->stream, dis_style_immediate, "%d",
@@ -433,7 +616,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	  if (((l & MASK_ADDI) == MATCH_ADDI && rs1 != 0)
 	      || (l & MASK_JALR) == MATCH_JALR)
 	    maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), 0);
-	  if (info->mach == bfd_mach_riscv64
+	  if (xlen > 32
 	      && ((l & MASK_ADDIW) == MATCH_ADDIW) && rs1 != 0)
 	    maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), 1);
 	  print (info->stream, dis_style_immediate, "%d",
@@ -536,6 +719,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		DECLARE_CSR (name, num, class, define_version, abort_version)
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
+		init_csr = true;
 	      }
 
 	    if (riscv_csr_hash[csr] != NULL)
@@ -572,23 +756,10 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 static int
 riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 {
-  const struct riscv_opcode *op;
-  static bool init = 0;
-  static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
+  const struct riscv_opcode **pop, **pop_end;
+  const struct riscv_opcode *op, *matched_op;
   struct riscv_private_data *pd;
   int insnlen;
-
-#define OP_HASH_IDX(i) ((i) & (riscv_insn_length (i) == 2 ? 0x3 : OP_MASK_OP))
-
-  /* Build a hash table to shorten the search time.  */
-  if (! init)
-    {
-      for (op = riscv_opcodes; op->name; op++)
-	if (!riscv_hash[OP_HASH_IDX (op->match)])
-	  riscv_hash[OP_HASH_IDX (op->match)] = op;
-
-      init = 1;
-    }
 
   if (info->private_data == NULL)
     {
@@ -623,82 +794,84 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   info->target = 0;
   info->target2 = 0;
 
-  op = riscv_hash[OP_HASH_IDX (word)];
-  if (op != NULL)
+  if (xlen == 0)
+    update_riscv_dis_xlen (info);
+
+  matched_op = NULL;
+  pop     = riscv_hash[OP_HASH_IDX (word)];
+  pop_end = riscv_hash[OP_HASH_IDX (word) + 1];
+  for (; pop != pop_end; pop++)
     {
-      /* If XLEN is not known, get its value from the ELF class.  */
-      if (info->mach == bfd_mach_riscv64)
-	xlen = 64;
-      else if (info->mach == bfd_mach_riscv32)
-	xlen = 32;
-      else if (info->section != NULL)
+      op = *pop;
+      /* Does the opcode match?  */
+      if (!(op->match_func) (op, word))
+	continue;
+      /* Is this a pseudo-instruction and may we print it as such?  */
+      if (no_aliases && (op->pinfo & INSN_ALIAS))
+	continue;
+      /* Is this instruction restricted to a certain value of XLEN?  */
+      if ((op->xlen_requirement != 0) && (op->xlen_requirement != xlen))
+	continue;
+      /* Is this instruction supported by the current architecture?  */
+      if (riscv_insn_support_cache[op->insn_class] == 0)
 	{
-	  Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
-	  xlen = ehdr->e_ident[EI_CLASS] == ELFCLASS64 ? 64 : 32;
+	  riscv_insn_support_cache[op->insn_class]
+	      = riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class)
+		    ? +1
+		    : -1;
+	}
+      if (riscv_insn_support_cache[op->insn_class] < 0)
+	continue;
+
+      matched_op = op;
+      break;
+    }
+
+  if (matched_op != NULL)
+    {
+      /* There is a match.  */
+      op = matched_op;
+
+      (*info->fprintf_styled_func) (info->stream, dis_style_mnemonic,
+				    "%s", op->name);
+      print_insn_args (op->args, word, memaddr, info);
+
+      /* Try to disassemble multi-instruction addressing sequences.  */
+      if (pd->print_addr != (bfd_vma)-1)
+	{
+	  info->target = pd->print_addr;
+	  (*info->fprintf_styled_func) (info->stream, dis_style_comment_start,
+					" # ");
+	  (*info->print_address_func) (info->target, info);
+	  pd->print_addr = -1;
 	}
 
-      /* If arch has ZFINX flags, use gpr for disassemble.  */
-      if(riscv_subset_supports (&riscv_rps_dis, "zfinx"))
-	riscv_fpr_names = riscv_gpr_names;
-
-      for (; op->name; op++)
+      /* Finish filling out insn_info fields.  */
+      switch (op->pinfo & INSN_TYPE)
 	{
-	  /* Does the opcode match?  */
-	  if (! (op->match_func) (op, word))
-	    continue;
-	  /* Is this a pseudo-instruction and may we print it as such?  */
-	  if (no_aliases && (op->pinfo & INSN_ALIAS))
-	    continue;
-	  /* Is this instruction restricted to a certain value of XLEN?  */
-	  if ((op->xlen_requirement != 0) && (op->xlen_requirement != xlen))
-	    continue;
-
-	  if (!riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class))
-	    continue;
-
-	  /* It's a match.  */
-	  (*info->fprintf_styled_func) (info->stream, dis_style_mnemonic,
-					"%s", op->name);
-	  print_insn_args (op->args, word, memaddr, info);
-
-	  /* Try to disassemble multi-instruction addressing sequences.  */
-	  if (pd->print_addr != (bfd_vma)-1)
-	    {
-	      info->target = pd->print_addr;
-	      (*info->fprintf_styled_func)
-		(info->stream, dis_style_comment_start, " # ");
-	      (*info->print_address_func) (info->target, info);
-	      pd->print_addr = -1;
-	    }
-
-	  /* Finish filling out insn_info fields.  */
-	  switch (op->pinfo & INSN_TYPE)
-	    {
-	    case INSN_BRANCH:
-	      info->insn_type = dis_branch;
-	      break;
-	    case INSN_CONDBRANCH:
-	      info->insn_type = dis_condbranch;
-	      break;
-	    case INSN_JSR:
-	      info->insn_type = dis_jsr;
-	      break;
-	    case INSN_DREF:
-	      info->insn_type = dis_dref;
-	      break;
-	    default:
-	      break;
-	    }
-
-	  if (op->pinfo & INSN_DATA_SIZE)
-	    {
-	      int size = ((op->pinfo & INSN_DATA_SIZE)
-			  >> INSN_DATA_SIZE_SHIFT);
-	      info->data_size = 1 << (size - 1);
-	    }
-
-	  return insnlen;
+	case INSN_BRANCH:
+	  info->insn_type = dis_branch;
+	  break;
+	case INSN_CONDBRANCH:
+	  info->insn_type = dis_condbranch;
+	  break;
+	case INSN_JSR:
+	  info->insn_type = dis_jsr;
+	  break;
+	case INSN_DREF:
+	  info->insn_type = dis_dref;
+	  break;
+	default:
+	  break;
 	}
+
+      if (op->pinfo & INSN_DATA_SIZE)
+	{
+	  int size = ((op->pinfo & INSN_DATA_SIZE) >> INSN_DATA_SIZE_SHIFT);
+	  info->data_size = 1 << (size - 1);
+	}
+
+      return insnlen;
     }
 
   /* We did not find a match, so just print the instruction bits.  */
@@ -950,18 +1123,7 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
   enum riscv_seg_mstate mstate;
   int (*riscv_disassembler) (bfd_vma, insn_t, struct disassemble_info *);
 
-  if (info->disassembler_options != NULL)
-    {
-      parse_riscv_dis_options (info->disassembler_options);
-      /* Avoid repeatedly parsing the options.  */
-      info->disassembler_options = NULL;
-    }
-  else if (riscv_gpr_names == NULL)
-    set_default_riscv_dis_options ();
-
   mstate = riscv_search_mapping_symbol (memaddr, info);
-  /* Save the last mapping state.  */
-  last_map_state = mstate;
 
   /* Set the size to dump.  */
   if (mstate == MAP_DATA
@@ -1000,7 +1162,7 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 disassembler_ftype
 riscv_get_disassembler (bfd *abfd)
 {
-  const char *default_arch = "rv64gc";
+  const char *default_arch_next = initial_default_arch;
 
   if (abfd && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
@@ -1015,13 +1177,41 @@ riscv_get_disassembler (bfd *abfd)
 						  attr[Tag_b].i,
 						  attr[Tag_c].i,
 						  &default_priv_spec);
-	  default_arch = attr[Tag_RISCV_arch].s;
+	  default_arch_next = attr[Tag_RISCV_arch].s;
+	  /* For ELF files with (somehow) no architecture string
+	     in the attributes, use the default value.  */
+	  if (!default_arch_next)
+	    default_arch_next = initial_default_arch;
 	}
     }
 
-  riscv_release_subset_list (&riscv_subsets);
-  riscv_parse_subset (&riscv_rps_dis, default_arch);
+  if (update_riscv_dis_default_arch (default_arch_next))
+    update_riscv_dis_current_arch (default_arch_next);
+  init_riscv_dis_state_for_arch_and_options ();
   return print_insn_riscv;
+}
+
+/* Initialize disassemble_info and parse options.  */
+
+void
+disassemble_init_riscv (struct disassemble_info *info)
+{
+  info->symbol_is_valid = riscv_symbol_is_valid;
+  /* Clear previous XLEN and guess by mach.  */
+  xlen = 0;
+  xlen_by_mach = 0;
+  xlen_by_arch = 0;
+  xlen_by_elf = 0;
+  if (info->mach == bfd_mach_riscv64)
+    xlen_by_mach = 64;
+  else if (info->mach == bfd_mach_riscv32)
+    xlen_by_mach = 32;
+  update_riscv_dis_xlen (info);
+  /* Parse disassembler options.  */
+  set_default_riscv_dis_options ();
+  if (info->disassembler_options != NULL)
+    parse_riscv_dis_options (info->disassembler_options);
+  init_riscv_dis_state_for_arch_and_options ();
 }
 
 /* Prevent use of the fake labels that are generated as part of the DWARF
