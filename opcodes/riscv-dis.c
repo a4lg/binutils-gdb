@@ -283,15 +283,15 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	      break;
 	    case 'u':
 	      print (info->stream, dis_style_immediate, "0x%x",
-		     (int)(EXTRACT_CITYPE_IMM (l) & (RISCV_BIGIMM_REACH-1)));
+		     (unsigned)(EXTRACT_CITYPE_IMM (l) & (RISCV_BIGIMM_REACH-1)));
 	      break;
 	    case '>':
 	      print (info->stream, dis_style_immediate, "0x%x",
-		     (int)EXTRACT_CITYPE_IMM (l) & 0x3f);
+		     (unsigned)EXTRACT_CITYPE_IMM (l) & 0x3f);
 	      break;
 	    case '<':
 	      print (info->stream, dis_style_immediate, "0x%x",
-		     (int)EXTRACT_CITYPE_IMM (l) & 0x1f);
+		     (unsigned)EXTRACT_CITYPE_IMM (l) & 0x1f);
 	      break;
 	    case 'T': /* Floating-point RS2.  */
 	      print (info->stream, dis_style_register, "%s",
@@ -373,9 +373,12 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		     (int)EXTRACT_RVV_OFFSET (l));
 	      break;
 	    case 'm':
-	      if (! EXTRACT_OPERAND (VMASK, l))
-		print (info->stream, dis_style_register, ",%s",
-		       riscv_vecm_names_numeric[0]);
+	      if (!EXTRACT_OPERAND (VMASK, l))
+		{
+		  print (info->stream, dis_style_text, ",");
+		  print (info->stream, dis_style_register, "%s",
+			 riscv_vecm_names_numeric[0]);
+		}
 	      break;
 	    }
 	  break;
@@ -472,8 +475,8 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	  break;
 
 	case 'y':
-	  print (info->stream, dis_style_text, "0x%x",
-		 (int)EXTRACT_OPERAND (BS, l));
+	  print (info->stream, dis_style_immediate, "0x%x",
+		 (unsigned)EXTRACT_OPERAND (BS, l));
 	  break;
 
 	case 'z':
@@ -482,12 +485,12 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	case '>':
 	  print (info->stream, dis_style_immediate, "0x%x",
-		 (int)EXTRACT_OPERAND (SHAMT, l));
+		 (unsigned)EXTRACT_OPERAND (SHAMT, l));
 	  break;
 
 	case '<':
 	  print (info->stream, dis_style_immediate, "0x%x",
-		 (int)EXTRACT_OPERAND (SHAMTW, l));
+		 (unsigned)EXTRACT_OPERAND (SHAMTW, l));
 	  break;
 
 	case 'S':
@@ -541,17 +544,17 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    if (riscv_csr_hash[csr] != NULL)
 	      print (info->stream, dis_style_text, "%s", riscv_csr_hash[csr]);
 	    else
-	      print (info->stream, dis_style_text, "0x%x", csr);
+	      print (info->stream, dis_style_immediate, "0x%x", csr);
 	    break;
 	  }
 
 	case 'Y':
-	  print (info->stream, dis_style_text, "0x%x",
-		 (int) EXTRACT_OPERAND (RNUM, l));
+	  print (info->stream, dis_style_immediate, "0x%x",
+		 (unsigned) EXTRACT_OPERAND (RNUM, l));
 	  break;
 
 	case 'Z':
-	  print (info->stream, dis_style_text, "%d", rs1);
+	  print (info->stream, dis_style_immediate, "%d", rs1);
 	  break;
 
 	default:
@@ -709,7 +712,8 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
     case 4:
     case 8:
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, ".%dbyte\t", insnlen);
+	(info->stream, dis_style_assembler_directive, ".%dbyte", insnlen);
+      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
       (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
 				    "0x%llx", (unsigned long long) word);
       break;
@@ -717,7 +721,8 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
       {
         int i;
 	(*info->fprintf_styled_func)
-	  (info->stream, dis_style_assembler_directive, ".byte\t");
+	  (info->stream, dis_style_assembler_directive, ".byte");
+	(*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
         for (i = 0; i < insnlen; ++i)
           {
             if (i > 0)
@@ -905,31 +910,33 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
     case 1:
       info->bytes_per_line = 6;
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, ".byte\t");
-      (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, "0x%02llx",
-	 (unsigned long long) data);
+	(info->stream, dis_style_assembler_directive, ".byte");
+      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
+      (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
+				    "0x%02x", (unsigned)data);
       break;
     case 2:
       info->bytes_per_line = 8;
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, ".short\t");
+	(info->stream, dis_style_assembler_directive, ".short");
+      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_immediate, "0x%04llx",
-	 (unsigned long long) data);
+	(info->stream, dis_style_immediate, "0x%04x", (unsigned) data);
       break;
     case 4:
       info->bytes_per_line = 8;
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, ".word\t");
+	(info->stream, dis_style_assembler_directive, ".word");
+      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_immediate, "0x%08llx",
-	 (unsigned long long) data);
+	(info->stream, dis_style_immediate, "0x%08lx",
+	 (unsigned long) data);
       break;
     case 8:
       info->bytes_per_line = 8;
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, ".dword\t");
+	(info->stream, dis_style_assembler_directive, ".dword");
+      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
       (*info->fprintf_styled_func)
 	(info->stream, dis_style_immediate, "0x%016llx",
 	 (unsigned long long) data);
