@@ -101,6 +101,7 @@ struct riscv_private_data
   bfd_vma print_addr;
   bfd_vma hi_addr[NGPR];
   bfd_vma expected_next_addr;
+  bfd_vma last_stop_offset;
   void* last_section;
   struct riscv_mapping_sym *mapping_syms;
   struct riscv_mapping_sym *last_mapping_sym;
@@ -280,6 +281,7 @@ init_riscv_dis_private_data (struct disassemble_info *info)
   for (int i = 0; i < (int)ARRAY_SIZE (pd->hi_addr); i++)
     pd->hi_addr[i] = 0;
   pd->expected_next_addr = 0;
+  pd->last_stop_offset = 0;
   pd->last_section = NULL;
   pd->mapping_syms = NULL;
   pd->last_mapping_sym = NULL;
@@ -1532,6 +1534,14 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
   /* Guess and update XLEN if we haven't determined it yet.  */
   if (xlen == 0)
     update_riscv_dis_xlen (info);
+
+  /* Clear all high address GPRs if the stop offset is changed
+     (usually when the function to disassemble is changed).  */
+  if (pd->last_stop_offset != info->stop_offset)
+    {
+      pd->last_stop_offset = info->stop_offset;
+      pd->hi_addr_mask = 0;
+    }
 
   /* Update default state (data or code) for the disassembler.  */
   mstate = riscv_search_mapping_symbol (memaddr, info);
