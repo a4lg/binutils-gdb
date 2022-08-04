@@ -88,6 +88,7 @@ struct riscv_private_data
   size_t mapping_syms_size;
   bool to_print_addr;
   bool has_gp;
+  bool is_elf_syms;
 };
 
 /* Register names as used by the disassembler.  */
@@ -1005,8 +1006,7 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
   if (info->section && (info->section->flags & SEC_CODE) == 0)
     mstate = MAP_DATA;
 
-  if (info->symtab_size == 0
-      || bfd_asymbol_flavour (*info->symtab) != bfd_target_elf_flavour)
+  if (!pd->is_elf_syms)
     return mstate;
 
   if (pd->last_mapping_sym != NULL
@@ -1050,9 +1050,7 @@ riscv_data_length (bfd_vma memaddr,
   struct riscv_private_data *pd = info->private_data;
 
   length = 4;
-  if (info->symtab_size != 0
-      && bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour
-      && pd->last_mapping_sym != NULL)
+  if (pd->is_elf_syms && pd->last_mapping_sym != NULL)
     {
       /* Get the next mapping symbol and adjust the length.  */
       struct riscv_mapping_sym *msym = pd->last_mapping_sym + 1;
@@ -1172,6 +1170,9 @@ init_riscv_dis_private_data (struct disassemble_info *info)
   pd->mapping_syms_size = 0;
   pd->to_print_addr = false;
   pd->has_gp = false;
+  pd->is_elf_syms
+      = info->symtab_size != 0
+	&& bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour;
 
   size_t n_mapping_syments = 2;  /* including sentinel nodes.  */
 
@@ -1189,8 +1190,7 @@ init_riscv_dis_private_data (struct disassemble_info *info)
 	}
     }
 
-  if (info->symtab_size != 0
-      && bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour)
+  if (pd->is_elf_syms)
     {
 	struct riscv_mapping_sym *msym = pd->mapping_syms
 	    = xcalloc (n_mapping_syments, sizeof (struct riscv_mapping_sym));
