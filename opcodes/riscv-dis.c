@@ -106,6 +106,7 @@ struct riscv_private_data
   struct riscv_mapping_sym *last_mapping_sym;
   struct riscv_mapping_sym *prev_last_mapping_sym;
   size_t mapping_syms_size;
+  unsigned long hi_addr_mask;
   bool to_print_addr;
   bool has_gp;
   bool is_elf_with_mapsyms;
@@ -277,13 +278,14 @@ init_riscv_dis_private_data (struct disassemble_info *info)
   pd->gp = 0;
   pd->print_addr = 0;
   for (int i = 0; i < (int)ARRAY_SIZE (pd->hi_addr); i++)
-    pd->hi_addr[i] = -1;
+    pd->hi_addr[i] = 0;
   pd->expected_next_addr = 0;
   pd->last_section = NULL;
   pd->mapping_syms = NULL;
   pd->last_mapping_sym = NULL;
   pd->prev_last_mapping_sym = NULL;
   pd->mapping_syms_size = 0;
+  pd->hi_addr_mask = 0;
   pd->to_print_addr = false;
   pd->has_gp = false;
 
@@ -567,10 +569,10 @@ static void
 maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset,
 		     int wide)
 {
-  if (pd->hi_addr[base_reg] != (bfd_vma)-1)
+  if (pd->hi_addr_mask & (1ul << base_reg))
     {
       pd->print_addr = (base_reg != 0 ? pd->hi_addr[base_reg] : 0) + offset;
-      pd->hi_addr[base_reg] = -1;
+      pd->hi_addr_mask &= ~(1ul << base_reg);
     }
   else if (base_reg == X_GP && pd->has_gp)
     pd->print_addr = pd->gp + offset;
@@ -866,11 +868,20 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	case 'd':
 	  if ((l & MASK_AUIPC) == MATCH_AUIPC)
-	    pd->hi_addr[rd] = pc + EXTRACT_UTYPE_IMM (l);
+	    {
+	      pd->hi_addr[rd] = pc + EXTRACT_UTYPE_IMM (l);
+	      pd->hi_addr_mask |= 1ul << rd;
+	    }
 	  else if ((l & MASK_LUI) == MATCH_LUI)
-	    pd->hi_addr[rd] = EXTRACT_UTYPE_IMM (l);
+	    {
+	      pd->hi_addr[rd] = EXTRACT_UTYPE_IMM (l);
+	      pd->hi_addr_mask |= 1ul << rd;
+	    }
 	  else if ((l & MASK_C_LUI) == MATCH_C_LUI)
-	    pd->hi_addr[rd] = EXTRACT_CITYPE_LUI_IMM (l);
+	    {
+	      pd->hi_addr[rd] = EXTRACT_CITYPE_LUI_IMM (l);
+	      pd->hi_addr_mask |= 1ul << rd;
+	    }
 	  print (info->stream, dis_style_register, "%s", riscv_gpr_names[rd]);
 	  break;
 
