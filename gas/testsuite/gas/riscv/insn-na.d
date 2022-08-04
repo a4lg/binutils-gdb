@@ -19,7 +19,7 @@ Disassembly of section .text:
 [^:]+:[ 	]+fe1ff56f[ 	]+jal[ 	]+a0,0 \<target\>
 [^:]+:[ 	]+fddff56f[ 	]+jal[ 	]+a0,0 \<target\>
 [^:]+:[ 	]+852e[ 	]+c\.mv[ 	]+a0,a1
-[^:]+:[ 	]+0511[ 	]+c\.addi[ 	]+a0,4 # .*
+[^:]+:[ 	]+0511[ 	]+c\.addi[ 	]+a0,4
 [^:]+:[ 	]+002c[ 	]+c\.addi4spn[ 	]+a1,sp,8
 [^:]+:[ 	]+c0aa[ 	]+c\.swsp[ 	]+a0,64\(sp\)
 [^:]+:[ 	]+41a8[ 	]+c\.lw[ 	]+a0,64\(a1\)
@@ -37,7 +37,7 @@ Disassembly of section .text:
 [^:]+:[ 	]+fa9ff56f[ 	]+jal[ 	]+a0,0 \<target\>
 [^:]+:[ 	]+fa5ff56f[ 	]+jal[ 	]+a0,0 \<target\>
 [^:]+:[ 	]+852e[ 	]+c\.mv[ 	]+a0,a1
-[^:]+:[ 	]+0511[ 	]+c\.addi[ 	]+a0,4 # .*
+[^:]+:[ 	]+0511[ 	]+c\.addi[ 	]+a0,4
 [^:]+:[ 	]+002c[ 	]+c\.addi4spn[ 	]+a1,sp,8
 [^:]+:[ 	]+c0aa[ 	]+c\.swsp[ 	]+a0,64\(sp\)
 [^:]+:[ 	]+41a8[ 	]+c\.lw[ 	]+a0,64\(a1\)

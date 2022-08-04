@@ -601,6 +601,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
   int rd = (l >> OP_SH_RD) & OP_MASK_RD;
   fprintf_styled_ftype print = info->fprintf_styled_func;
   const char *opargStart;
+  unsigned long hi_addr_unmask = 0;
 
   if (*oparg != '\0')
     print (info->stream, dis_style_text, "\t");
@@ -882,6 +883,8 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	      pd->hi_addr[rd] = EXTRACT_CITYPE_LUI_IMM (l);
 	      pd->hi_addr_mask |= 1ul << rd;
 	    }
+	  else
+	    hi_addr_unmask |= 1ul << rd;
 	  print (info->stream, dis_style_register, "%s", riscv_gpr_names[rd]);
 	  break;
 
@@ -1077,6 +1080,8 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	  return;
 	}
     }
+    /* Remove GPRs from printing for maybe_print_address.  */
+    pd->hi_addr_mask &= ~hi_addr_unmask;
 }
 
 /* Build a hash table for the disassembler to shorten the search time.
