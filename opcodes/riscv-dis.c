@@ -228,7 +228,12 @@ init_riscv_dis_state_for_arch_and_options (void)
   if (is_arch_changed)
     update_riscv_dis_xlen (NULL);
   /* Set GPR register names to disassemble.  */
-  riscv_gpr_names = is_numeric ? riscv_gpr_names_numeric : riscv_gpr_names_abi;
+  riscv_gpr_names
+      = !riscv_subset_supports (&riscv_rps_dis, "e")
+	    ? (is_numeric ? riscv_gpr_names_numeric
+			  : riscv_gpr_names_abi)
+	    : (is_numeric ? riscv_gpr_names_rve_numeric
+			  : riscv_gpr_names_rve_abi);
   /* Set FPR register names to disassemble.  */
   riscv_fpr_names
       = !riscv_subset_supports (&riscv_rps_dis, "zfinx")
@@ -413,6 +418,19 @@ maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset,
     pd->print_addr = (bfd_vma)(uint32_t)pd->print_addr;
 }
 
+/* Print a GPR (print invalid16-31 on RV32E-invalid registers).  */
+
+static void
+print_gpr (struct disassemble_info *info, int val)
+{
+  const char *str = riscv_gpr_names[val];
+  if (str[0])
+    (*info->fprintf_styled_func) (info->stream, dis_style_register, "%s", str);
+  else
+    (*info->fprintf_styled_func) (info->stream, dis_style_text,
+				  "invalid%d", val);
+}
+
 /* Print insn arguments for 32/64-bit code.  */
 
 static void
@@ -437,25 +455,20 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    {
 	    case 's': /* RS1 x8-x15.  */
 	    case 'w': /* RS1 x8-x15.  */
-	      print (info->stream, dis_style_register, "%s",
-		     riscv_gpr_names[EXTRACT_OPERAND (CRS1S, l) + 8]);
+	      print_gpr (info, EXTRACT_OPERAND (CRS1S, l) + 8);
 	      break;
 	    case 't': /* RS2 x8-x15.  */
 	    case 'x': /* RS2 x8-x15.  */
-	      print (info->stream, dis_style_register, "%s",
-		     riscv_gpr_names[EXTRACT_OPERAND (CRS2S, l) + 8]);
+	      print_gpr (info, EXTRACT_OPERAND (CRS2S, l) + 8);
 	      break;
 	    case 'U': /* RS1, constrained to equal RD.  */
-	      print (info->stream, dis_style_register,
-		     "%s", riscv_gpr_names[rd]);
+	      print_gpr (info, rd);
 	      break;
 	    case 'c': /* RS1, constrained to equal sp.  */
-	      print (info->stream, dis_style_register, "%s",
-		     riscv_gpr_names[X_SP]);
+	      print_gpr (info, X_SP);
 	      break;
 	    case 'V': /* RS2 */
-	      print (info->stream, dis_style_register, "%s",
-		     riscv_gpr_names[EXTRACT_OPERAND (CRS2, l)]);
+	      print_gpr (info, EXTRACT_OPERAND (CRS2, l));
 	      break;
 	    case 'o':
 	    case 'j':
@@ -540,8 +553,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	      break;
 	    case 'e':
 	      if (!EXTRACT_OPERAND (VWD, l))
-		print (info->stream, dis_style_register, "%s",
-		       riscv_gpr_names[0]);
+		print_gpr (info, 0);
 	      else
 		print (info->stream, dis_style_register, "%s",
 		       riscv_vecr_names_numeric[EXTRACT_OPERAND (VD, l)]);
@@ -630,12 +642,11 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	case 's':
 	  if ((l & MASK_JALR) == MATCH_JALR)
 	    maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), 0);
-	  print (info->stream, dis_style_register, "%s", riscv_gpr_names[rs1]);
+	  print_gpr (info, rs1);
 	  break;
 
 	case 't':
-	  print (info->stream, dis_style_register, "%s",
-		 riscv_gpr_names[EXTRACT_OPERAND (RS2, l)]);
+	  print_gpr (info, EXTRACT_OPERAND (RS2, l));
 	  break;
 
 	case 'u':
@@ -695,7 +706,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    pd->hi_addr[rd] = EXTRACT_UTYPE_IMM (l);
 	  else if ((l & MASK_C_LUI) == MATCH_C_LUI)
 	    pd->hi_addr[rd] = EXTRACT_CITYPE_LUI_IMM (l);
-	  print (info->stream, dis_style_register, "%s", riscv_gpr_names[rd]);
+	  print_gpr (info, rd);
 	  break;
 
 	case 'y':
@@ -704,7 +715,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	  break;
 
 	case 'z':
-	  print (info->stream, dis_style_register, "%s", riscv_gpr_names[0]);
+	  print_gpr (info, 0);
 	  break;
 
 	case '>':
