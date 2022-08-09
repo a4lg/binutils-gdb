@@ -229,20 +229,20 @@ riscv_set_default_priv_spec (const char *s)
 /* This is the set of options which the .option pseudo-op may modify.  */
 struct riscv_set_options
 {
-  int pic; /* Generate position-independent code.  */
-  int rvc; /* Generate RVC code.  */
-  int relax; /* Emit relocs the linker is allowed to relax.  */
-  int arch_attr; /* Emit architecture and privileged elf attributes.  */
-  int csr_check; /* Enable the CSR checking.  */
+  bool pic; /* Generate position-independent code.  */
+  bool rvc; /* Generate RVC code.  */
+  bool relax; /* Emit relocs the linker is allowed to relax.  */
+  bool arch_attr; /* Emit architecture and privileged elf attributes.  */
+  bool csr_check; /* Enable the CSR checking.  */
 };
 
 static struct riscv_set_options riscv_opts =
 {
-  0, /* pic */
-  0, /* rvc */
-  1, /* relax */
-  DEFAULT_RISCV_ATTR, /* arch_attr */
-  0, /* csr_check */
+  false, /* pic */
+  false, /* rvc */
+  true,  /* relax */
+  (bool) DEFAULT_RISCV_ATTR, /* arch_attr */
+  false, /* csr_check */
 };
 
 /* Enable or disable the rvc flags for riscv_opts.  Turn on the rvc flag
