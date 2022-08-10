@@ -140,6 +140,11 @@ struct riscv_segment_info_type
   enum riscv_seg_mstate map_state;
 };
 
+#ifdef OBJ_ELF
+#define md_elf_section_change_hook() riscv_elf_section_change_hook ()
+extern void riscv_elf_section_change_hook (void);
+#endif
+
 /* Define target fragment type.  */
 #define TC_FRAG_TYPE struct riscv_frag_type
 struct riscv_frag_type

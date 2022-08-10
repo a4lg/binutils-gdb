@@ -234,6 +234,7 @@ struct riscv_set_options
   bool relax; /* Emit relocs the linker is allowed to relax.  */
   bool arch_attr; /* Emit architecture and privileged elf attributes.  */
   bool csr_check; /* Enable the CSR checking.  */
+  bool arch_is_default; /* Architecture string is not modified.  */
 };
 
 static struct riscv_set_options riscv_opts =
@@ -243,6 +244,7 @@ static struct riscv_set_options riscv_opts =
   true,  /* relax */
   (bool) DEFAULT_RISCV_ATTR, /* arch_attr */
   false, /* csr_check */
+  true,  /* arch_is_default */
 };
 
 /* Enable or disable the rvc flags for riscv_opts.  Turn on the rvc flag
@@ -289,6 +291,9 @@ struct riscv_option_stack
 };
 
 static struct riscv_option_stack *riscv_opts_stack = NULL;
+
+/* Output the instruction mapping symbols with ISA string if it is true.  */
+static bool updated_riscv_subsets = false;
 
 /* Set which ISA and extensions are available.  */
 
@@ -467,6 +472,7 @@ make_mapping_symbol (enum riscv_seg_mstate state,
 		     fragS *frag)
 {
   const char *name;
+  char *buff = NULL;
   switch (state)
     {
     case MAP_DATA:
@@ -474,6 +480,15 @@ make_mapping_symbol (enum riscv_seg_mstate state,
       break;
     case MAP_INSN:
       name = "$x";
+      if (!riscv_opts.arch_is_default)
+	{
+	  char *isa = riscv_arch_str (xlen, riscv_subsets);
+	  size_t size = strlen (isa) + 3; /* "$x" + '\0'  */
+	  name = buff = xmalloc (size);
+	  snprintf (buff, size, "$x%s", isa);
+	  xfree ((void *) isa);
+	}
+      updated_riscv_subsets = false;
       break;
     default:
       abort ();
@@ -481,6 +496,7 @@ make_mapping_symbol (enum riscv_seg_mstate state,
 
   symbolS *symbol = symbol_new (name, now_seg, frag, value);
   symbol_get_bfdsym (symbol)->flags |= (BSF_NO_FLAGS | BSF_LOCAL);
+  xfree ((void *) buff);
 
   /* If .fill or other data filling directive generates zero sized data,
      or we are adding odd alignemnts, then the mapping symbol for the
@@ -502,13 +518,28 @@ make_mapping_symbol (enum riscv_seg_mstate state,
       /* The mapping symbols should be added in offset order.  */
       know (S_GET_VALUE (frag->tc_frag_data.last_map_symbol)
 			 <= S_GET_VALUE (symbol));
-      /* Remove the old one.  */
+      /* Remove the new one if the name matches.  */
+      if (strcmp (S_GET_NAME (frag->tc_frag_data.last_map_symbol),
+		  S_GET_NAME (symbol)) == 0)
+	{
+	  symbol_remove (symbol, &symbol_rootP, &symbol_lastP);
+	  return;
+	}
+      /* Remove the old one if the value matches.  */
       if (S_GET_VALUE (frag->tc_frag_data.last_map_symbol)
 	  == S_GET_VALUE (symbol))
 	symbol_remove (frag->tc_frag_data.last_map_symbol,
 		       &symbol_rootP, &symbol_lastP);
     }
   frag->tc_frag_data.last_map_symbol = symbol;
+}
+
+/* Called when the section is change.  Try to emit a new mapping symbol.  */
+
+void
+riscv_elf_section_change_hook (void)
+{
+  updated_riscv_subsets = true;
 }
 
 /* Set the mapping state for frag_now.  */
@@ -530,7 +561,8 @@ riscv_mapping_state (enum riscv_seg_mstate to_state,
 
   /* The mapping symbol should be emitted if not in the right
      mapping state.  */
-  if (from_state == to_state)
+  if (from_state == to_state
+      && (to_state != MAP_INSN || !updated_riscv_subsets))
     return;
 
   valueT value = (valueT) (frag_now_fix () - max_chars);
@@ -3931,6 +3963,16 @@ riscv_pre_output_hook (void)
   subseg_set (seg, subseg);
 }
 
+/* Update subset to a non-default state.  */
+
+static void
+riscv_as_update_subset (const char *name)
+{
+  riscv_update_subset (&riscv_rps_as, name);
+  updated_riscv_subsets = true;
+  riscv_opts.arch_is_default = false;
+}
+
 /* Handle the .option pseudo-op.  */
 
 static void
@@ -3945,12 +3987,12 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
 
   if (strcmp (name, "rvc") == 0)
     {
-      riscv_update_subset (&riscv_rps_as, "+c");
+      riscv_as_update_subset ("+c");
       riscv_set_rvc (true);
     }
   else if (strcmp (name, "norvc") == 0)
     {
-      riscv_update_subset (&riscv_rps_as, "-c");
+      riscv_as_update_subset ("-c");
       riscv_set_rvc (false);
     }
   else if (strcmp (name, "pic") == 0)
@@ -3970,7 +4012,7 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
       name += 5;
       if (ISSPACE (*name) && *name != '\0')
 	name++;
-      riscv_update_subset (&riscv_rps_as, name);
+      riscv_as_update_subset (name);
 
       riscv_set_rvc (false);
       if (riscv_subset_supports (&riscv_rps_as, "c"))
@@ -4005,6 +4047,7 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
 	  riscv_opts = s->options;
 	  riscv_subsets = s->subset_list;
 	  riscv_rps_as.subset_list = riscv_subsets;
+	  updated_riscv_subsets = true;
 	  riscv_release_subset_list (release_subsets);
 	  free (s);
 	}
