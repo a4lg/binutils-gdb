@@ -487,7 +487,7 @@ make_mapping_symbol (enum riscv_seg_mstate state,
      following code will have the same value.  */
   if (value == 0)
     {
-       if (frag->tc_frag_data.first_map_symbol != NULL)
+      if (frag->tc_frag_data.first_map_symbol != NULL)
 	{
 	  know (S_GET_VALUE (frag->tc_frag_data.first_map_symbol)
 		== S_GET_VALUE (symbol));
@@ -529,7 +529,7 @@ riscv_mapping_state (enum riscv_seg_mstate to_state,
     return;
 
   /* The mapping symbol should be emitted if not in the right
-     mapping state  */
+     mapping state.  */
   if (from_state == to_state)
     return;
 
