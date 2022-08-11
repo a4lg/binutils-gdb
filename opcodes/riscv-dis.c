@@ -32,6 +32,16 @@
 #include <stdint.h>
 #include <ctype.h>
 
+/* Default architecture string (if not available).  */
+static const char *initial_default_arch = "rv64gc";
+
+/* Default architecture string
+   (as specified by the ELF attributes or `initial_default_arch').  */
+static const char *default_arch = NULL;
+
+/* True if the architecture is set from a mapping symbol.  */
+static bool is_arch_mapping = false;
+
 static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
 static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
 
@@ -696,6 +706,10 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
       /* If arch has Zfinx extension, replace FPR with GPR.  */
       if (riscv_subset_supports (&riscv_rps_dis, "zfinx"))
 	riscv_fpr_names = riscv_gpr_names;
+      else
+	riscv_fpr_names = riscv_gpr_names == riscv_gpr_names_abi
+			      ? riscv_fpr_names_abi
+			      : riscv_fpr_names_numeric;
 
       for (; op->name; op++)
 	{
@@ -806,8 +820,23 @@ riscv_get_map_state (int n,
     return false;
 
   name = bfd_asymbol_name(info->symtab[n]);
-  if (startswith (name, "$x"))
+  if (startswith (name, "$xrv"))
+  {
     *state = MAP_INSN;
+    riscv_release_subset_list (&riscv_subsets);
+    riscv_parse_subset (&riscv_rps_dis, name + 2);
+    is_arch_mapping = true;
+  }
+  else if (strcmp (name, "$x") == 0)
+  {
+    *state = MAP_INSN;
+    if (is_arch_mapping)
+    {
+      riscv_release_subset_list (&riscv_subsets);
+      riscv_parse_subset (&riscv_rps_dis, default_arch);
+      is_arch_mapping = false;
+    }
+  }
   else if (strcmp (name, "$d") == 0)
     *state = MAP_DATA;
   else
@@ -1056,7 +1085,7 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 disassembler_ftype
 riscv_get_disassembler (bfd *abfd)
 {
-  const char *default_arch = "rv64gc";
+  const char *default_arch_next = initial_default_arch;
 
   if (abfd && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
@@ -1071,12 +1100,19 @@ riscv_get_disassembler (bfd *abfd)
 						  attr[Tag_b].i,
 						  attr[Tag_c].i,
 						  &default_priv_spec);
-	  default_arch = attr[Tag_RISCV_arch].s;
+	  default_arch_next = attr[Tag_RISCV_arch].s;
+	  /* For ELF files with (somehow) no architecture string
+	     in the attributes, use the default value.  */
+	  if (!default_arch_next)
+	    default_arch_next = initial_default_arch;
 	}
     }
+  free ((void *) default_arch);
+  default_arch = xstrdup (default_arch_next);
 
   riscv_release_subset_list (&riscv_subsets);
   riscv_parse_subset (&riscv_rps_dis, default_arch);
+  is_arch_mapping = false;
   return print_insn_riscv;
 }
 
