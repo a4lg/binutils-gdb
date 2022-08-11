@@ -1,0 +1,12 @@
+	.section	.text,  "ax", @progbits
+	add	a0, a1, a2
+	.section	.text2, "ax", @progbits
+	sub	a0, a1, a2
+	.section	.text,  "ax", @progbits
+	add	a0, a1, a2
+	.section	.text2, "ax", @progbits
+	sub	a0, a1, a2
+	.section	.text,  "ax", @progbits
+	add	a0, a1, a2
+	.section	.text2, "ax", @progbits
+	sub	a0, a1, a2
