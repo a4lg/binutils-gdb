@@ -738,6 +738,9 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 static const struct riscv_opcode **riscv_hash[OP_HASH_LEN + 1];
 static const struct riscv_opcode **riscv_opcodes_sorted;
 
+/* Whether the fallback should be used.  */
+static bool is_riscv_hash_fallback = false;
+
 /* Compare two riscv_opcode* objects to sort by hash index.  */
 
 static int
@@ -768,15 +771,25 @@ build_riscv_opcodes_hash_table (void)
 
   /* Sort riscv_opcodes entry pointers (except macros).  */
   for (op = riscv_opcodes; op->name; op++)
-    if (op->pinfo != INSN_MACRO)
+    {
+      if (op->pinfo == INSN_MACRO)
+	continue;
       len++;
+      if (is_riscv_hash_fallback)
+	continue;
+      if (OP_HASH_IDX (op->match) < OP_MASK_OP2
+	      ? (op->mask & OP_MASK_OP2) != OP_MASK_OP2
+	      : (op->mask & OP_MASK_OP)  != OP_MASK_OP)
+	is_riscv_hash_fallback = true;
+    }
   riscv_opcodes_sorted = xcalloc (len, sizeof (struct riscv_opcode *));
   pop_end = riscv_opcodes_sorted;
   for (op = riscv_opcodes; op->name; op++)
     if (op->pinfo != INSN_MACRO)
       *pop_end++ = op;
-  qsort (riscv_opcodes_sorted, len, sizeof (struct riscv_opcode *),
-	 compare_opcodes);
+  if (!is_riscv_hash_fallback)
+    qsort (riscv_opcodes_sorted, len, sizeof (struct riscv_opcode *),
+	   compare_opcodes);
 
   /* Initialize faster hash table.  */
   pop = riscv_opcodes_sorted;
@@ -819,8 +832,16 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   info->target2 = 0;
 
   matched_op = NULL;
-  pop     = riscv_hash[OP_HASH_IDX (word)];
-  pop_end = riscv_hash[OP_HASH_IDX (word) + 1];
+  if (!is_riscv_hash_fallback)
+    {
+      pop     = riscv_hash[OP_HASH_IDX (word)];
+      pop_end = riscv_hash[OP_HASH_IDX (word) + 1];
+    }
+  else
+    {
+      pop     = riscv_hash[0];
+      pop_end = riscv_hash[OP_HASH_LEN];
+    }
   for (; pop != pop_end; pop++)
     {
       op = *pop;
