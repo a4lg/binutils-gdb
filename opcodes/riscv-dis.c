@@ -172,7 +172,7 @@ arg_print (struct disassemble_info *info, unsigned long val,
 
 static void
 maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset,
-		     int wide)
+		     int is_addiw)
 {
   if (pd->hi_addr[base_reg] != (bfd_vma)-1)
     {
@@ -187,8 +187,8 @@ maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset,
     return;  /* Don't print the address.  */
   pd->to_print_addr = true;
 
-  /* Sign-extend a 32-bit value to a 64-bit value.  */
-  if (wide)
+  /* On ADDIW, sign-extend a 32-bit value to a 64-bit value.  */
+  if (is_addiw)
     pd->print_addr = (bfd_vma)(int32_t) pd->print_addr;
 
   /* Fit into a 32-bit value on RV32.  */
