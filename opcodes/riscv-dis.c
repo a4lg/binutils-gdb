@@ -39,6 +39,12 @@ static const char *const initial_default_arch = "rv64gc";
    (as specified by the ELF attributes or `initial_default_arch').  */
 static const char *default_arch = NULL;
 
+/* If set, a custom architecture string is specified.  */
+static bool is_custom_arch = false;
+
+/* If set, the last architecture used by the disassembler is custom.  */
+static bool prev_is_custom_arch = false;
+
 /* Current XLEN for the disassembler.  */
 static unsigned xlen = 0;
 
@@ -56,7 +62,17 @@ static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
 
 /* Default privileged specification
    (as specified by the ELF attributes or the `priv-spec' option).  */
-static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
+static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_DRAFT - 1;
+
+/* Current privileged specification version.  */
+static enum riscv_spec_class priv_spec = PRIV_SPEC_CLASS_DRAFT - 1;
+
+/* If set, a custom privileged specification is specified.  */
+static bool is_custom_priv_spec = false;
+
+/* Reset when reinitializing the CSR hash table is required.  */
+static bool is_init_csr = false;
+
 
 static riscv_subset_list_t riscv_subsets;
 static riscv_parse_subset_t riscv_rps_dis =
@@ -138,10 +154,13 @@ static void
 init_riscv_dis_state_for_arch_and_options (void)
 {
   static bool init = false;
+  static enum riscv_spec_class prev_priv_spec;
   if (!init)
     {
       build_riscv_opcodes_hash_table ();
       init = true;
+      /* Save initial options.  */
+      prev_priv_spec = priv_spec;
     }
   /* If the architecture string is changed, update XLEN.  */
   if (is_arch_changed)
@@ -153,7 +172,12 @@ init_riscv_dis_state_for_arch_and_options (void)
       = !riscv_subset_supports (&riscv_rps_dis, "zfinx")
 	    ? (is_numeric ? riscv_fpr_names_numeric : riscv_fpr_names_abi)
 	    : riscv_gpr_names;
+  /* Reset CSR hash table if either the architecture or the privileged
+     specification version is changed.  */
+  if (prev_priv_spec != priv_spec)
+    is_init_csr = false;
   /* Save previous options and mark them "unchanged".  */
+  prev_priv_spec = priv_spec;
   is_arch_changed = false;
 }
 
@@ -167,25 +191,28 @@ update_riscv_dis_current_arch (const char *arch)
   riscv_release_subset_list (&riscv_subsets);
   riscv_parse_subset (&riscv_rps_dis, arch);
   xlen_by_arch = (arch == initial_default_arch) ? 0 : xlen;
+  prev_is_custom_arch = is_custom_arch;
   init_riscv_dis_state_for_arch ();
   /* xlen is readjusted by the next call to
      init_riscv_dis_state_for_arch_and_options.  */
 }
 
 /* Update default architecture string.
-   Return true if a default arch string change is detected.  */
+   Return true if a default arch string change is detected or previous
+   architecture string is custom one.  */
 
 static bool
 update_riscv_dis_default_arch (const char* arch)
 {
-  /* Do nothing if default arch string is unchanged. */
+  /* Do nothing if default arch string is unchanged.
+     Return true if previous architecture string is custom one.  */
   if (arch == initial_default_arch)
     {
       if (default_arch == initial_default_arch)
-	return false;
+	return prev_is_custom_arch;
     }
   else if (default_arch != NULL && strcmp (default_arch, arch) == 0)
-    return false;
+    return prev_is_custom_arch;
   /* Save new default arch string
      (either initial_default_arch or a copy of the arch string).  */
   if (default_arch != initial_default_arch)
@@ -206,7 +233,9 @@ update_riscv_dis_xlen (struct disassemble_info *info)
        This is only effective if XLEN-specific BFD machine architecture is
        chosen.  If XLEN-neutral (like riscv), BFD machine architecture is
        ignored on XLEN selection.
-     2. Non-default RISC-V architecture string set by the ELF attributes.
+     2. Non-default RISC-V architecture string set by either:
+       a. -M arch=... option (GDB: set disassembler-options arch=...) or
+       b. The ELF attributes.
      3. ELF class in dummy ELF header.  */
   if (xlen_by_mach != 0)
     xlen = xlen_by_mach;
@@ -228,6 +257,8 @@ set_default_riscv_dis_options (void)
 {
   no_aliases = false;
   is_numeric = false;
+  is_custom_priv_spec = false;
+  is_custom_arch = false;
 }
 
 /* Parse RISC-V disassembler option (without arguments).  */
@@ -275,22 +306,24 @@ parse_riscv_dis_option (const char *option)
   value = equal + 1;
   if (strcmp (option, "priv-spec") == 0)
     {
-      enum riscv_spec_class priv_spec = PRIV_SPEC_CLASS_NONE;
-      const char *name = NULL;
-
-      RISCV_GET_PRIV_SPEC_CLASS (value, priv_spec);
-      if (priv_spec == PRIV_SPEC_CLASS_NONE)
-	opcodes_error_handler (_("unknown privileged spec set by %s=%s"),
-			       option, value);
-      else if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
-	default_priv_spec = priv_spec;
-      else if (default_priv_spec != priv_spec)
+      enum riscv_spec_class priv_spec_new = PRIV_SPEC_CLASS_NONE;
+      RISCV_GET_PRIV_SPEC_CLASS (value, priv_spec_new);
+      if (priv_spec_new == PRIV_SPEC_CLASS_NONE)
 	{
-	  RISCV_GET_PRIV_SPEC_NAME (name, default_priv_spec);
-	  opcodes_error_handler (_("mis-matched privilege spec set by %s=%s, "
-				   "the elf privilege attribute is %s"),
-				 option, value, name);
+	  opcodes_error_handler (_ ("unknown privileged spec set by %s=%s."
+				    "not overriding"),
+				 option, value);
 	}
+      else
+	{
+	  is_custom_priv_spec = true;
+	  priv_spec = priv_spec_new;
+	}
+    }
+  else if (strcmp (option, "arch") == 0)
+    {
+      is_custom_arch = true;
+      update_riscv_dis_current_arch (value);
     }
   else
     {
@@ -679,31 +712,26 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	case 'E':
 	  {
 	    static const char *riscv_csr_hash[4096]; /* Total 2^12 CSRs.  */
-	    static bool init_csr = false;
 	    unsigned int csr = EXTRACT_OPERAND (CSR, l);
 
-	    if (!init_csr)
+	    if (!is_init_csr)
 	      {
 		unsigned int i;
 		for (i = 0; i < 4096; i++)
 		  riscv_csr_hash[i] = NULL;
 
-		/* Set to the newest privileged version.  */
-		if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
-		  default_priv_spec = PRIV_SPEC_CLASS_DRAFT - 1;
-
 #define DECLARE_CSR(name, num, class, define_version, abort_version)	\
 		if (riscv_csr_hash[num] == NULL 			\
 		    && ((define_version == PRIV_SPEC_CLASS_NONE 	\
 			 && abort_version == PRIV_SPEC_CLASS_NONE)	\
-			|| (default_priv_spec >= define_version 	\
-			    && default_priv_spec < abort_version)))	\
+			|| (priv_spec >= define_version 	\
+			    && priv_spec < abort_version)))	\
 		  riscv_csr_hash[num] = #name;
 #define DECLARE_CSR_ALIAS(name, num, class, define_version, abort_version) \
 		DECLARE_CSR (name, num, class, define_version, abort_version)
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
-		init_csr = true;
+		is_init_csr = true;
 	      }
 
 	    if (riscv_csr_hash[csr] != NULL)
@@ -1248,11 +1276,16 @@ riscv_get_disassembler (bfd *abfd)
 	     in the attributes, use the default value.  */
 	  if (!default_arch_next)
 	    default_arch_next = initial_default_arch;
+	  /* By default, set to the newest privileged version.  */
+	  if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
+	    default_priv_spec = PRIV_SPEC_CLASS_DRAFT - 1;
 	}
     }
 
-  if (update_riscv_dis_default_arch (default_arch_next))
+  if (!is_custom_arch && update_riscv_dis_default_arch (default_arch_next))
     update_riscv_dis_current_arch (default_arch_next);
+  if (!is_custom_priv_spec)
+    priv_spec = default_priv_spec;
   init_riscv_dis_state_for_arch_and_options ();
   return print_insn_riscv;
 }
@@ -1277,6 +1310,8 @@ disassemble_init_riscv (struct disassemble_info *info)
   set_default_riscv_dis_options ();
   if (info->disassembler_options != NULL)
     parse_riscv_dis_options (info->disassembler_options);
+  if (!is_custom_priv_spec)
+    priv_spec = default_priv_spec;
   init_riscv_dis_state_for_arch_and_options ();
 }
 
@@ -1305,6 +1340,7 @@ riscv_symbol_is_valid (asymbol * sym,
 typedef enum
 {
   RISCV_OPTION_ARG_NONE = -1,
+  RISCV_OPTION_ARG_ARCH,
   RISCV_OPTION_ARG_PRIV_SPEC,
 
   RISCV_OPTION_ARG_COUNT
@@ -1322,6 +1358,9 @@ static struct
   { "numeric",
     N_("Print numeric register names, rather than ABI names."),
     RISCV_OPTION_ARG_NONE },
+  { "arch=",
+    N_("Disassemble using specified ISA and extensions."),
+    RISCV_OPTION_ARG_ARCH },
   { "no-aliases",
     N_("Disassemble only into canonical instructions."),
     RISCV_OPTION_ARG_NONE },
@@ -1348,6 +1387,9 @@ disassembler_options_riscv (void)
       size_t i, priv_spec_count;
 
       args = XNEWVEC (disasm_option_arg_t, num_args + 1);
+
+      args[RISCV_OPTION_ARG_ARCH].name = "ISA";
+      args[RISCV_OPTION_ARG_ARCH].values = NULL;
 
       args[RISCV_OPTION_ARG_PRIV_SPEC].name = "SPEC";
       priv_spec_count = PRIV_SPEC_CLASS_DRAFT - PRIV_SPEC_CLASS_NONE - 1;
@@ -1437,6 +1479,8 @@ with the -M switch (multiple options should be separated by commas):\n"));
 
   for (i = 0; args[i].name != NULL; i++)
     {
+      if (args[i].values == NULL)
+	continue;
       fprintf (stream, _("\n\
   For the options above, the following values are supported for \"%s\":\n   "),
 	       args[i].name);
