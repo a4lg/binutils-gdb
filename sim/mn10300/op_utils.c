@@ -152,8 +152,9 @@ do_syscall (SIM_DESC sd)
   if (cb_target_to_host_syscall (STATE_CALLBACK (sd), func) == CB_SYS_exit)
     {
       /* EXIT - caller can look in parm1 to work out the reason */
-      sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
-		       (parm1 == 0xdead ? SIM_SIGABRT : sim_exited), parm1);
+      sim_engine_halt (
+	  simulator, STATE_CPU (simulator, 0), NULL, PC,
+	  (parm1 == 0xdead ? (enum sim_stop) SIM_SIGABRT : sim_exited), parm1);
     }
   else
     {
