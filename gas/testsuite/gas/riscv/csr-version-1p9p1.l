@@ -1681,3 +1681,23 @@
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw vlenb,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `mpm', needs `smjpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mpm', needs `smjpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spm', needs `ssjpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spm', needs `ssjpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `upm', needs `zjpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `upm', needs `zjpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vspm', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vspm', needs `ssjpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vspm', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vspm', needs `ssjpm' extension
+.*Info: macro .*

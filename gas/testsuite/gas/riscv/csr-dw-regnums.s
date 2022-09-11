@@ -464,5 +464,10 @@ _start:
 	.cfi_offset vl, 12416
 	.cfi_offset vtype, 12420
 	.cfi_offset vlenb, 12424
+	# Zjpm extension (both privileged and unprivileged)
+	.cfi_offset mpm, 7936
+	.cfi_offset spm, 5888
+	.cfi_offset upm, 8960
+	.cfi_offset vspm, 6912
 	nop
 	.cfi_endproc

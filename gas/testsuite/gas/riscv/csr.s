@@ -510,3 +510,9 @@
 	csr vl
 	csr vtype
 	csr vlenb
+
+	# Pointer masking (Zjpm extension)
+	csr mpm
+	csr spm
+	csr upm
+	csr vspm

@@ -68,6 +68,7 @@ enum riscv_csr_class
   CSR_CLASS_I_32,	/* rv32 only */
   CSR_CLASS_F,		/* f-ext only */
   CSR_CLASS_ZKR,	/* zkr only */
+  CSR_CLASS_ZJPM,	/* zjpm only */
   CSR_CLASS_V,		/* rvv only */
   CSR_CLASS_DEBUG,	/* debug CSR */
   CSR_CLASS_H,		/* hypervisor */
@@ -76,12 +77,15 @@ enum riscv_csr_class
   CSR_CLASS_SMAIA_32,		/* Smaia, rv32 only */
   CSR_CLASS_SMCNTRPMF,		/* Smcntrpmf */
   CSR_CLASS_SMCNTRPMF_32,	/* Smcntrpmf, rv32 only */
+  CSR_CLASS_SMJPM,		/* Smjpm */
   CSR_CLASS_SMSTATEEN,		/* Smstateen only */
   CSR_CLASS_SMSTATEEN_32,	/* Smstateen RV32 only */
   CSR_CLASS_SSAIA,		/* Ssaia */
   CSR_CLASS_SSAIA_AND_H,	/* Ssaia with H */
   CSR_CLASS_SSAIA_32,		/* Ssaia, rv32 only */
   CSR_CLASS_SSAIA_AND_H_32,	/* Ssaia with H, rv32 only */
+  CSR_CLASS_SSJPM,		/* Ssjpm */
+  CSR_CLASS_SSJPM_AND_H,	/* Ssjpm with H */
   CSR_CLASS_SSSTATEEN,		/* S[ms]stateen only */
   CSR_CLASS_SSSTATEEN_AND_H,	/* S[ms]stateen only (with H) */
   CSR_CLASS_SSSTATEEN_AND_H_32,	/* S[ms]stateen RV32 only (with H) */
@@ -1045,6 +1049,9 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_ZKR:
       extension = "zkr";
       break;
+    case CSR_CLASS_ZJPM:
+      extension = "zjpm";
+      break;
     case CSR_CLASS_V:
       extension = "zve32x";
       break;
@@ -1061,6 +1068,9 @@ riscv_csr_address (const char *csr_name,
       need_check_version = true;
       extension = "smcntrpmf";
       break;
+    case CSR_CLASS_SMJPM:
+      extension = "smjpm";
+      break;
     case CSR_CLASS_SMSTATEEN_32:
       is_rv32_only = true;
       /* Fall through.  */
@@ -1076,6 +1086,12 @@ riscv_csr_address (const char *csr_name,
       is_h_required = (csr_class == CSR_CLASS_SSAIA_AND_H
 		       || csr_class == CSR_CLASS_SSAIA_AND_H_32);
       extension = "ssaia";
+      break;
+    case CSR_CLASS_SSJPM_AND_H:
+      is_h_required = true;
+      /* Fall through.  */
+    case CSR_CLASS_SSJPM:
+      extension = "ssjpm";
       break;
     case CSR_CLASS_SSSTATEEN_AND_H_32:
       is_rv32_only = true;

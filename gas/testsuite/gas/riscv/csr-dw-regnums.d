@@ -460,4 +460,8 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r7200 \(vl\) at cfa\+12416
   DW_CFA_offset_extended_sf: r7201 \(vtype\) at cfa\+12420
   DW_CFA_offset_extended_sf: r7202 \(vlenb\) at cfa\+12424
+  DW_CFA_offset_extended_sf: r6080 \(mpm\) at cfa\+7936
+  DW_CFA_offset_extended_sf: r5568 \(spm\) at cfa\+5888
+  DW_CFA_offset_extended_sf: r6336 \(upm\) at cfa\+8960
+  DW_CFA_offset_extended_sf: r5824 \(vspm\) at cfa\+6912
 #...
