@@ -468,3 +468,17 @@
 	csr vl
 	csr vtype
 	csr vlenb
+
+	# Pointer masking (Zjpm extension)
+	csr mmte
+	csr mpmmask
+	csr mpmbase
+	csr smte
+	csr spmmask
+	csr spmbase
+	csr umte
+	csr upmmask
+	csr upmbase
+	csr vsmte
+	csr vspmmask
+	csr vspmbase

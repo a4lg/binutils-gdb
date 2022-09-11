@@ -423,5 +423,19 @@ _start:
 	.cfi_offset vl, 12416
 	.cfi_offset vtype, 12420
 	.cfi_offset vlenb, 12424
+	# Zjpm extension (currently conflicting with pmpaddr16..18)
+	.cfi_offset mmte, 3840
+	.cfi_offset mpmmask, 3844
+	.cfi_offset mpmbase, 3848
+	# Zjpm extension (both privileged and unprivileged)
+	.cfi_offset smte, 1792
+	.cfi_offset spmmask, 1796
+	.cfi_offset spmbase, 1800
+	.cfi_offset umte, 4864
+	.cfi_offset upmmask, 4868
+	.cfi_offset upmbase, 4872
+	.cfi_offset vsmte, 2816
+	.cfi_offset vspmmask, 2820
+	.cfi_offset vspmbase, 2824
 	nop
 	.cfi_endproc

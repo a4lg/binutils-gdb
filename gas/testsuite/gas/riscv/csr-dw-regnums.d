@@ -424,4 +424,16 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r7200 \(vl\) at cfa\+12416
   DW_CFA_offset_extended_sf: r7201 \(vtype\) at cfa\+12420
   DW_CFA_offset_extended_sf: r7202 \(vlenb\) at cfa\+12424
+  DW_CFA_offset_extended_sf: r5056 \(pmpaddr16\) at cfa\+3840
+  DW_CFA_offset_extended_sf: r5057 \(pmpaddr17\) at cfa\+3844
+  DW_CFA_offset_extended_sf: r5058 \(pmpaddr18\) at cfa\+3848
+  DW_CFA_offset_extended_sf: r4544 \(smte\) at cfa\+1792
+  DW_CFA_offset_extended_sf: r4545 \(spmmask\) at cfa\+1796
+  DW_CFA_offset_extended_sf: r4546 \(spmbase\) at cfa\+1800
+  DW_CFA_offset_extended_sf: r5312 \(umte\) at cfa\+4864
+  DW_CFA_offset_extended_sf: r5313 \(upmmask\) at cfa\+4868
+  DW_CFA_offset_extended_sf: r5314 \(upmbase\) at cfa\+4872
+  DW_CFA_offset_extended_sf: r4800 \(vsmte\) at cfa\+2816
+  DW_CFA_offset_extended_sf: r4801 \(vspmmask\) at cfa\+2820
+  DW_CFA_offset_extended_sf: r4802 \(vspmbase\) at cfa\+2824
 #...

@@ -64,6 +64,8 @@ enum riscv_csr_class
   CSR_CLASS_I_32,	/* rv32 only */
   CSR_CLASS_F,		/* f-ext only */
   CSR_CLASS_ZKR,	/* zkr only */
+  CSR_CLASS_ZJPM,	/* zjpm only */
+  CSR_CLASS_ZJPM_AND_H,	/* zjpm only (with H) */
   CSR_CLASS_V,		/* rvv only */
   CSR_CLASS_DEBUG,	/* debug CSR */
   CSR_CLASS_H,		/* hypervisor */
@@ -945,6 +947,12 @@ riscv_csr_address (const char *csr_name,
       break;
     case CSR_CLASS_ZKR:
       extension = "zkr";
+      break;
+    case CSR_CLASS_ZJPM_AND_H:
+      is_h_required = true;
+      /* Fall through.  */
+    case CSR_CLASS_ZJPM:
+      extension = "zjpm";
       break;
     case CSR_CLASS_V:
       extension = "zve32x";
