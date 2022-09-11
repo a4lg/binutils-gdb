@@ -887,3 +887,11 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+c2159073[ 	]+csrw[ 	]+vtype,a1
 [ 	]+[0-9a-f]+:[ 	]+c2202573[ 	]+csrr[ 	]+a0,vlenb
 [ 	]+[0-9a-f]+:[ 	]+c2259073[ 	]+csrw[ 	]+vlenb,a1
+[ 	]+[0-9a-f]+:[ 	]+7c002573[ 	]+csrr[ 	]+a0,mpm
+[ 	]+[0-9a-f]+:[ 	]+7c059073[ 	]+csrw[ 	]+mpm,a1
+[ 	]+[0-9a-f]+:[ 	]+5c002573[ 	]+csrr[ 	]+a0,spm
+[ 	]+[0-9a-f]+:[ 	]+5c059073[ 	]+csrw[ 	]+spm,a1
+[ 	]+[0-9a-f]+:[ 	]+8c002573[ 	]+csrr[ 	]+a0,upm
+[ 	]+[0-9a-f]+:[ 	]+8c059073[ 	]+csrw[ 	]+upm,a1
+[ 	]+[0-9a-f]+:[ 	]+6c002573[ 	]+csrr[ 	]+a0,vspm
+[ 	]+[0-9a-f]+:[ 	]+6c059073[ 	]+csrw[ 	]+vspm,a1
