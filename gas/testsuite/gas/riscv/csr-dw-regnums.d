@@ -399,6 +399,7 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r5949 \(mhpmevent29h\) at cfa\+7412
   DW_CFA_offset_extended_sf: r5950 \(mhpmevent30h\) at cfa\+7416
   DW_CFA_offset_extended_sf: r5951 \(mhpmevent31h\) at cfa\+7420
+  DW_CFA_offset_extended_sf: r5568 \(sqoscfg\) at cfa\+5888
   DW_CFA_offset_extended_sf: r4429 \(stimecmp\) at cfa\+1332
   DW_CFA_offset_extended_sf: r4445 \(stimecmph\) at cfa\+1396
   DW_CFA_offset_extended_sf: r4685 \(vstimecmp\) at cfa\+2356

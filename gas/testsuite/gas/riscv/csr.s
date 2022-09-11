@@ -433,6 +433,9 @@
 	csr mhpmevent30h
 	csr mhpmevent31h
 
+	# Ssqosid extension
+	csr sqoscfg
+
 	# Sstc extension
 	csr stimecmp
 	csr stimecmph
