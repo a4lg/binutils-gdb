@@ -23,6 +23,11 @@
 
 #define GNULIB_NAMESPACE gnulib
 
+#include "diagnostics.h"
+
+DIAGNOSTIC_PUSH
+DIAGNOSTIC_IGNORE_USER_DEFINED_WARNINGS
+
 #include "defs.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/gdb_string_view.h"
@@ -33,6 +38,8 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+
+DIAGNOSTIC_POP
 
 /* libstdc++'s testsuite uses VERIFY.  */
 #define VERIFY SELF_CHECK
