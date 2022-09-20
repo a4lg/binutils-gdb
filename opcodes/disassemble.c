@@ -762,6 +762,12 @@ disassemble_free_target (struct disassemble_info *info)
     case bfd_arch_arc:
       break;
 #endif
+#ifdef ARCH_arm
+    case bfd_arch_arm:
+      if (info->private_data)
+	disassemble_free_arm (info);
+      break;
+#endif
 #ifdef ARCH_cris
     case bfd_arch_cris:
       break;

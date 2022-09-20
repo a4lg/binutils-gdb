@@ -48,23 +48,37 @@ enum map_type
   MAP_DATA
 };
 
+/* Extracted mapping symbol information.  */
+struct arm_mapping_sym
+{
+  uintptr_t section;
+  bfd_vma address;
+  int index;
+  enum map_type mstate;
+};
+
 struct arm_private_data
 {
   /* The features to use when disassembling optional instructions.  */
   arm_feature_set features;
 
-  /* Track the last type (although this doesn't seem to be useful) */
-  enum map_type last_type;
-
-  /* Tracking symbol table information */
-  int last_mapping_sym;
-
-  /* The end range of the current range being disassembled.  */
-  bfd_vma last_stop_offset;
-  bfd_vma last_mapping_addr;
-
   /* The last section we disassembled.  */
   void* last_section;
+
+  /* Filtered mapping symbols.  */
+  struct arm_mapping_sym *mapping_syms;
+
+  /* Last mapping symbol found.  */
+  struct arm_mapping_sym *last_mapping_sym;
+
+  /* Size of mapping symbols except sentinel entries.  */
+  size_t mapping_syms_size;
+
+  /* Reuse last mapping symbol if expected address matches.  */
+  bfd_vma expected_next_addr;
+
+  /* If given input is an ELF file with symbols.  */
+  bool is_elf_syms;
 };
 
 enum mve_instructions
@@ -12310,9 +12324,8 @@ parse_arm_disassembler_options (const char *options)
   return;
 }
 
-static bool
-mapping_symbol_for_insn (bfd_vma pc, struct disassemble_info *info,
-			 enum map_type *map_symbol);
+static bool arm_search_mapping_symbol (bfd_vma memaddr, enum map_type *state,
+				       struct disassemble_info *info);
 
 /* Search back through the insn stream to determine if this instruction is
    conditionally executed.  */
@@ -12377,7 +12390,7 @@ find_ifthen_state (bfd_vma pc,
       if ((insn & 0xff00) == 0xbf00 && (insn & 0xf) != 0)
 	{
 	  enum map_type type = MAP_ARM;
-	  bool found = mapping_symbol_for_insn (addr, info, &type);
+	  bool found = arm_search_mapping_symbol (addr, &type, info);
 
 	  if (!found || (found && type == MAP_THUMB))
 	    {
@@ -12421,39 +12434,6 @@ arm_get_map_state_by_name (const char *name)
     }
 }
 
-/* Returns nonzero and sets *MAP_TYPE if the N'th symbol is a
-   mapping symbol.  */
-
-static int
-is_mapping_symbol (struct disassemble_info *info,
-		   int n,
-		   enum map_type *map_type)
-{
-  const char *name = bfd_asymbol_name (info->symtab[n]);
-  enum map_type type = arm_get_map_state_by_name (name);
-  if (type != MAP_NONE)
-    {
-      *map_type = type;
-      return true;
-    }
-  return false;
-}
-
-/* Try to infer the code type (ARM or Thumb) from a mapping symbol.
-   Returns nonzero if *MAP_TYPE was set.  */
-
-static int
-get_map_sym_type (struct disassemble_info *info,
-		  int n,
-		  enum map_type *map_type)
-{
-  /* If the symbol is in a different section, ignore it.  */
-  if (info->section != NULL && info->section != info->symtab[n]->section)
-    return false;
-
-  return is_mapping_symbol (info, n, map_type);
-}
-
 /* Try to infer the code type (ARM or Thumb) from a non-mapping symbol.
    Returns nonzero if *MAP_TYPE was set.  */
 
@@ -12492,24 +12472,83 @@ get_sym_code_type (struct disassemble_info *info,
   return false;
 }
 
-/* Search the mapping symbol state for instruction at pc.  This is only
+/* Search the mapping symbol state for instruction at memaddr.  This is only
    applicable for elf target.
 
    There is an assumption here, info->private_data contains the correct AND
    up-to-date information about current scan process.  The information will be
    used to speed this search process.
 
+   This function assumes that pd->mapping_syms is not NULL.
+
    Return true if the mapping state can be determined, and map_symbol
    will be updated accordingly.  Otherwise, return false.  */
 
 static bool
-mapping_symbol_for_insn (bfd_vma pc, struct disassemble_info *info,
-			 enum map_type *map_symbol)
+arm_search_mapping_sym (bfd_vma memaddr,
+			enum map_type *state,
+			struct disassemble_info *info)
 {
-  bfd_vma addr, section_vma = 0;
-  int n, last_sym = -1;
-  bool found = false;
-  bool can_use_search_opt_p = false;
+  struct arm_private_data *pd = info->private_data;
+  struct arm_mapping_sym *msym = pd->mapping_syms;
+  /* Do a binary search to find the last mapping symbol (which does not
+     violate upper address and section boundaries) that may be suitable
+     for a given section and address.
+     This part is equivalent to std::partition_point(...)-1.  */
+  size_t low = 1, len = pd->mapping_syms_size;
+  while (len != 0)
+    {
+      size_t half = len / 2;
+      size_t mid = low + half;
+      bool is_mid_in_bound
+	  = info->section
+		? (msym[mid].section < (uintptr_t)info->section
+		   || (msym[mid].section == (uintptr_t)info->section
+		       && msym[mid].address <= memaddr))
+		: msym[mid].address <= memaddr;
+      if (is_mid_in_bound)
+	{
+	  len -= half + 1;
+	  low = mid + 1;
+	}
+      else
+	len = half;
+    }
+  msym += low - 1;
+  /* The result may however violate lower boundaries.
+     Check if the result is actually suitable.  */
+  if ((info->section && (uintptr_t)info->section != msym->section)
+      || msym->mstate == MAP_NONE)
+    {
+      pd->last_mapping_sym = NULL;
+      return false;
+    }
+  /* Update the state and the last suitable mapping symbol.  */
+  pd->last_mapping_sym = msym;
+  *state = msym->mstate;
+  return true;
+}
+
+/* Search the mapping symbol state for instruction at memaddr.  This is only
+   applicable for elf target.
+
+   There is an assumption here, info->private_data contains the correct AND
+   up-to-date information about current scan process.  The information will be
+   used to speed this search process.
+
+   It reuses the last mapping symbol as possible but use arm_search_mapping_sym
+   function to do a binary search if we could not.
+
+   Return TRUE if the mapping state can be determined, and map_symbol
+   will be updated accordingly.  Otherwise, return FALSE.  */
+
+static bool
+arm_search_mapping_symbol (bfd_vma memaddr,
+			enum map_type *state,
+			struct disassemble_info *info)
+{
+  enum map_type mstate;
+  struct arm_private_data *pd = info->private_data;
 
   /* Sanity check.  */
   if (info == NULL)
@@ -12526,99 +12565,54 @@ mapping_symbol_for_insn (bfd_vma pc, struct disassemble_info *info,
   enum map_type type = MAP_DATA;
   if ((info->section && info->section->flags & SEC_CODE) || !info->section)
     type = MAP_ARM;
-  struct arm_private_data *private_data;
 
-  if (info->private_data == NULL || info->symtab == NULL
-      || info->symtab_size == 0
-      || bfd_asymbol_flavour (*info->symtab) != bfd_target_elf_flavour)
+  if (!pd->is_elf_syms)
     return false;
 
-  private_data = info->private_data;
-
-  /* First, look for mapping symbols.  */
-  if (pc <= private_data->last_mapping_addr)
-    private_data->last_mapping_sym = -1;
-
-  /* Start scanning at the start of the function, or wherever
-     we finished last time.  */
-  n = info->symtab_pos + 1;
-
-  /* If the last stop offset is different from the current one it means we
-     are disassembling a different glob of bytes.  As such the optimization
-     would not be safe and we should start over.  */
-  can_use_search_opt_p
-    = (private_data->last_mapping_sym >= 0
-       && info->stop_offset == private_data->last_stop_offset);
-
-  if (n >= private_data->last_mapping_sym && can_use_search_opt_p)
-    n = private_data->last_mapping_sym;
-
-  /* Look down while we haven't passed the location being disassembled.
-     The reason for this is that there's no defined order between a symbol
-     and an mapping symbol that may be at the same address.  We may have to
-     look at least one position ahead.  */
-  for (; n < info->symtab_size; n++)
+  if (pd->last_mapping_sym != NULL
+      && memaddr != 0
+      && memaddr == pd->expected_next_addr)
     {
-      addr = bfd_asymbol_value (info->symtab[n]);
-      if (addr > pc)
-	break;
-      if (get_map_sym_type (info, n, &type))
+      /* Reuse the last mapping symbol.  */
+      *state = pd->last_mapping_sym->mstate;
+      /* Do a forward linear search to find the next mapping symbol.  */
+      struct arm_mapping_sym *msym = pd->last_mapping_sym + 1;
+      while (true)
 	{
-	  last_sym = n;
-	  found = true;
-	}
-    }
-
-  if (!found)
-    {
-      n = info->symtab_pos;
-      if (n >= private_data->last_mapping_sym && can_use_search_opt_p)
-	n = private_data->last_mapping_sym;
-
-      /* No mapping symbol found at this address.  Look backwards
-	 for a preceeding one, but don't go pass the section start
-	 otherwise a data section with no mapping symbol can pick up
-	 a text mapping symbol of a preceeding section.  The documentation
-	 says section can be NULL, in which case we will seek up all the
-	 way to the top.  */
-      if (info->section)
-	section_vma = info->section->vma;
-
-      for (; n >= 0; n--)
-	{
-	  addr = bfd_asymbol_value (info->symtab[n]);
-	  if (addr < section_vma)
+	  /* Break if we reached to the end.  */
+	  if (msym->mstate == MAP_NONE)
 	    break;
-
-	  if (get_map_sym_type (info, n, &type))
-	    {
-	      last_sym = n;
-	      found = true;
-	      break;
-	    }
+	  /* For section symbols, only test symbols in the same section.  */
+	  if (info->section && (uintptr_t)info->section != msym->section)
+	    break;
+	  /* Don't go beyond memaddr.  */
+	  if (memaddr < msym->address)
+	    break;
+	  /* Update the state and go to the next symbol.  */
+	  *state = msym->mstate;
+	  pd->last_mapping_sym = msym;
+	  msym++;
 	}
+      return true;
+    }
+  else if (pd->mapping_syms)
+    {
+      /* Can't reuse the mapping symbol.  Do a binary search if there is
+	 a mapping symbol.  */
+      if (arm_search_mapping_sym (memaddr, state, info))
+	return true;
     }
 
-  /* If no mapping symbol was found, try looking up without a mapping
+  /* No mapping symbol was found, try looking up without a mapping
      symbol.  This is done by walking up from the current PC to the nearest
      symbol.  We don't actually have to loop here since symtab_pos will
      contain the nearest symbol already.  */
-  if (!found)
-    {
-      n = info->symtab_pos;
-      if (n >= 0 && get_sym_code_type (info, n, &type))
-	{
-	  last_sym = n;
-	  found = true;
-	}
-    }
+  int n = info->symtab_pos;
+  if (n >= 0 && get_sym_code_type (info, n, state))
+    return true;
 
-  private_data->last_mapping_sym = last_sym;
-  private_data->last_type = type;
-  private_data->last_stop_offset = info->stop_offset;
-
-  *map_symbol = type;
-  return found;
+  *state = mstate;
+  return false;
 }
 
 /* Given a bfd_mach_arm_XXX value, this function fills in the fields
@@ -12715,10 +12709,6 @@ init_arm_dis_private_data (struct disassemble_info *info)
   struct arm_private_data *pd;
 
   pd = info->private_data = xcalloc (1, sizeof (struct arm_private_data));
-  pd->last_mapping_sym = -1;
-  pd->last_mapping_addr = 0;
-  pd->last_stop_offset = 0;
-  pd->last_section = NULL;
 
   if ((info->flags & USER_SPECIFIED_MACHINE_TYPE) == 0)
     {
@@ -12747,6 +12737,83 @@ init_arm_dis_private_data (struct disassemble_info *info)
      Note: This assumes that the machine number will not change
      during disassembly....  */
   select_arm_features (info->mach, &pd->features);
+
+  pd->last_section = NULL;
+  pd->mapping_syms = NULL;
+  pd->last_mapping_sym = NULL;
+  pd->mapping_syms_size = 0;
+  pd->expected_next_addr = 0;
+  pd->is_elf_syms
+      = info->symtab_size != 0
+	&& bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour;
+
+  if (pd->is_elf_syms)
+    {
+      size_t n_mapping_symbols = 0;
+      for (int i = 0; i < info->symtab_size; i++)
+	if (arm_get_map_state_by_name (bfd_asymbol_name (info->symtab[i]))
+	    != MAP_NONE)
+	  n_mapping_symbols++;
+      if (n_mapping_symbols == 0)
+	return;
+
+      /* Allocate mapping symbols (with head/tail sentinel entries).  */
+      struct arm_mapping_sym *msym = pd->mapping_syms
+	  = xcalloc (n_mapping_symbols + 2, sizeof (struct arm_mapping_sym));
+      /* Head sentinel entry.  */
+      msym->index = -1;
+      msym->mstate = MAP_NONE;
+      msym++;
+      /* Mapping symbols.  */
+      for (int i = 0; i < info->symtab_size; i++)
+	{
+	  enum map_type state
+	      = arm_get_map_state_by_name (bfd_asymbol_name (info->symtab[i]));
+	  if (state == MAP_NONE)
+	    continue;
+	  msym->section = (uintptr_t) info->symtab[i]->section;
+	  msym->address = bfd_asymbol_value (info->symtab[i]);
+	  msym->index = i;
+	  msym->mstate = state;
+	  msym++;
+	}
+      /* Tail sentinel entry.  */
+      msym->index = -1;
+      msym->mstate = MAP_NONE;
+
+      pd->mapping_syms_size = n_mapping_symbols;
+      /* Mapping symbols are now ordered for section == NULL.
+	 will be qsorted on the first non-NULL section.  */
+    }
+}
+
+/* Compare two mapping symbols (sort by original index).  */
+
+static inline int
+compare_mapping_syms_without_section (const void* ap, const void* bp)
+{
+  const struct arm_mapping_sym *a = ap;
+  const struct arm_mapping_sym *b = bp;
+  return a->index - b->index;
+}
+
+/* Compare two mapping symbols (sort by section, address and
+   original index for a stable sort).  */
+
+static int
+compare_mapping_syms_with_section (const void* ap, const void* bp)
+{
+  const struct arm_mapping_sym *a = ap;
+  const struct arm_mapping_sym *b = bp;
+  if (a->section < b->section)
+    return -1;
+  else if (a->section > b->section)
+    return +1;
+  else if (a->address < b->address)
+    return -1;
+  else if (a->address > b->address)
+    return +1;
+  return compare_mapping_syms_without_section (a, b);
 }
 
 /* Initialize private data when the section to disassemble is changed.  */
@@ -12755,6 +12822,25 @@ static void
 init_arm_dis_private_data_for_section (struct disassemble_info *info)
 {
   struct arm_private_data *pd = info->private_data;
+
+  /* Clear the last mapping symbol because we start to dump a new section.  */
+  pd->last_mapping_sym = NULL;
+
+  /* Sort the mapping symbols depending on the current section
+     (depending on whether the current section is NULL or not).  */
+  if (pd->last_section == NULL && info->section != NULL)
+    {
+      qsort (pd->mapping_syms + 1, pd->mapping_syms_size,
+	     sizeof (struct arm_mapping_sym),
+	     compare_mapping_syms_with_section);
+    }
+  else if (pd->last_section != NULL && info->section == NULL)
+    {
+      qsort (pd->mapping_syms + 1, pd->mapping_syms_size,
+	     sizeof (struct arm_mapping_sym),
+	     compare_mapping_syms_without_section);
+    }
+
   pd->last_section = info->section;
 }
 
@@ -12810,19 +12896,16 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bool little)
 
   /* For ELF, consult the symbol table to determine what kind of code
      or data we have.  */
-  if (info->symtab_size != 0
-      && bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour)
+  if (private_data->is_elf_syms)
     {
       bfd_vma addr;
       int n;
-      int last_sym = -1;
       enum map_type type = MAP_ARM;
 
-      found = mapping_symbol_for_insn (pc, info, &type);
-      last_sym = private_data->last_mapping_sym;
+      found = arm_search_mapping_symbol (pc, &type, info);
 
-      is_thumb = (private_data->last_type == MAP_THUMB);
-      is_data = (private_data->last_type == MAP_DATA);
+      is_thumb = (type == MAP_THUMB);
+      is_data = (type == MAP_DATA);
 
       /* Look a little bit ahead to see if we should print out
 	 two or four bytes of data.  If there's a symbol,
@@ -12831,7 +12914,11 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bool little)
       if (is_data)
 	{
 	  size = 4 - (pc & 3);
-	  for (n = last_sym + 1; n < info->symtab_size; n++)
+	  n = (private_data->last_mapping_sym
+		   ? private_data->last_mapping_sym->index
+		   : info->symtab_pos)
+	      + 1;
+	  for (; n < info->symtab_size; n++)
 	    {
 	      addr = bfd_asymbol_value (info->symtab[n]);
 	      if (addr > pc
@@ -12983,21 +13070,20 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bool little)
       info->memory_error_func (status, pc, info);
       return -1;
     }
-  if (info->flags & INSN_HAS_RELOC)
-    /* If the instruction has a reloc associated with it, then
-       the offset field in the instruction will actually be the
-       addend for the reloc.  (We are using REL type relocs).
-       In such cases, we can ignore the pc when computing
-       addresses, since the addend is not currently pc-relative.  */
-    pc = 0;
 
-  printer (pc, info, given);
+  /* If the instruction has a reloc associated with it, then
+     the offset field in the instruction will actually be the
+     addend for the reloc.  (We are using REL type relocs).
+     In such cases, we can ignore the pc when computing
+     addresses, since the addend is not currently pc-relative.  */
+  printer ((info->flags & INSN_HAS_RELOC) ? 0 : pc, info, given);
 
   if (is_thumb)
     {
       ifthen_state = ifthen_next_state;
       ifthen_address += size;
     }
+  private_data->expected_next_addr = pc + size;
   return size;
 }
 
@@ -13017,6 +13103,17 @@ int
 print_insn_little_arm (bfd_vma pc, struct disassemble_info *info)
 {
   return print_insn (pc, info, true);
+}
+
+void
+disassemble_free_arm (struct disassemble_info *info)
+{
+  if (!info)
+    return;
+  struct arm_private_data *pd = info->private_data;
+  if (!pd)
+    return;
+  free (pd->mapping_syms);
 }
 
 const disasm_options_and_args_t *
