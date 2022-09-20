@@ -42,6 +42,7 @@
 /* Cached mapping symbol state.  */
 enum map_type
 {
+  MAP_NONE = 0,
   MAP_ARM,
   MAP_THUMB,
   MAP_DATA
@@ -12396,6 +12397,27 @@ find_ifthen_state (bfd_vma pc,
     ifthen_state = 0;
 }
 
+/* Returns new mapping state if a given symbol name is of mapping symbols',
+   MAP_NONE otherwise.  */
+
+static enum map_type
+arm_get_map_state_by_name (const char *name)
+{
+  if (name[0] != '$' || name[1] == '\0' || (name[2] != '\0' && name[2] != '.'))
+    return MAP_NONE;
+  switch (name[1])
+    {
+    case 'a':
+      return MAP_ARM;
+    case 't':
+      return MAP_THUMB;
+    case 'd':
+      return MAP_DATA;
+    default:
+      return MAP_NONE;
+    }
+}
+
 /* Returns nonzero and sets *MAP_TYPE if the N'th symbol is a
    mapping symbol.  */
 
@@ -12405,17 +12427,12 @@ is_mapping_symbol (struct disassemble_info *info,
 		   enum map_type *map_type)
 {
   const char *name = bfd_asymbol_name (info->symtab[n]);
-
-  if (name[0] == '$'
-      && (name[1] == 'a' || name[1] == 't' || name[1] == 'd')
-      && (name[2] == 0 || name[2] == '.'))
+  enum map_type type = arm_get_map_state_by_name (name);
+  if (type != MAP_NONE)
     {
-      *map_type = ((name[1] == 'a') ? MAP_ARM
-		   : (name[1] == 't') ? MAP_THUMB
-		   : MAP_DATA);
+      *map_type = type;
       return true;
     }
-
   return false;
 }
 
