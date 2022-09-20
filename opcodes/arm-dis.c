@@ -62,6 +62,9 @@ struct arm_private_data
   /* The end range of the current range being disassembled.  */
   bfd_vma last_stop_offset;
   bfd_vma last_mapping_addr;
+
+  /* The last section we disassembled.  */
+  void* last_section;
 };
 
 enum mve_instructions
@@ -12715,6 +12718,7 @@ init_arm_dis_private_data (struct disassemble_info *info)
   pd->last_mapping_sym = -1;
   pd->last_mapping_addr = 0;
   pd->last_stop_offset = 0;
+  pd->last_section = NULL;
 
   if ((info->flags & USER_SPECIFIED_MACHINE_TYPE) == 0)
     {
@@ -12743,6 +12747,15 @@ init_arm_dis_private_data (struct disassemble_info *info)
      Note: This assumes that the machine number will not change
      during disassembly....  */
   select_arm_features (info->mach, &pd->features);
+}
+
+/* Initialize private data when the section to disassemble is changed.  */
+
+static void
+init_arm_dis_private_data_for_section (struct disassemble_info *info)
+{
+  struct arm_private_data *pd = info->private_data;
+  pd->last_section = info->section;
 }
 
 
@@ -12784,8 +12797,12 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bool little)
   if (private_data == NULL)
     {
       init_arm_dis_private_data (info);
+      init_arm_dis_private_data_for_section (info);
       private_data = info->private_data;
     }
+
+  if (info->section != private_data->last_section)
+    init_arm_dis_private_data_for_section (info);
 
   /* Decide if our code is going to be little-endian, despite what the
      function argument might say.  */
