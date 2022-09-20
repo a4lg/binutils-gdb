@@ -12475,12 +12475,12 @@ get_sym_code_type (struct disassemble_info *info,
 /* Search the mapping symbol state for instruction at pc.  This is only
    applicable for elf target.
 
-   There is an assumption Here, info->private_data contains the correct AND
+   There is an assumption here, info->private_data contains the correct AND
    up-to-date information about current scan process.  The information will be
    used to speed this search process.
 
-   Return TRUE if the mapping state can be determined, and map_symbol
-   will be updated accordingly.  Otherwise, return FALSE.  */
+   Return true if the mapping state can be determined, and map_symbol
+   will be updated accordingly.  Otherwise, return false.  */
 
 static bool
 mapping_symbol_for_insn (bfd_vma pc, struct disassemble_info *info,
