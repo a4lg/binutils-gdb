@@ -12704,6 +12704,47 @@ select_arm_features (unsigned long mach,
   ARM_MERGE_FEATURE_SETS (*features, arch_fset, fpu_any);
 }
 
+/* Initialize private data of disassemble_info.  */
+
+static void
+init_arm_dis_private_data (struct disassemble_info *info)
+{
+  struct arm_private_data *pd;
+
+  pd = info->private_data = xcalloc (1, sizeof (struct arm_private_data));
+  pd->last_mapping_sym = -1;
+  pd->last_mapping_addr = 0;
+  pd->last_stop_offset = 0;
+
+  if ((info->flags & USER_SPECIFIED_MACHINE_TYPE) == 0)
+    {
+      /* If the user did not use the -m command line switch then default to
+	 disassembling all types of ARM instruction.
+
+	 The info->mach value has to be ignored as this will be based on
+	 the default archictecture for the target and/or hints in the notes
+	 section, but it will never be greater than the current largest arm
+	 machine value (iWMMXt2), which is only equivalent to the V5TE
+	 architecture.  ARM architectures have advanced beyond the machine
+	 value encoding, and these newer architectures would be ignored if
+	 the machine value was used.
+
+	 Ie the -m switch is used to restrict which instructions will be
+	 disassembled.  If it is necessary to use the -m switch to tell
+	 objdump that an ARM binary is being disassembled, eg because the
+	 input is a raw binary file, but it is also desired to disassemble
+	 all ARM instructions then use "-marm".  This will select the
+	 "unknown" arm architecture which is compatible with any ARM
+	 instruction.  */
+      info->mach = bfd_mach_arm_unknown;
+    }
+
+  /* Compute the architecture bitmask from the machine number.
+     Note: This assumes that the machine number will not change
+     during disassembly....  */
+  select_arm_features (info->mach, &pd->features);
+}
+
 
 /* NOTE: There are no checks in these routines that
    the relevant number of data bytes exist.  */
@@ -12738,45 +12779,13 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bool little)
       info->disassembler_options = NULL;
     }
 
-  /* PR 10288: Control which instructions will be disassembled.  */
-  if (info->private_data == NULL)
-    {
-      static struct arm_private_data private;
-
-      if ((info->flags & USER_SPECIFIED_MACHINE_TYPE) == 0)
-	/* If the user did not use the -m command line switch then default to
-	   disassembling all types of ARM instruction.
-
-	   The info->mach value has to be ignored as this will be based on
-	   the default archictecture for the target and/or hints in the notes
-	   section, but it will never be greater than the current largest arm
-	   machine value (iWMMXt2), which is only equivalent to the V5TE
-	   architecture.  ARM architectures have advanced beyond the machine
-	   value encoding, and these newer architectures would be ignored if
-	   the machine value was used.
-
-	   Ie the -m switch is used to restrict which instructions will be
-	   disassembled.  If it is necessary to use the -m switch to tell
-	   objdump that an ARM binary is being disassembled, eg because the
-	   input is a raw binary file, but it is also desired to disassemble
-	   all ARM instructions then use "-marm".  This will select the
-	   "unknown" arm architecture which is compatible with any ARM
-	   instruction.  */
-	  info->mach = bfd_mach_arm_unknown;
-
-      /* Compute the architecture bitmask from the machine number.
-	 Note: This assumes that the machine number will not change
-	 during disassembly....  */
-      select_arm_features (info->mach, & private.features);
-
-      private.last_mapping_sym = -1;
-      private.last_mapping_addr = 0;
-      private.last_stop_offset = 0;
-
-      info->private_data = & private;
-    }
-
   private_data = info->private_data;
+  /* PR 10288: Control which instructions will be disassembled.  */
+  if (private_data == NULL)
+    {
+      init_arm_dis_private_data (info);
+      private_data = info->private_data;
+    }
 
   /* Decide if our code is going to be little-endian, despite what the
      function argument might say.  */
