@@ -55,6 +55,7 @@
 #include "cli/cli-decode.h"
 #include "observable.h"
 #include "prologue-value.h"
+#include "progspace.h"
 #include "arch/riscv.h"
 #include "riscv-ravenscar-thread.h"
 
@@ -1306,6 +1307,27 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 	}
     }
   gdb_printf (file, "\n");
+}
+
+/* Calling disassembler function on RISC-V is not fast as others.
+   We cache the disassembler function as long as current BFD is the same.  */
+
+static int
+riscv_print_insn (bfd_vma memaddr, disassemble_info *info)
+{
+  static disassembler_ftype disassemble_fn = NULL;
+  static bfd *abfd = NULL;
+  bfd *ebfd = current_program_space->exec_bfd ();
+
+  if (disassemble_fn == NULL || abfd != ebfd)
+    {
+      disassemble_fn = disassembler (
+	  info->arch, info->endian == BFD_ENDIAN_BIG, info->mach, ebfd);
+      abfd = ebfd;
+    }
+
+  gdb_assert (disassemble_fn != NULL);
+  return (*disassemble_fn) (memaddr, info);
 }
 
 /* Return true if REGNUM is a valid CSR register.  The CSR register space
@@ -3925,6 +3947,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_pc_regnum (gdbarch, RISCV_PC_REGNUM);
 
   set_gdbarch_print_registers_info (gdbarch, riscv_print_registers_info);
+  set_gdbarch_print_insn (gdbarch, riscv_print_insn);
 
   set_tdesc_pseudo_register_name (gdbarch, riscv_pseudo_register_name);
   set_tdesc_pseudo_register_type (gdbarch, riscv_pseudo_register_type);
