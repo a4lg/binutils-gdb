@@ -298,7 +298,7 @@ disp_reg(struct pstate *sregs, char *reg)
 #ifdef ERRINJ
 
 void
-errinj (void)
+errinj (int32_t arg ATTRIBUTE_UNUSED)
 {
     int	err;
 
@@ -887,8 +887,8 @@ advance_time(struct pstate *sregs)
 {
 
     struct evcell  *evrem;
-    void            (*cfunc) ();
-    uint32_t          arg;
+    void            (*cfunc) (int32_t);
+    int32_t           arg;
     uint64_t          endtime;
 
 #ifdef STAT
@@ -926,7 +926,7 @@ int
 wait_for_irq(void)
 {
     struct evcell  *evrem;
-    void            (*cfunc) ();
+    void            (*cfunc) (int32_t);
     int32_t           arg;
     uint64_t          endtime;
 
