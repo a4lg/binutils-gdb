@@ -3257,8 +3257,8 @@ ppi_gensim (void)
   printf ("  static char const u_tab[] = { 8, 10,  7,  5};\n");
   printf ("\n");
   printf ("  int z;\n");
-  printf ("  int res, res_grd;\n");
-  printf ("  int carry, overflow, greater_equal;\n");
+  printf ("  int res = 0, res_grd = 0;\n");
+  printf ("  int carry = 0, overflow = 0, greater_equal = 0;\n");
   printf ("\n");
   printf ("  switch (ppi_table[iword >> 4]) {\n");
 
