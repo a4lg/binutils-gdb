@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2022 Free Software Foundation, Inc.
+Copyright (C) 1996-2022 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -17,7 +17,8 @@ This file is part of the GNU simulators.
    License for more details.
 
    You should have received a copy of the GNU General Public License along
-   with this program; if not, see <http://www.gnu.org/licenses/>.
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -264,7 +265,7 @@ This file is part of the GNU simulators.
 
 /* If hyper-fast [well not unnecessarily slow] execution is selected, turn
    off frills like tracing and profiling.  */
-/* FIXME: A better way would be to have CGEN_TRACE_RESULT check for something
+/* FIXME: A better way would be to have TRACE_RESULT check for something
    that can cause it to be optimized out.  Another way would be to emit
    special handlers into the instruction "stream".  */
 
@@ -3291,6 +3292,7 @@ cgen_rtx_error (current_cpu, "move-spr-r from unimplemented register");
   SI tmp_rno;
   SI tmp_newval;
   tmp_rno = FLD (f_operand2);
+  tmp_newval = 0;
 if (EQSI (tmp_rno, 2)) {
   tmp_newval = ({   SI tmp_addr;
   SI tmp_tmp_mem;
@@ -11263,7 +11265,8 @@ SET_H_VBIT_MOVE (0);
   tmp_tmpd = ({   SI tmp_tmpcode;
   SI tmp_tmpval;
   SI tmp_tmpres;
-  tmp_tmpcode = FLD (f_operand2);
+  tmp_tmpres = 0;
+;   tmp_tmpcode = FLD (f_operand2);
 ;   tmp_tmpval = tmp_tmps;
 ; if (EQSI (tmp_tmpcode, 0)) {
   tmp_tmpres = (cgen_rtx_error (current_cpu, "SWAP without swap modifier isn't implemented"), 0);
@@ -12460,7 +12463,8 @@ crisv32f_rfg_handler (current_cpu, pc);
   BI tmp_truthval;
   tmp_truthval = ({   SI tmp_tmpcond;
   BI tmp_condres;
-  tmp_tmpcond = FLD (f_operand2);
+  tmp_condres = 0;
+;   tmp_tmpcond = FLD (f_operand2);
 ; if (EQSI (tmp_tmpcond, 0)) {
   tmp_condres = NOTBI (CPU (h_cbit));
 }
@@ -12592,7 +12596,8 @@ if (tmp_truthval) {
   BI tmp_truthval;
   tmp_truthval = ({   SI tmp_tmpcond;
   BI tmp_condres;
-  tmp_tmpcond = FLD (f_operand2);
+  tmp_condres = 0;
+;   tmp_tmpcond = FLD (f_operand2);
 ; if (EQSI (tmp_tmpcond, 0)) {
   tmp_condres = NOTBI (CPU (h_cbit));
 }
@@ -13380,7 +13385,8 @@ SET_H_VBIT_MOVE (0);
   BI tmp_truthval;
   tmp_truthval = ({   SI tmp_tmpcond;
   BI tmp_condres;
-  tmp_tmpcond = FLD (f_operand2);
+  tmp_condres = 0;
+;   tmp_tmpcond = FLD (f_operand2);
 ; if (EQSI (tmp_tmpcond, 0)) {
   tmp_condres = NOTBI (CPU (h_cbit));
 }

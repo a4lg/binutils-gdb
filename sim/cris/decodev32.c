@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2022 Free Software Foundation, Inc.
+Copyright (C) 1996-2022 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -17,7 +17,8 @@ This file is part of the GNU simulators.
    License for more details.
 
    You should have received a copy of the GNU General Public License along
-   with this program; if not, see <http://www.gnu.org/licenses/>.
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -41,12 +42,12 @@ static IDESC crisv32f_insn_data[CRISV32F_INSN__MAX];
 
 static const struct insn_sem crisv32f_insn_sem[] =
 {
-  { VIRTUAL_INSN_X_INVALID, CRISV32F_INSN_X_INVALID, CRISV32F_SFMT_EMPTY },
-  { VIRTUAL_INSN_X_AFTER, CRISV32F_INSN_X_AFTER, CRISV32F_SFMT_EMPTY },
-  { VIRTUAL_INSN_X_BEFORE, CRISV32F_INSN_X_BEFORE, CRISV32F_SFMT_EMPTY },
-  { VIRTUAL_INSN_X_CTI_CHAIN, CRISV32F_INSN_X_CTI_CHAIN, CRISV32F_SFMT_EMPTY },
-  { VIRTUAL_INSN_X_CHAIN, CRISV32F_INSN_X_CHAIN, CRISV32F_SFMT_EMPTY },
-  { VIRTUAL_INSN_X_BEGIN, CRISV32F_INSN_X_BEGIN, CRISV32F_SFMT_EMPTY },
+  { (CGEN_INSN_TYPE) VIRTUAL_INSN_X_INVALID, CRISV32F_INSN_X_INVALID, CRISV32F_SFMT_EMPTY },
+  { (CGEN_INSN_TYPE) VIRTUAL_INSN_X_AFTER, CRISV32F_INSN_X_AFTER, CRISV32F_SFMT_EMPTY },
+  { (CGEN_INSN_TYPE) VIRTUAL_INSN_X_BEFORE, CRISV32F_INSN_X_BEFORE, CRISV32F_SFMT_EMPTY },
+  { (CGEN_INSN_TYPE) VIRTUAL_INSN_X_CTI_CHAIN, CRISV32F_INSN_X_CTI_CHAIN, CRISV32F_SFMT_EMPTY },
+  { (CGEN_INSN_TYPE) VIRTUAL_INSN_X_CHAIN, CRISV32F_INSN_X_CHAIN, CRISV32F_SFMT_EMPTY },
+  { (CGEN_INSN_TYPE) VIRTUAL_INSN_X_BEGIN, CRISV32F_INSN_X_BEGIN, CRISV32F_SFMT_EMPTY },
   { CRIS_INSN_MOVE_B_R, CRISV32F_INSN_MOVE_B_R, CRISV32F_SFMT_MOVE_B_R },
   { CRIS_INSN_MOVE_W_R, CRISV32F_INSN_MOVE_W_R, CRISV32F_SFMT_MOVE_B_R },
   { CRIS_INSN_MOVE_D_R, CRISV32F_INSN_MOVE_D_R, CRISV32F_SFMT_MOVE_D_R },
@@ -258,7 +259,7 @@ static const struct insn_sem crisv32f_insn_sem[] =
 
 static const struct insn_sem crisv32f_insn_sem_invalid =
 {
-  VIRTUAL_INSN_X_INVALID, CRISV32F_INSN_X_INVALID, CRISV32F_SFMT_EMPTY
+  (CGEN_INSN_TYPE) VIRTUAL_INSN_X_INVALID, CRISV32F_INSN_X_INVALID, CRISV32F_SFMT_EMPTY
 };
 
 /* Initialize an IDESC from the compile-time computable parts.  */
@@ -307,7 +308,7 @@ crisv32f_init_idesc_table (SIM_CPU *cpu)
     init_idesc (cpu, id, t);
 
   /* Now fill in the values for the chosen cpu.  */
-  for (t = crisv32f_insn_sem, tend = t + ARRAY_SIZE (crisv32f_insn_sem);
+  for (t = crisv32f_insn_sem, tend = t + sizeof (crisv32f_insn_sem) / sizeof (*t);
        t != tend; ++t)
     {
       init_idesc (cpu, & table[t->index], t);
