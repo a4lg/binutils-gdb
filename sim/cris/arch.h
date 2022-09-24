@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2022 Free Software Foundation, Inc.
+Copyright (C) 1996-2022 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -17,12 +17,21 @@ This file is part of the GNU simulators.
    License for more details.
 
    You should have received a copy of the GNU General Public License along
-   with this program; if not, see <http://www.gnu.org/licenses/>.
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
 #ifndef CRIS_ARCH_H
 #define CRIS_ARCH_H
+
+#define TARGET_BIG_ENDIAN 1
+
+#define WI  SI
+#define UWI USI
+#define AI  USI
+
+#define IAI USI
 
 /* Enum declaration for model types.  */
 typedef enum model_type {
@@ -36,10 +45,10 @@ typedef enum unit_type {
   UNIT_NONE, UNIT_CRISV10_U_MOVEM, UNIT_CRISV10_U_MULTIPLY, UNIT_CRISV10_U_SKIP4
  , UNIT_CRISV10_U_STALL, UNIT_CRISV10_U_CONST32, UNIT_CRISV10_U_CONST16, UNIT_CRISV10_U_MEM
  , UNIT_CRISV10_U_EXEC, UNIT_CRISV32_U_EXEC_TO_SR, UNIT_CRISV32_U_EXEC_MOVEM, UNIT_CRISV32_U_EXEC
- , UNIT_CRISV32_U_SKIP4, UNIT_CRISV32_U_CONST32, UNIT_CRISV32_U_CONST16, UNIT_CRISV32_U_JUMP
- , UNIT_CRISV32_U_JUMP_SR, UNIT_CRISV32_U_JUMP_R, UNIT_CRISV32_U_BRANCH, UNIT_CRISV32_U_MULTIPLY
- , UNIT_CRISV32_U_MOVEM_MTOR, UNIT_CRISV32_U_MOVEM_RTOM, UNIT_CRISV32_U_MEM_W, UNIT_CRISV32_U_MEM_R
- , UNIT_CRISV32_U_MEM, UNIT_MAX
+ , UNIT_CRISV32_U_STALL, UNIT_CRISV32_U_SKIP4, UNIT_CRISV32_U_CONST32, UNIT_CRISV32_U_CONST16
+ , UNIT_CRISV32_U_JUMP, UNIT_CRISV32_U_JUMP_SR, UNIT_CRISV32_U_JUMP_R, UNIT_CRISV32_U_BRANCH
+ , UNIT_CRISV32_U_MULTIPLY, UNIT_CRISV32_U_MOVEM_MTOR, UNIT_CRISV32_U_MOVEM_RTOM, UNIT_CRISV32_U_MEM_W
+ , UNIT_CRISV32_U_MEM_R, UNIT_CRISV32_U_MEM, UNIT_MAX
 } UNIT_TYPE;
 
 #define MAX_UNITS (4)
