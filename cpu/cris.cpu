@@ -284,6 +284,7 @@
   (unit u-const16 "Fetch 16-bit operand" () 1 1 () () () ())
   (unit u-const32 "Fetch 32-bit operand" () 1 1 () () () ())
   (unit u-skip4 "Skip 4 bytes" () 1 1 () () () ())
+  (unit u-stall "Stall unit" () 1 1 () () () ())
 
   ; For v32, we need to keep track of inputs (for movem destination
   ; cycle penalties) and output (for e.g. memory source and jump
