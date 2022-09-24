@@ -109,7 +109,7 @@ hw_sem_init_data(device *me)
   hw_sem_device *sem = (hw_sem_device*)device_data(me);
   const device_unit *d;
   int status;
-  union semun help;
+  union semun help = { 0 };
 
   /* initialize the properties of the sem */
 
@@ -188,7 +188,7 @@ hw_sem_io_read_buffer(device *me,
   struct sembuf sb;
   int status;
   uint32_t u32;
-  union semun help;
+  union semun help = { 0 };
 
   /* do we need to worry about out of range addresses? */
 
