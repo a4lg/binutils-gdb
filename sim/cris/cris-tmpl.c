@@ -264,6 +264,8 @@ MY (make_thread_cpu_data) (SIM_CPU *current_cpu, void *context)
 
 /* Hook function for per-cpu simulator initialization.  */
 
+extern void MY (f_specific_init) (SIM_CPU *);
+
 void
 MY (f_specific_init) (SIM_CPU *current_cpu)
 {
