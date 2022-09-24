@@ -541,6 +541,7 @@
   (sequence
     BI
     ((SI tmpcond) (BI condres))
+    (set condres 0)
     (set tmpcond condno)
      (.splice
       cond
@@ -2655,6 +2656,7 @@
      (sequence
        ((SI rno) (SI newval))
        (set rno (regno Pd))
+       (set newval 0)
        (.splice
 	cond
 	; No sanity check for constant special register here, since the
@@ -3698,6 +3700,7 @@
   (sequence
     SI
     ((SI tmpcode) (SI tmpval) (SI tmpres))
+    (set tmpres 0)
     (set tmpcode swapcode)
     (set tmpval val)
     (.splice
