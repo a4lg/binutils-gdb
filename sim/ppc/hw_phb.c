@@ -319,7 +319,7 @@ hw_phb_attach_address(device *me,
   /* attach it to the relevent bus */
   DTRACE(phb, ("attach %s - %s %s:0x%lx (0x%lx bytes)\n",
 	       device_path(client),
-	       hw_phb_decode_name(type),
+	       hw_phb_decode_name((hw_phb_decode)type),
 	       pci_space->name,
 	       (unsigned long)addr,
 	       (unsigned long)nr_bytes));
