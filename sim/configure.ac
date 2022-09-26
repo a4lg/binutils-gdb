@@ -187,6 +187,16 @@ if test $sim_cv_decl_getopt_unistd_h = yes; then
 	    [Is the prototype for getopt in <unistd.h> in the expected format?])
 fi
 
+AC_MSG_CHECKING(for a known getrusage prototype in sys/resource.h)
+AC_CACHE_VAL(sim_cv_decl_getrusage_sys_resource_h,
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/resource.h>], [extern int getrusage (int, struct rusage *);])],
+sim_cv_decl_getrusage_sys_resource_h=yes, sim_cv_decl_getrusage_sys_resource_h=no)])
+AC_MSG_RESULT($sim_cv_decl_getrusage_sys_resource_h)
+if test $sim_cv_decl_getrusage_sys_resource_h = yes; then
+  AC_DEFINE([HAVE_DECL_GETRUSAGE], 1,
+	    [Is the prototype for getrusage in <sys/resource.h> in the expected format?])
+fi
+
 dnl These are unfortunate.  They are conditionally called by other sim macros
 dnl but always used by common/Make-common.in.  So we have to subst here even
 dnl when the rest of the code is in the respective macros.  Once we merge the
