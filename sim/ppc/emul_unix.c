@@ -95,7 +95,9 @@
 
 #ifdef HAVE_GETRUSAGE
 #include <sys/resource.h>
+#ifndef HAVE_DECL_GETRUSAGE
 int getrusage();
+#endif
 #endif
 
 #if HAVE_DIRENT_H

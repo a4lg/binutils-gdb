@@ -38,7 +38,9 @@
 
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
+#ifndef HAVE_DECL_GETRUSAGE
 int getrusage();
+#endif
 #endif
 
 #include "basics.h"
