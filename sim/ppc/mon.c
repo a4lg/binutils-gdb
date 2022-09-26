@@ -38,7 +38,6 @@
 
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
-int getrusage();
 #endif
 
 #include "basics.h"
