@@ -432,7 +432,7 @@ frvbf_check_non_excepting_load (
   int do_elos;
   SI NE_flags[2];
   SI NE_base;
-  SI nesr;
+  SI nesr = 0;
   SI ne_index;
   FRV_REGISTER_CONTROL *control;
 
