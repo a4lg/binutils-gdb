@@ -729,8 +729,8 @@ hw_ide_io_read_buffer(device *me,
 		      unsigned_word cia)
 {
   hw_ide_device *ide = (hw_ide_device *)device_data(me);
-  int control_nr;
-  int reg;
+  int control_nr = 0;
+  int reg = 0;
   ide_controller *controller;
 
   /* find the interface */
@@ -783,8 +783,8 @@ hw_ide_io_write_buffer(device *me,
 		       unsigned_word cia)
 {
   hw_ide_device *ide = (hw_ide_device *)device_data(me);
-  int control_nr;
-  int reg;
+  int control_nr = 0;
+  int reg = 0;
   ide_controller *controller;
 
   /* find the interface */
