@@ -3054,6 +3054,7 @@ SEM_FN_NAME (frvbf,cmpb) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   QI tmp_cc;
+  tmp_cc = 0;
 if (EQBI (EQSI (ANDSI (GET_H_GR (FLD (f_GRi)), 0xff000000), ANDSI (GET_H_GR (FLD (f_GRj)), 0xff000000)), 0)) {
   tmp_cc = ANDQI (tmp_cc, 7);
 } else {
@@ -4545,6 +4546,7 @@ SEM_FN_NAME (frvbf,lddu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   SI tmp_address;
+  tmp_address = 0;
 if (NESI (FLD (f_GRk), 0)) {
 {
   tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
@@ -4591,6 +4593,7 @@ SEM_FN_NAME (frvbf,nlddu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (tmp_do_op) {
 {
   SI tmp_address;
+  tmp_address = 0;
 if (NESI (FLD (f_GRk), 0)) {
 {
   tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
@@ -6706,6 +6709,7 @@ SEM_FN_NAME (frvbf,clddu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 {
   SI tmp_address;
+  tmp_address = 0;
 if (NESI (FLD (f_GRk), 0)) {
 {
   tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
