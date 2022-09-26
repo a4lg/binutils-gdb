@@ -4266,6 +4266,7 @@
      "cmpb$pack $GRi,$GRj,$ICCi_1"
      (+ pack (GRk-null) OP_00 GRi ICCi_1 OPE2_0C GRj)
      (sequence ((QI cc))
+	       (set cc 0)
 	       (set-n cc (eq (and GRi #xff000000) (and GRj #xff000000)))
 	       (set-z cc (eq (and GRi #x00ff0000) (and GRj #x00ff0000)))
 	       (set-v cc (eq (and GRi #x0000ff00) (and GRj #x0000ff00)))
@@ -4655,6 +4656,7 @@
 
 (define-pmacro (load-double-gr-u-semantics)
   (sequence ((WI address))
+	    (set address 0)
 	    (load-double-semantics 0 DI GR address GRj)
 	    (if (ne (index-of GRi) (index-of GRdoublek))
 		(sequence ()
@@ -5309,6 +5311,7 @@
      (+ pack GRdoublek OP_62 GRi CCi cond OPE4_1 GRj)
      (if (eq CCi (or cond 2))
 	 (sequence ((WI address))
+		   (set address 0)
 		   (load-double-semantics 0 DI GR address GRj)
 		   (if (ne (index-of GRi) (index-of GRdoublek))
 		       (set GRi address))))
