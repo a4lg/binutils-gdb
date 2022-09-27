@@ -1251,6 +1251,30 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	case 'z': break; /* Zero immediate.  */
 	case '[': break; /* Unused operand.  */
 	case ']': break; /* Unused operand.  */
+	case 'l': /* Register pairs.  */
+	  switch (*++oparg)
+	    {
+	    case '1':
+	    case '2':
+	    case '4':
+	      break;
+	    default:
+	      goto unknown_validate_operand;
+	    }
+	  switch (*++oparg)
+	    {
+	    case 'd': USE_BITS (OP_MASK_RD, OP_SH_RD); break;
+	    case 's': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
+	    case 't': USE_BITS (OP_MASK_RS2, OP_SH_RS2); break;
+	    case 'r': USE_BITS (OP_MASK_RS3, OP_SH_RS3); break;
+	    case 'u': /* RS1 == RS2.  */
+	      USE_BITS (OP_MASK_RS1, OP_SH_RS1);
+	      USE_BITS (OP_MASK_RS2, OP_SH_RS2);
+	      break;
+	    default:
+	      goto unknown_validate_operand;
+	    }
+	  break;
 	case '0': break; /* AMO displacement, must to zero.  */
 	case '1': break; /* Relaxation operand.  */
 	case 'F': /* Funct for .insn directive.  */
@@ -3016,6 +3040,54 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    case 'r':
 		      INSERT_OPERAND (RS3, *ip, regno);
 		      break;
+		    }
+		  continue;
+		}
+	      break;
+
+	    case 'l': /* Register pairs.  */
+	      if (reg_lookup (&asarg, RCLASS_GPR, &regno))
+		{
+		  if (*asarg == ' ')
+		    ++asarg;
+
+		  unsigned w;
+		  switch (*++oparg)
+		    {
+		    case '1': w =  32; break;
+		    case '2': w =  64; break;
+		    case '4': w = 128; break;
+		    default:
+		      goto unknown_riscv_ip_operand;
+		    }
+		  if (xlen < w && (regno % (w / xlen)) != 0)
+		    {
+		      ++oparg;
+		      break;
+		    }
+
+		  /* Now that we have assembled one operand, we use the args
+		     string to figure out where it goes in the instruction.  */
+		  switch (*++oparg)
+		    {
+		    case 'd':
+		      INSERT_OPERAND (RD, *ip, regno);
+		      break;
+		    case 's':
+		      INSERT_OPERAND (RS1, *ip, regno);
+		      break;
+		    case 't':
+		      INSERT_OPERAND (RS2, *ip, regno);
+		      break;
+		    case 'r':
+		      INSERT_OPERAND (RS3, *ip, regno);
+		      break;
+		    case 'u':
+		      INSERT_OPERAND (RS1, *ip, regno);
+		      INSERT_OPERAND (RS2, *ip, regno);
+		      break;
+		    default:
+		      goto unknown_riscv_ip_operand;
 		    }
 		  continue;
 		}

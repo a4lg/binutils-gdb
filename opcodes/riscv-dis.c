@@ -488,6 +488,36 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	  print (info->stream, dis_style_register, "%s", riscv_gpr_names[0]);
 	  break;
 
+	case 'l':
+	  {
+	    unsigned w;
+	    int regno;
+	    switch (*++oparg)
+	      {
+	      case '1': w =  32; break;
+	      case '2': w =  64; break;
+	      case '4': w = 128; break;
+	      default:
+		goto undefined_modifier;
+	      }
+	    switch (*++oparg)
+	      {
+	      case 'd': regno = rd; break;
+	      case 's': regno = rs1; break;
+	      case 't': regno = EXTRACT_OPERAND (RS2, l); break;
+	      case 'r': regno = EXTRACT_OPERAND (RS3, l); break;
+	      case 'u': regno = rs1; break; /* RS1 == RS2.  */
+	      default:
+		goto undefined_modifier;
+	      }
+	    if (xlen < w && (regno % (w / xlen)) != 0)
+	      print (info->stream, dis_style_text, "invalid%d", regno);
+	    else
+	      print (info->stream, dis_style_register, "%s",
+		     riscv_gpr_names[regno]);
+	    break;
+	  }
+
 	case '>':
 	  print (info->stream, dis_style_immediate, "0x%x",
 		 (int)EXTRACT_OPERAND (SHAMT, l));
