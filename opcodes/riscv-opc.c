@@ -121,8 +121,11 @@ const char * const riscv_vma[2] =
 #define MASK_RL (OP_MASK_RL << OP_SH_RL)
 #define MASK_AQRL (MASK_AQ | MASK_RL)
 #define MASK_SHAMT (OP_MASK_SHAMT << OP_SH_SHAMT)
+#define MATCH_SHAMT_REV_32   (0b11111 << OP_SH_SHAMT)
+#define MATCH_SHAMT_REV_64  (0b111111 << OP_SH_SHAMT)
 #define MATCH_SHAMT_REV8_32 (0b11000 << OP_SH_SHAMT)
 #define MATCH_SHAMT_REV8_64 (0b111000 << OP_SH_SHAMT)
+#define MATCH_SHAMT_REV8_H  (0b001000 << OP_SH_SHAMT)
 #define MATCH_SHAMT_BREV8 (0b00111 << OP_SH_SHAMT)
 #define MATCH_SHAMT_ZIP_32 (0b1111 << OP_SH_SHAMT)
 #define MATCH_SHAMT_ORC_B (0b00111 << OP_SH_SHAMT)
@@ -922,12 +925,13 @@ const struct riscv_opcode riscv_opcodes[] =
 {"wrs.nto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_NTO, MASK_WRS_NTO, match_opcode, 0 },
 {"wrs.sto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_STO, MASK_WRS_STO, match_opcode, 0 },
 
-/* Zbb or zbkb instructions.  */
-{"clz",        0, INSN_CLASS_ZBB,  "d,s",   MATCH_CLZ, MASK_CLZ, match_opcode, 0 },
+/* Zbb, Zbkb or Zbpbo instructions.  */
+{"clz",        0, INSN_CLASS_ZBB,    "d,s",   MATCH_CLZ, MASK_CLZ, match_opcode, INSN_HAS_EXT_VARS },
+{"clz",       32, INSN_CLASS_ZBPBO,  "d,s",   MATCH_CLZ, MASK_CLZ, match_opcode, INSN_HAS_EXT_VARS },
 {"ctz",        0, INSN_CLASS_ZBB,  "d,s",   MATCH_CTZ, MASK_CTZ, match_opcode, 0 },
 {"cpop",       0, INSN_CLASS_ZBB,  "d,s",   MATCH_CPOP, MASK_CPOP, match_opcode, 0 },
-{"min",        0, INSN_CLASS_ZBB,  "d,s,t", MATCH_MIN, MASK_MIN, match_opcode, 0 },
-{"max",        0, INSN_CLASS_ZBB,  "d,s,t", MATCH_MAX, MASK_MAX, match_opcode, 0 },
+{"min",        0, INSN_CLASS_ZBB_OR_ZBPBO,  "d,s,t", MATCH_MIN, MASK_MIN, match_opcode, 0 },
+{"max",        0, INSN_CLASS_ZBB_OR_ZBPBO,  "d,s,t", MATCH_MAX, MASK_MAX, match_opcode, 0 },
 {"minu",       0, INSN_CLASS_ZBB,  "d,s,t", MATCH_MINU, MASK_MINU, match_opcode, 0 },
 {"maxu",       0, INSN_CLASS_ZBB,  "d,s,t", MATCH_MAXU, MASK_MAXU, match_opcode, 0 },
 {"sext.b",     0, INSN_CLASS_ZBB,  "d,s",   MATCH_SEXT_B, MASK_SEXT_B, match_opcode, 0 },
@@ -945,7 +949,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"brev8",     64, INSN_CLASS_ZBKB,  "d,s",      MATCH_GREVI | MATCH_SHAMT_BREV8, MASK_GREVI | MASK_SHAMT, match_opcode, 0 },
 {"zip",       32, INSN_CLASS_ZBKB,  "d,s",      MATCH_SHFLI|MATCH_SHAMT_ZIP_32, MASK_SHFLI|MASK_SHAMT, match_opcode, 0 },
 {"unzip",     32, INSN_CLASS_ZBKB,  "d,s",      MATCH_UNSHFLI|MATCH_SHAMT_ZIP_32, MASK_UNSHFLI|MASK_SHAMT, match_opcode, 0 },
-{"pack",       0, INSN_CLASS_ZBKB,  "d,s,t",    MATCH_PACK, MASK_PACK, match_opcode, 0 },
+{"pack",       0, INSN_CLASS_ZBKB_OR_ZBPBO,  "d,s,t",    MATCH_PACK, MASK_PACK, match_opcode, 0 },
 {"packh",      0, INSN_CLASS_ZBKB,  "d,s,t",    MATCH_PACKH, MASK_PACKH, match_opcode, 0 },
 {"packw",     64, INSN_CLASS_ZBKB,  "d,s,t",    MATCH_PACKW, MASK_PACKW, match_opcode, 0 },
 {"andn",       0, INSN_CLASS_ZBB_OR_ZBKB,  "d,s,t", MATCH_ANDN, MASK_ANDN, match_opcode, 0 },
@@ -996,6 +1000,18 @@ const struct riscv_opcode riscv_opcodes[] =
 /* Zbkx instructions.  */
 {"xperm4",     0, INSN_CLASS_ZBKX,  "d,s,t",  MATCH_XPERM4, MASK_XPERM4, match_opcode, 0 },
 {"xperm8",     0, INSN_CLASS_ZBKX,  "d,s,t",  MATCH_XPERM8, MASK_XPERM8, match_opcode, 0 },
+
+/* Zbpbo instructions.  */
+{"cmix",       0, INSN_CLASS_ZBPBO,       "d,t,s,r",      MATCH_CMIX, MASK_CMIX, match_opcode, 0 },
+{"bpick",      0, INSN_CLASS_ZBPBO,       "d,s,r,t",      MATCH_CMIX, MASK_CMIX, match_opcode, INSN_ALIAS },
+{"fsr",       32, INSN_CLASS_ZBPBO,       "d,s,r,t",      MATCH_FSR, MASK_FSR, match_opcode, 0 },
+{"fsri",      32, INSN_CLASS_ZBPBO,       "d,s,r,XU6@20", MATCH_FSRI, MASK_FSRI, match_opcode, 0 },
+{"fsrw",      64, INSN_CLASS_ZBPBO,       "d,s,r,t",      MATCH_FSRW, MASK_FSRW, match_opcode, 0 },
+{"packu",      0, INSN_CLASS_ZBPBO,       "d,s,t",        MATCH_PACKU, MASK_PACKU, match_opcode, 0 },
+{"rev",       32, INSN_CLASS_ZBPBO,       "d,s",          MATCH_GREVI|MATCH_SHAMT_REV_32, MASK_GREVI|MASK_SHAMT, match_opcode, 0 },
+{"rev",       64, INSN_CLASS_ZBPBO,       "d,s",          MATCH_GREVI|MATCH_SHAMT_REV_64, MASK_GREVI|MASK_SHAMT, match_opcode, 0 },
+{"rev8.h",     0, INSN_CLASS_ZBPBO,       "d,s",          MATCH_GREVI|MATCH_SHAMT_REV8_H, MASK_GREVI|MASK_SHAMT, match_opcode, 0 },
+{"swap8",      0, INSN_CLASS_ZBPBO,       "d,s",          MATCH_GREVI|MATCH_SHAMT_REV8_H, MASK_GREVI|MASK_SHAMT, match_opcode, INSN_ALIAS },
 
 /* Zknd instructions.  */
 {"aes32dsi",  32, INSN_CLASS_ZKND,  "d,s,t,y",  MATCH_AES32DSI, MASK_AES32DSI, match_opcode, 0 },

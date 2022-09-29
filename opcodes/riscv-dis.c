@@ -414,6 +414,11 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		 riscv_gpr_names[EXTRACT_OPERAND (RS2, l)]);
 	  break;
 
+	case 'r':
+	  print (info->stream, dis_style_register, "%s",
+		 riscv_gpr_names[EXTRACT_OPERAND (RS3, l)]);
+	  break;
+
 	case 'u':
 	  print (info->stream, dis_style_immediate, "0x%x",
 		 (unsigned)EXTRACT_UTYPE_IMM (l) >> RISCV_IMM_BITS);

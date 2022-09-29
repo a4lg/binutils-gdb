@@ -2421,6 +2421,12 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      */
 	      switch (insn_class)
 		{
+		case INSN_CLASS_ZBB:
+		case INSN_CLASS_ZBPBO:
+		  if (*riscv_rps_as.xlen == 32
+		      && strcmp (insn->name, "clz") == 0)
+		    insn_class = INSN_CLASS_ZBB_OR_ZBPBO;
+		  break;
 		default:
 		  break;
 		}

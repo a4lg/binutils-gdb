@@ -1177,6 +1177,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zbkb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zbkc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zbkx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zbpbo",		ISA_SPEC_CLASS_DRAFT,		0, 9,  0 },
   {"zk",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zkn",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zknd",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -2370,12 +2371,20 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zbkc");
     case INSN_CLASS_ZBKX:
       return riscv_subset_supports (rps, "zbkx");
+    case INSN_CLASS_ZBPBO:
+      return riscv_subset_supports (rps, "zbpbo");
     case INSN_CLASS_ZBB_OR_ZBKB:
       return (riscv_subset_supports (rps, "zbb")
 	      || riscv_subset_supports (rps, "zbkb"));
+    case INSN_CLASS_ZBB_OR_ZBPBO:
+      return (riscv_subset_supports (rps, "zbb")
+	      || riscv_subset_supports (rps, "zbpbo"));
     case INSN_CLASS_ZBC_OR_ZBKC:
       return (riscv_subset_supports (rps, "zbc")
 	      || riscv_subset_supports (rps, "zbkc"));
+    case INSN_CLASS_ZBKB_OR_ZBPBO:
+      return (riscv_subset_supports (rps, "zbkb")
+	      || riscv_subset_supports (rps, "zbpbo"));
     case INSN_CLASS_ZKND:
       return riscv_subset_supports (rps, "zknd");
     case INSN_CLASS_ZKNE:
@@ -2527,10 +2536,16 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zbkc";
     case INSN_CLASS_ZBKX:
       return "zbkx";
+    case INSN_CLASS_ZBPBO:
+      return "zbpbo";
     case INSN_CLASS_ZBB_OR_ZBKB:
       return _("zbb' or `zbkb");
+    case INSN_CLASS_ZBB_OR_ZBPBO:
+      return _("zbb' or `zbpbo");
     case INSN_CLASS_ZBC_OR_ZBKC:
       return _("zbc' or `zbkc");
+    case INSN_CLASS_ZBKB_OR_ZBPBO:
+      return _("zbkb' or `zbpbo");
     case INSN_CLASS_ZKND:
       return "zknd";
     case INSN_CLASS_ZKNE:
