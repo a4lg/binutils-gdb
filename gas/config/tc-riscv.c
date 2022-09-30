@@ -2376,6 +2376,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
   unsigned int regno;
   const struct percent_op_match *p;
   struct riscv_ip_error error;
+  enum riscv_insn_class insn_class;
   error.msg = "unrecognized opcode";
   error.statement = str;
   error.missing_ext = NULL;
@@ -2402,8 +2403,30 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 
       if (!riscv_multi_subset_supports (&riscv_rps_as, insn->insn_class))
 	{
-	  error.missing_ext = riscv_multi_subset_supports_ext (&riscv_rps_as,
-							       insn->insn_class);
+	  insn_class = insn->insn_class;
+	  if (insn->pinfo != INSN_MACRO && insn->pinfo & INSN_HAS_EXT_VARS)
+	    {
+	      /*  If an instruction is not supported for example, there is a
+		  case where some extensions (that is not related to the last
+		  "same name" variants) should be printed for diagnostics.
+
+		  For instance, if parsing "fmin.d" fails on both 'D' and
+		  'Zdinx' variants, we have to require 'D' or 'Zdinx', not just
+		  'Zdinx', the last "fmin.d" variant in riscv_opcodes.
+
+		  For instructions with INSN_HAS_EXT_VARS, we should rewrite the
+		  instruction class (from a specific one to a generic one)
+		  to provide proper error output.
+	      */
+	      switch (insn_class)
+		{
+		default:
+		  break;
+		}
+	    }
+	  if (!riscv_multi_subset_supports (&riscv_rps_as, insn_class))
+	    error.missing_ext = riscv_multi_subset_supports_ext (&riscv_rps_as,
+								 insn_class);
 	  continue;
 	}
 

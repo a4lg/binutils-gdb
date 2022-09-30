@@ -496,6 +496,11 @@ struct riscv_opcode
 #define INSN_8_BYTE		0x00000040
 #define INSN_16_BYTE		0x00000050
 
+/* Instruction has different entry that shares the name but differs
+   in extension requirements (extension variants).  Those instructions must be
+   taken care if we should print an "extension required" error.  */
+#define INSN_HAS_EXT_VARS	0x00000080
+
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */
 #define INSN_MACRO		0xffffffff
