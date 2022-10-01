@@ -109,6 +109,7 @@ const char * const riscv_vma[2] =
 
 #define MASK_RS1 (OP_MASK_RS1 << OP_SH_RS1)
 #define MASK_RS2 (OP_MASK_RS2 << OP_SH_RS2)
+#define MASK_RS3 (OP_MASK_RS3 << OP_SH_RS3)
 #define MASK_RD (OP_MASK_RD << OP_SH_RD)
 #define MASK_CRS2 (OP_MASK_CRS2 << OP_SH_CRS2)
 #define MASK_IMM ENCODE_ITYPE_IMM (-1U)
@@ -246,6 +247,17 @@ static int
 match_srxi_as_c_srxi (const struct riscv_opcode *op, insn_t insn)
 {
   return match_opcode (op, insn) && EXTRACT_CITYPE_IMM (insn) != 0;
+}
+
+/* This is used for both wext and wexti ('P'-extension proposal).
+   It requires that RS3 == RS1 + 1.  */
+
+static int
+match_wext (const struct riscv_opcode *op, insn_t insn)
+{
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  int rs3 = (insn & MASK_RS3) >> OP_SH_RS3;
+  return match_opcode (op, insn) && rs3 == rs1 + 1;
 }
 
 static int
@@ -1005,6 +1017,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"cmix",       0, INSN_CLASS_ZBPBO,       "d,t,s,r",      MATCH_CMIX, MASK_CMIX, match_opcode, 0 },
 {"bpick",      0, INSN_CLASS_ZBPBO,       "d,s,r,t",      MATCH_CMIX, MASK_CMIX, match_opcode, INSN_ALIAS },
 {"fsr",       32, INSN_CLASS_ZBPBO,       "d,s,r,t",      MATCH_FSR, MASK_FSR, match_opcode, 0 },
+{"wexti",     32, INSN_CLASS_ZBPBO,       "d,l2F,XU5@20", MATCH_FSRI, MASK_FSRI|(1ul<<25), match_wext, INSN_ALIAS },
 {"fsri",      32, INSN_CLASS_ZBPBO,       "d,s,r,XU6@20", MATCH_FSRI, MASK_FSRI, match_opcode, 0 },
 {"fsrw",      64, INSN_CLASS_ZBPBO,       "d,s,r,t",      MATCH_FSRW, MASK_FSRW, match_opcode, 0 },
 {"packu",      0, INSN_CLASS_ZBPBO,       "d,s,t",        MATCH_PACKU, MASK_PACKU, match_opcode, 0 },

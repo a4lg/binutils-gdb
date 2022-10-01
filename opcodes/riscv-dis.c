@@ -512,6 +512,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	      case 't': regno = EXTRACT_OPERAND (RS2, l); break;
 	      case 'r': regno = EXTRACT_OPERAND (RS3, l); break;
 	      case 'u': regno = rs1; break; /* RS1 == RS2.  */
+	      case 'F': regno = rs1; break; /* RS1.  RS3 == RS1 + 1.  */
 	      default:
 		goto undefined_modifier;
 	      }

@@ -1271,6 +1271,10 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	      USE_BITS (OP_MASK_RS1, OP_SH_RS1);
 	      USE_BITS (OP_MASK_RS2, OP_SH_RS2);
 	      break;
+	    case 'F': /* For funnel shift aliases (RS3 == RS1 + 1).  */
+	      USE_BITS (OP_MASK_RS1, OP_SH_RS1);
+	      USE_BITS (OP_MASK_RS3, OP_SH_RS3);
+	      break;
 	    default:
 	      goto unknown_validate_operand;
 	    }
@@ -3115,6 +3119,10 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    case 'u':
 		      INSERT_OPERAND (RS1, *ip, regno);
 		      INSERT_OPERAND (RS2, *ip, regno);
+		      break;
+		    case 'F':
+		      INSERT_OPERAND (RS1, *ip, regno);
+		      INSERT_OPERAND (RS3, *ip, regno + 1);
 		      break;
 		    default:
 		      goto unknown_riscv_ip_operand;
