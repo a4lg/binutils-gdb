@@ -19,3 +19,8 @@ target:
 	# Aliases
 	bpick	a0, a1, a3, a2
 	swap8	a0, a1
+.ifdef rv32
+	wexti	a0, a2, 0
+	wexti	a0, a2, 31
+	fsri	a0, a2, a3, 0x3f	# Non-alias
+.endif
