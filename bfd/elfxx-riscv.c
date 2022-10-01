@@ -1101,6 +1101,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zks", "zbkx",	check_implicit_always},
   {"zks", "zksed",	check_implicit_always},
   {"zks", "zksh",	check_implicit_always},
+  {"zpn", "zicsr",	check_implicit_always},
+  {"zpn", "zmmul",	check_implicit_always},
   {"smaia", "ssaia",		check_implicit_always},
   {"smstateen", "ssstateen",	check_implicit_always},
   {"smepmp", "zicsr",		check_implicit_always},
@@ -1200,6 +1202,8 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zksed",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zksh",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zkt",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zpn",		ISA_SPEC_CLASS_DRAFT,		0, 9,  0 },
+  {"zpsfoperand",	ISA_SPEC_CLASS_DRAFT,		0, 9,  0 },
   {"zve32x",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zve32f",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zve32d",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -2355,6 +2359,10 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zksed");
     case INSN_CLASS_ZKSH:
       return riscv_subset_supports (rps, "zksh");
+    case INSN_CLASS_P:
+      return riscv_subset_supports (rps, "zpn");
+    case INSN_CLASS_ZPSFOPERAND:
+      return riscv_subset_supports (rps, "zpsfoperand");
     case INSN_CLASS_V:
       return (riscv_subset_supports (rps, "v")
 	      || riscv_subset_supports (rps, "zve64x")
@@ -2524,6 +2532,10 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zksed";
     case INSN_CLASS_ZKSH:
       return "zksh";
+    case INSN_CLASS_P:
+      return "zpn";
+    case INSN_CLASS_ZPSFOPERAND:
+      return "zpsfoperand";
     case INSN_CLASS_V:
       return _("v' or `zve64x' or `zve32x");
     case INSN_CLASS_ZVEF:
