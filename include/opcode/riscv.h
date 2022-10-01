@@ -539,6 +539,7 @@ enum
   M_VMSGEU,
   M_FLH,
   M_FSH,
+  M_WEXT,
   M_NUM_MACROS
 };
 
