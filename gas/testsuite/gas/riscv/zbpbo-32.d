@@ -21,3 +21,6 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+6ff5d513[ 	]+fsri[ 	]+a0,a1,a3,0x3f
 [ 	]+[0-9a-f]+:[ 	]+6ec59533[ 	]+cmix[ 	]+a0,a2,a1,a3
 [ 	]+[0-9a-f]+:[ 	]+6885d513[ 	]+rev8\.h[ 	]+a0,a1
+[ 	]+[0-9a-f]+:[ 	]+6c065513[ 	]+wexti[ 	]+a0,a2,0x0
+[ 	]+[0-9a-f]+:[ 	]+6df65513[ 	]+wexti[ 	]+a0,a2,0x1f
+[ 	]+[0-9a-f]+:[ 	]+6ff65513[ 	]+fsri[ 	]+a0,a2,a3,0x3f
