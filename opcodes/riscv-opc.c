@@ -1016,6 +1016,7 @@ const struct riscv_opcode riscv_opcodes[] =
 /* Zbpbo instructions.  */
 {"cmix",       0, INSN_CLASS_ZBPBO,       "d,t,s,r",      MATCH_CMIX, MASK_CMIX, match_opcode, 0 },
 {"bpick",      0, INSN_CLASS_ZBPBO,       "d,s,r,t",      MATCH_CMIX, MASK_CMIX, match_opcode, INSN_ALIAS },
+{"wext",      32, INSN_CLASS_ZBPBO,       "d,l2F,t",      0, (int) M_WEXT, match_never, INSN_MACRO },
 {"fsr",       32, INSN_CLASS_ZBPBO,       "d,s,r,t",      MATCH_FSR, MASK_FSR, match_opcode, 0 },
 {"wexti",     32, INSN_CLASS_ZBPBO,       "d,l2F,XU5@20", MATCH_FSRI, MASK_FSRI|(1ul<<25), match_wext, INSN_ALIAS },
 {"fsri",      32, INSN_CLASS_ZBPBO,       "d,s,r,XU6@20", MATCH_FSRI, MASK_FSRI, match_opcode, 0 },

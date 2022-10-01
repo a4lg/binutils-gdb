@@ -1897,6 +1897,7 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
   int rd = (ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD;
   int rs1 = (ip->insn_opcode >> OP_SH_RS1) & OP_MASK_RS1;
   int rs2 = (ip->insn_opcode >> OP_SH_RS2) & OP_MASK_RS2;
+  int rs3 = (ip->insn_opcode >> OP_SH_RS3) & OP_MASK_RS3;
   int mask = ip->insn_mo->mask;
 
   switch (mask)
@@ -2038,6 +2039,12 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
     case M_FSH:
       pcrel_store (rs2, rs1, imm_expr, "fsh",
 		   BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_S);
+      break;
+
+    case M_WEXT:
+      /* BUG: If RD is either RS1 or RS1+1, the result is broken.  */
+      md_assemblef ("andi x%d, x%d, %u", rd, rs2, xlen - 1);
+      md_assemblef ("fsr x%d, x%d, x%d, x%d", rd, rs1, rs3, rd);
       break;
 
     default:
