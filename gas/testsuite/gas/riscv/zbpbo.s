@@ -24,3 +24,14 @@ target:
 	wexti	a0, a2, 31
 	fsri	a0, a2, a3, 0x3f	# Non-alias
 .endif
+
+	# Zpn-like aliases
+.ifdef rv32
+	pkbb16	a0, a1, a2
+	pktt16	a0, a1, a2
+	clz32	a0, a1
+.endif
+.ifdef rv64
+	pkbb32	a0, a1, a2
+	pktt32	a0, a1, a2
+.endif

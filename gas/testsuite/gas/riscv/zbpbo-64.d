@@ -18,3 +18,5 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+6cc5d53b[ 	]+fsrw[ 	]+a0,a1,a3,a2
 [ 	]+[0-9a-f]+:[ 	]+6ec59533[ 	]+cmix[ 	]+a0,a2,a1,a3
 [ 	]+[0-9a-f]+:[ 	]+6885d513[ 	]+rev8\.h[ 	]+a0,a1
+[ 	]+[0-9a-f]+:[ 	]+08b64533[ 	]+pack[ 	]+a0,a2,a1
+[ 	]+[0-9a-f]+:[ 	]+48b64533[ 	]+packu[ 	]+a0,a2,a1
