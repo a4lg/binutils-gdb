@@ -1309,6 +1309,7 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		case 's': /* 'XsN@S' ... N-bit signed immediate at bit S.  */
 		  goto use_imm;
 		case 'u': /* 'XuN@S' ... N-bit unsigned immediate at bit S.  */
+		case 'U': /* 'XUN@S' ... same but disassembled as hex.  */
 		  goto use_imm;
 		use_imm:
 		  n = strtol (oparg + 1, (char **)&oparg, 10);
@@ -3419,6 +3420,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      sign = true;
 		      goto parse_imm;
 		    case 'u': /* 'XuN@S' ... N-bit unsigned immediate at bit S.  */
+		    case 'U': /* 'XUN@S' ... same but disassembled as hex.  */
 		      sign = false;
 		      goto parse_imm;
 		    parse_imm:

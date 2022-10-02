@@ -598,8 +598,9 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    size_t n;
 	    size_t s;
 	    bool sign;
+	    char opch = *++oparg;
 
-	    switch (*++oparg)
+	    switch (opch)
 	      {
 		case 'l': /* Literal.  */
 		  oparg++;
@@ -614,6 +615,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		  sign = true;
 		  goto print_imm;
 		case 'u': /* 'XuN@S' ... N-bit unsigned immediate at bit S.  */
+		case 'U': /* 'XUN@S' ... same but disassembled as hex.  */
 		  sign = false;
 		  goto print_imm;
 		print_imm:
@@ -624,11 +626,12 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		  oparg--;
 
 		  if (!sign)
-		    print (info->stream, dis_style_immediate, "%u",
-			   (unsigned)EXTRACT_U_IMM (n, s, l));
+		    print (info->stream, dis_style_immediate,
+			   opch == 'U' ? "0x%lx" : "%lu",
+			   (unsigned long) EXTRACT_U_IMM (n, s, l));
 		  else
-		    print (info->stream, dis_style_immediate, "%i",
-			   (unsigned)EXTRACT_S_IMM (n, s, l));
+		    print (info->stream, dis_style_immediate, "%li",
+			   (signed long)EXTRACT_S_IMM (n, s, l));
 		  break;
 		default:
 		  goto undefined_modifier;
