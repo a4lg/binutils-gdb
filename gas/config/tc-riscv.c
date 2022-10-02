@@ -65,6 +65,7 @@ enum riscv_csr_class
   CSR_CLASS_F,		/* f-ext only */
   CSR_CLASS_ZKR,	/* zkr only */
   CSR_CLASS_V,		/* rvv only */
+  CSR_CLASS_V_OR_P,	/* RVV or RVP.  */
   CSR_CLASS_DEBUG,	/* debug CSR */
   CSR_CLASS_H,		/* hypervisor */
   CSR_CLASS_H_32,	/* hypervisor, rv32 only */
@@ -925,7 +926,9 @@ riscv_csr_address (const char *csr_name,
   bool need_check_version = false;
   bool is_rv32_only = false;
   bool is_h_required = false;
+  bool custom = true;
   const char* extension = NULL;
+  const char* custom_display = NULL;
 
   switch (csr_class)
     {
@@ -950,6 +953,11 @@ riscv_csr_address (const char *csr_name,
       break;
     case CSR_CLASS_V:
       extension = "zve32x";
+      break;
+    case CSR_CLASS_V_OR_P:
+      custom = riscv_subset_supports (&riscv_rps_as, "zve32x")
+	       || riscv_subset_supports (&riscv_rps_as, "zpn");
+      custom_display = "zve32x' or `zpn";
       break;
     case CSR_CLASS_SMSTATEEN:
     case CSR_CLASS_SMSTATEEN_AND_H:
@@ -994,6 +1002,9 @@ riscv_csr_address (const char *csr_name,
 	  && !riscv_subset_supports (&riscv_rps_as, extension))
 	as_warn (_("invalid CSR `%s', needs `%s' extension"),
 		 csr_name, extension);
+      if (custom_display != NULL && !custom)
+	as_warn (_("invalid CSR `%s', needs `%s' extension"),
+		 csr_name, custom_display);
     }
 
   while (entry != NULL)

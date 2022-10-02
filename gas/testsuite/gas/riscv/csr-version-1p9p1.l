@@ -680,8 +680,8 @@
 .*Warning: invalid CSR `seed', needs `zkr' extension
 .*Warning: invalid CSR `vstart', needs `zve32x' extension
 .*Warning: invalid CSR `vstart', needs `zve32x' extension
-.*Warning: invalid CSR `vxsat', needs `zve32x' extension
-.*Warning: invalid CSR `vxsat', needs `zve32x' extension
+.*Warning: invalid CSR `vxsat', needs `zve32x' or `zpn' extension
+.*Warning: invalid CSR `vxsat', needs `zve32x' or `zpn' extension
 .*Warning: invalid CSR `vxrm', needs `zve32x' extension
 .*Warning: invalid CSR `vxrm', needs `zve32x' extension
 .*Warning: invalid CSR `vcsr', needs `zve32x' extension
