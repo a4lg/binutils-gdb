@@ -1010,7 +1010,8 @@ riscv_elf_add_sub_reloc (bfd *abfd,
 
 static bool
 check_implicit_always (const char *implicit ATTRIBUTE_UNUSED,
-		       riscv_subset_t *subset ATTRIBUTE_UNUSED)
+		       riscv_subset_t *subset ATTRIBUTE_UNUSED,
+		       unsigned xlen ATTRIBUTE_UNUSED)
 {
   return true;
 }
@@ -1019,11 +1020,22 @@ check_implicit_always (const char *implicit ATTRIBUTE_UNUSED,
 
 static bool
 check_implicit_for_i (const char *implicit ATTRIBUTE_UNUSED,
-		      riscv_subset_t *subset)
+		      riscv_subset_t *subset,
+		      unsigned xlen ATTRIBUTE_UNUSED)
 {
   return (subset->major_version < 2
 	  || (subset->major_version == 2
 	      && subset->minor_version < 1));
+}
+
+/* Always add the IMPLICIT only if XLEN is larger than 32.  */
+
+static bool
+check_implicit_on_rv64 (const char *implicit ATTRIBUTE_UNUSED,
+			riscv_subset_t *subset ATTRIBUTE_UNUSED,
+			unsigned xlen)
+{
+  return xlen > 32;
 }
 
 /* Record all implicit information for the subsets.  */
@@ -1032,7 +1044,7 @@ struct riscv_implicit_subset
   const char *subset_name;
   const char *implicit_name;
   /* A function to determine if we need to add the implicit subset.  */
-  bool (*check_func) (const char *, riscv_subset_t *);
+  bool (*check_func) (const char *, riscv_subset_t *, unsigned);
 };
 static struct riscv_implicit_subset riscv_implicit_subsets[] =
 {
@@ -1096,6 +1108,9 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zks", "zbkx",	check_implicit_always},
   {"zks", "zksed",	check_implicit_always},
   {"zks", "zksh",	check_implicit_always},
+  {"p", "zbpbo",	check_implicit_always},
+  {"p", "zpn",		check_implicit_always},
+  {"p", "zpsfoperand",	check_implicit_on_rv64},
   {"zpn", "zicsr",	check_implicit_always},
   {"zpn", "zmmul",	check_implicit_always},
   {NULL, NULL, NULL}
@@ -1148,6 +1163,7 @@ static struct riscv_supported_ext riscv_supported_std_ext[] =
   {"c",		ISA_SPEC_CLASS_20191213,	2, 0, 0 },
   {"c",		ISA_SPEC_CLASS_20190608,	2, 0, 0 },
   {"c",		ISA_SPEC_CLASS_2P2,		2, 0, 0 },
+  {"p",		ISA_SPEC_CLASS_DRAFT,		0, 9, 0 },
   {"v",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"h",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {NULL, 0, 0, 0, 0}
@@ -1839,7 +1855,7 @@ riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
     {
       riscv_subset_t *subset = NULL;
       if (riscv_lookup_subset (rps->subset_list, t->subset_name, &subset)
-	  && t->check_func (t->implicit_name, subset))
+	  && t->check_func (t->implicit_name, subset, *rps->xlen))
 	riscv_parse_add_subset (rps, t->implicit_name,
 				RISCV_UNKNOWN_VERSION,
 				RISCV_UNKNOWN_VERSION, true);
