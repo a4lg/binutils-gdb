@@ -383,11 +383,6 @@ RANLIB_FOR_BUILD = @RANLIB_FOR_BUILD@
 WINDMC_FOR_BUILD = @WINDMC_FOR_BUILD@
 WINDRES_FOR_BUILD = @WINDRES_FOR_BUILD@
 
-# Special variables passed down in EXTRA_GCC_FLAGS.  They are defined
-# here so that they can be overridden by Makefile fragments.
-BUILD_PREFIX = @BUILD_PREFIX@
-BUILD_PREFIX_1 = @BUILD_PREFIX_1@
-
 # Flags to pass to stage2 and later makes.  They are defined
 # here so that they can be overridden by Makefile fragments.
 BOOT_CFLAGS= -g -O2
