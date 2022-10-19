@@ -148,7 +148,7 @@ hw_sem_init_data(device *me)
       error("hw_sem_init_data() semget failed\n");
   }
 
-  sem->count = semctl( sem->id, 0, GETVAL, help );
+  sem->count = semctl( sem->id, 0, GETVAL, 0 );
   if (sem->count == -1)
     error("hw_sem_init_data() semctl -- get value failed\n");
   DTRACE(sem, ("semaphore OS value (%d)\n", sem->count) );
@@ -241,7 +241,7 @@ hw_sem_io_read_buffer(device *me,
   }
 
   /* assume target is big endian */
-  u32 = H2T_4(semctl( sem->id, 0, GETVAL, help ));
+  u32 = H2T_4(semctl( sem->id, 0, GETVAL, 0 ));
 
   DTRACE(sem, ("semaphore OS value (%d)\n", u32) );
   if (u32 == 0xffffffff) {
