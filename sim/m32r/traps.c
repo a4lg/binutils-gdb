@@ -55,6 +55,21 @@
 #include <linux/unistd.h>
 #endif
 
+/* From cpu.h, cpux.h and cpu2.h.  */
+SI m32rbf_h_gr_get (SIM_CPU *, UINT);
+void m32rbf_h_gr_set (SIM_CPU *, UINT, SI);
+USI m32rbf_h_cr_get (SIM_CPU *, UINT);
+void m32rbf_h_cr_set (SIM_CPU *, UINT, USI);
+UQI m32rbf_h_psw_get (SIM_CPU *);
+void m32rbf_h_psw_set (SIM_CPU *, UQI);
+void m32rbf_h_bpsw_set (SIM_CPU *, UQI);
+UQI m32rxf_h_psw_get (SIM_CPU *);
+void m32rxf_h_psw_set (SIM_CPU *, UQI);
+void m32rxf_h_bpsw_set (SIM_CPU *, UQI);
+UQI m32r2f_h_psw_get (SIM_CPU *);
+void m32r2f_h_psw_set (SIM_CPU *, UQI);
+void m32r2f_h_bpsw_set (SIM_CPU *, UQI);
+
 #define TRAP_LINUX_SYSCALL 2
 #define TRAP_FLUSH_CACHE 12
 /* The semantic code invokes this for invalid (unrecognized) instructions.  */

@@ -26,6 +26,11 @@
 #include "sim-main.h"
 #include "cgen-mem.h"
 #include "cgen-ops.h"
+#include "decode.h"
+
+/* From cpu.h.  */
+extern CPUREG_FETCH_FN m32rbf_fetch_register;
+extern CPUREG_STORE_FN m32rbf_store_register;
 
 /* The contents of BUF are in target byte order.  */
 
