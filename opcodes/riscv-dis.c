@@ -72,7 +72,7 @@ static const char * const *riscv_fpr_names;
 
 /* If set, disassemble as most general instruction.  */
 static bool no_aliases = false;
-
+
 
 /* Set default RISC-V disassembler options.  */
 
@@ -174,6 +174,7 @@ parse_riscv_dis_options (const char *opts_in)
 
   free (opts);
 }
+
 
 /* Print one argument from an array.  */
 
