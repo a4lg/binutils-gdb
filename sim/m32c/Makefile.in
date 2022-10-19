@@ -40,4 +40,7 @@ SIM_OBJS = \
 	trace.o \
 	$(ENDLIST)
 
+# Some modules don't build cleanly yet.
+mem.o: SIM_WERROR_CFLAGS =
+
 ## COMMON_POST_CONFIG_FRAG
