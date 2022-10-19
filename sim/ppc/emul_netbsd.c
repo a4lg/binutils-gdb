@@ -888,6 +888,8 @@ do_fstat(os_emul_data *emul,
   status = fdbad (fd);
   if (status == 0)
     status = fstat(fd, &buf);
+  else
+    memset (&buf, 0, sizeof (buf));
   emul_write_status(processor, status, errno);
   write_stat(stat_buf_addr, buf, processor, cia);
 }
