@@ -35,6 +35,9 @@
 
 #define M32R_DEFAULT_MEM_SIZE 0x2000000 /* 32M */
 
+/* From cpu.h.  */
+void m32rbf_h_cr_set (SIM_CPU *, UINT, USI);
+
 static void free_state (SIM_DESC);
 static void print_m32r_misc_cpu (SIM_CPU *cpu, bool verbose);
 
