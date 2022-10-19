@@ -42,9 +42,6 @@ extern int m32r_decode_gdb_ctrl_regnum (int);
 #define GET_H_SM() ((CPU (h_psw) & 0x80) != 0)
 
 #ifndef GET_H_CR
-extern USI  m32rbf_h_cr_get_handler (SIM_CPU *, UINT);
-extern void m32rbf_h_cr_set_handler (SIM_CPU *, UINT, USI);
-
 #define GET_H_CR(regno) \
   XCONCAT2 (WANT_CPU,_h_cr_get_handler) (current_cpu, (regno))
 #define SET_H_CR(regno, val) \
@@ -52,9 +49,6 @@ extern void m32rbf_h_cr_set_handler (SIM_CPU *, UINT, USI);
 #endif
 
 #ifndef  GET_H_PSW
-extern UQI  m32rbf_h_psw_get_handler (SIM_CPU *);
-extern void m32rbf_h_psw_set_handler (SIM_CPU *, UQI);
-
 #define GET_H_PSW() \
   XCONCAT2 (WANT_CPU,_h_psw_get_handler) (current_cpu)
 #define SET_H_PSW(val) \
@@ -68,8 +62,26 @@ extern void m32rbf_h_psw_set_handler (SIM_CPU *, UQI);
 
    The correct solution is to fix the code in cgen/sim.scm to generate
    prototypes for each of the functions it generates.  */
+extern USI  m32rbf_h_cr_get_handler (SIM_CPU *, UINT);
+extern void m32rbf_h_cr_set_handler (SIM_CPU *, UINT, USI);
+extern USI  m32rxf_h_cr_get_handler (SIM_CPU *, UINT);
+extern void m32rxf_h_cr_set_handler (SIM_CPU *, UINT, USI);
+extern USI  m32r2f_h_cr_get_handler (SIM_CPU *, UINT);
+extern void m32r2f_h_cr_set_handler (SIM_CPU *, UINT, USI);
+extern UQI  m32rbf_h_psw_get_handler (SIM_CPU *);
+extern void m32rbf_h_psw_set_handler (SIM_CPU *, UQI);
+extern UQI  m32rxf_h_psw_get_handler (SIM_CPU *);
+extern void m32rxf_h_psw_set_handler (SIM_CPU *, UQI);
+extern UQI  m32r2f_h_psw_get_handler (SIM_CPU *);
+extern void m32r2f_h_psw_set_handler (SIM_CPU *, UQI);
 extern DI   m32rbf_h_accum_get_handler (SIM_CPU *);
 extern void m32rbf_h_accum_set_handler (SIM_CPU *, DI);
+extern DI   m32rxf_h_accum_get_handler (SIM_CPU *);
+extern void m32rxf_h_accum_set_handler (SIM_CPU *, DI);
+extern DI   m32r2f_h_accum_get_handler (SIM_CPU *);
+extern void m32r2f_h_accum_set_handler (SIM_CPU *, DI);
+extern DI   m32rxf_h_accums_get_handler (SIM_CPU *, UINT);
+extern void m32rxf_h_accums_set_handler (SIM_CPU *, UINT, DI);
 extern DI   m32r2f_h_accums_get_handler (SIM_CPU *, UINT);
 extern void m32r2f_h_accums_set_handler (SIM_CPU *, UINT, DI);
 
