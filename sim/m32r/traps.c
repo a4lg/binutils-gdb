@@ -20,6 +20,7 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include "diagnostics.h"
 #include "portability.h"
 #include "sim-main.h"
 #include "sim-signal.h"
@@ -38,9 +39,14 @@
    NB: The emulation is also missing argument conversion (endian & bitsize)
    even on Linux hosts.  */
 #ifdef __linux__
+#include <sys/file.h>
+#include <sys/fsuid.h>
+#include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/poll.h>
 #include <sys/resource.h>
+#include <sys/sendfile.h>
+#include <sys/syscall.h>
 #include <sys/sysinfo.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -397,7 +403,10 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	    {
 	      struct timeb t;
 
+DIAGNOSTIC_PUSH
+DIAGNOSTIC_IGNORE_DEPRECATED_DECLARATIONS
 	      result = ftime (&t);
+DIAGNOSTIC_POP
 	      errcode = errno;
 
 	      if (result != 0)
@@ -851,7 +860,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	    break;
 
 	  case TARGET_LINUX_SYS_syslog:
-	    result = syslog (arg1, (char *) t2h_addr (cb, &s, arg2));
+	    result = syscall (SYS_syslog, arg1, (char *) t2h_addr (cb, &s, arg2), arg3);
 	    errcode = errno;
 	    break;
 
