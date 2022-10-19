@@ -754,14 +754,6 @@ typedef union {
   float f;
 } FloatInt;
 
-static inline int
-float2int (float f)
-{
-  FloatInt fi;
-  fi.f = f;
-  return fi.i;
-}
-
 static inline float
 int2float (int i)
 {
