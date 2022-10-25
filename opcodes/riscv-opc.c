@@ -939,7 +939,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"wrs.nto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_NTO, MASK_WRS_NTO, match_opcode, 0 },
 {"wrs.sto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_STO, MASK_WRS_STO, match_opcode, 0 },
 
-/* Zbb or zbkb instructions.  */
+/* Zbb or Zbkb instructions.  */
 {"clz",        0, INSN_CLASS_ZBB,  "d,s",   MATCH_CLZ, MASK_CLZ, match_opcode, 0 },
 {"ctz",        0, INSN_CLASS_ZBB,  "d,s",   MATCH_CTZ, MASK_CTZ, match_opcode, 0 },
 {"cpop",       0, INSN_CLASS_ZBB,  "d,s",   MATCH_CPOP, MASK_CPOP, match_opcode, 0 },
@@ -991,7 +991,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"add.uw",    64, INSN_CLASS_ZBA,  "d,s,t", MATCH_ADD_UW, MASK_ADD_UW, match_opcode, 0 },
 {"slli.uw",   64, INSN_CLASS_ZBA,  "d,s,>", MATCH_SLLI_UW, MASK_SLLI_UW, match_opcode, 0 },
 
-/* Zbc or zbkc instructions.  */
+/* Zbc or Zbkc instructions.  */
 {"clmul",      0, INSN_CLASS_ZBC_OR_ZBKC,  "d,s,t", MATCH_CLMUL, MASK_CLMUL, match_opcode, 0 },
 {"clmulh",     0, INSN_CLASS_ZBC_OR_ZBKC,  "d,s,t", MATCH_CLMULH, MASK_CLMULH, match_opcode, 0 },
 {"clmulr",     0, INSN_CLASS_ZBC,  "d,s,t", MATCH_CLMULR, MASK_CLMULR, match_opcode, 0 },
