@@ -321,6 +321,24 @@ _start:
 	.cfi_offset mvienh, 3168
 	.cfi_offset mviph, 3172
 	.cfi_offset miph, 3408
+	# Smclic/Ssclic/Suclic extensions
+	.cfi_offset mtvt, 3100
+	.cfi_offset mnxti, 3348
+	.cfi_offset mintstatus, 16068
+	.cfi_offset mintthresh, 3356
+	.cfi_offset mscratchcsw, 3360
+	.cfi_offset mscratchcswl, 3364
+	.cfi_offset stvt, 1052
+	.cfi_offset snxti, 1300
+	.cfi_offset sintstatus, 14020
+	.cfi_offset sintthresh, 1308
+	.cfi_offset sscratchcsw, 1312
+	.cfi_offset sscratchcswl, 1316
+	.cfi_offset utvt, 28
+	.cfi_offset unxti, 276
+	.cfi_offset uintstatus, 12996
+	.cfi_offset uintthresh, 284
+	.cfi_offset uscratchcswl, 292
 	# Smcntrpmf extension
 	.cfi_offset mcyclecfg, 3204
 	.cfi_offset minstretcfg, 3208
