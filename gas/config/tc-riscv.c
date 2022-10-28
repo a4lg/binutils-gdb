@@ -470,10 +470,12 @@ static char *expr_end;
 #define OPCODE_MATCHES(OPCODE, OP) \
   (((OPCODE) & MASK_##OP) == MATCH_##OP)
 
-/* Indicate if .option directives do affect instructions.  Set to true means
-   we need to add $x+arch at somewhere; Otherwise just add $x for instructions
-   should be enough.  */
-static bool need_arch_map_symbol = false;
+/* Indicate if .option directives changed the architecture so that
+   two or more architectures are simultaneously used in one segment.
+   Set to true means that we need to add $x+arch at somewhere; Otherwise check
+   default architecture (to be written as an ELF attribute) and decide whether
+   we need to replace $x+arch with $x.  */
+static bool arch_changed_in_seg = false;
 
 /* Create a new mapping symbol for the transition to STATE.  */
 
@@ -579,7 +581,7 @@ riscv_mapping_state (enum riscv_seg_mstate to_state,
 		      S_GET_NAME (seg_arch_symbol) + 2) != 0)
     {
       reset_seg_arch_str = true;
-      need_arch_map_symbol = true;
+      arch_changed_in_seg = true;
     }
   else if (from_state == to_state)
     return;
@@ -634,11 +636,15 @@ riscv_check_mapping_symbols (bfd *abfd ATTRIBUTE_UNUSED,
   if (seginfo == NULL || seginfo->frchainP == NULL)
     return;
 
-  /* If we don't set any .option arch directive, then the arch_map_symbol
-     in each segment must be the first instruction, and we don't need to
-     add $x+arch for them.  */
-  if (!need_arch_map_symbol
-      && seginfo->tc_segment_info_data.arch_map_symbol != 0)
+  /* If up to one architecture is used per segment, arch_map_symbol
+     (if exists) represents the architecture used in the segment.
+     Replace to $x if the architecture is the same as the default
+     architecture (to be written as an ELF attribute).  */
+  if (!arch_changed_in_seg
+      && seginfo->tc_segment_info_data.arch_map_symbol != 0
+      && strcmp (riscv_rps_as.subset_list->arch_str,
+		 S_GET_NAME (seginfo->tc_segment_info_data.arch_map_symbol) + 2)
+	 == 0)
     S_SET_NAME (seginfo->tc_segment_info_data.arch_map_symbol, "$x");
 
   for (fragp = seginfo->frchainP->frch_root;
