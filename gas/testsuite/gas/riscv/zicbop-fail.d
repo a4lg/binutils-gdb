@@ -1,3 +1,2 @@
-#as: -march=rv64g_zicbop
-#source: zicbop-fail.s
+#as: -march=rv32i_zicbop
 #error_output: zicbop-fail.l
