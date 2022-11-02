@@ -1,0 +1,11 @@
+.*: Assembler messages:
+.*: Error: illegal operands `cbo\.clean 1\(x1\)'
+.*: Error: illegal operands `cbo\.clean x30'
+.*: Error: illegal operands `cbo\.flush \(0\+1\)\(x1\)'
+.*: Error: illegal operands `cbo\.flush x30'
+.*: Error: illegal operands `cbo\.inval 3\*2\+5\(x1\)'
+.*: Error: illegal operands `cbo\.inval x30'
+.*: Error: illegal operands `cbo\.zero x1'
+.*: Error: illegal operands `cbo\.zero 1\(x30\)'
+.*: Error: illegal operands `cbo\.zero 3\+5\(x1\)'
+.*: Error: illegal operands `cbo\.zero \(2\*4\)\(x30\)'
