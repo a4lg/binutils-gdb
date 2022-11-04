@@ -1,4 +1,4 @@
-#as: -march=rv64im -defsym rv64=1
+#as: -march=rv64i -I$srcdir/$subdir -defsym XLEN=64
 #source: m-ext.s
 #objdump: -d
 
