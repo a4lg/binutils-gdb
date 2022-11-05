@@ -1,8 +1,8 @@
-#as: -march=rv32ic
+#as: -march=rv32ic -defsym XLEN=32
 #source: dis-addr-overflow.s
 #objdump: -d
 
-.*:     file format elf32-(little|big)riscv
+.*:[ 	]+file format .*
 
 
 Disassembly of section .text:

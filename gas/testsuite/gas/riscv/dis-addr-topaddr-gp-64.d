@@ -1,8 +1,8 @@
-#as: -march=rv64i -defsym rv64=1
+#as: -march=rv64i -defsym XLEN=64
 #source: dis-addr-topaddr-gp.s
 #objdump: -d
 
-.*:     file format elf64-(little|big)riscv
+.*:[ 	]+file format .*
 
 
 Disassembly of section .text:

@@ -1,8 +1,8 @@
-#as: -march=rv32ic
-#source: dis-addr-topaddr.s
+#as: -march=rv32i -defsym XLEN=32
+#source: dis-addr-topaddr-zero.s
 #objdump: -d
 
-.*:     file format elf32-(little|big)riscv
+.*:[ 	]+file format .*
 
 
 Disassembly of section .text:
