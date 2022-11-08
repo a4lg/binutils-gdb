@@ -52,11 +52,12 @@ static riscv_parse_subset_t riscv_rps_dis =
   false,		/* check_unknown_prefixed_ext.  */
 };
 
+/* Private data structure for the RISC-V disassembler.  */
 struct riscv_private_data
 {
   bfd_vma gp;
   bfd_vma print_addr;
-  bfd_vma hi_addr[OP_MASK_RD + 1];
+  bfd_vma hi_addr[NGPR];
   bool to_print_addr;
   bool has_gp;
 };
