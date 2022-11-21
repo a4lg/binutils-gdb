@@ -374,6 +374,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"c.ntl.s1",    0, INSN_CLASS_ZIHINTNTL_AND_C, "", MATCH_C_NTL_S1, MASK_C_NTL_S1, match_opcode, 0 },
 {"c.ntl.all",   0, INSN_CLASS_ZIHINTNTL_AND_C, "", MATCH_C_NTL_ALL, MASK_C_NTL_ALL, match_opcode, 0 },
 {"pause",       0, INSN_CLASS_ZIHINTPAUSE, "", MATCH_PAUSE, MASK_PAUSE, match_opcode, 0 },
+{"lpad",        0, INSN_CLASS_ZICFILP, "u", MATCH_LPAD, MASK_LPAD, match_opcode, 0 },
 
 /* Standard "May Be Ops" (and compressed aliases).  */
 {"sspush",     0, INSN_CLASS_ZICFISS, "d",  MATCH_C_SSPUSH, MASK_C_SSPUSH, match_opcode, INSN_ALIAS|INSN_DREF },

@@ -2396,6 +2396,9 @@
 #define MASK_MOP_RR_6 0xfe00707f
 #define MATCH_MOP_RR_7 0xce004073
 #define MASK_MOP_RR_7 0xfe00707f
+/* Zicfilp instructions.  */
+#define MATCH_LPAD 0x00000017
+#define MASK_LPAD 0x00000fff
 /* Zicfiss instructions.  */
 #define MATCH_SSPUSH 0x82004073
 #define MASK_SSPUSH 0xfe0fffff
