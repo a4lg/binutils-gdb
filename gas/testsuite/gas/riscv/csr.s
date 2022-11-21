@@ -510,3 +510,6 @@
 	csr vl
 	csr vtype
 	csr vlenb
+
+	# Control flow integrity (the Zicfiss extension)
+	csr ssp

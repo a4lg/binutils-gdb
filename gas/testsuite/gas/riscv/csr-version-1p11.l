@@ -1609,3 +1609,7 @@
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw vlenb,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `ssp', needs `zicfiss' extension
+.*Info: macro .*
+.*Warning: invalid CSR `ssp', needs `zicfiss' extension
+.*Info: macro .*
