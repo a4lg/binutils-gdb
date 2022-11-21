@@ -1207,6 +1207,14 @@
 .*Info: macro .*
 .*Warning: invalid CSR `vstimecmph', needs `sstc' extension
 .*Info: macro .*
+.*Warning: invalid CSR `lplr', needs `zisslpcfi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `lplr', needs `zisslpcfi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `ssp', needs `zisslpcfi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `ssp', needs `zisslpcfi' extension
+.*Info: macro .*
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.12'
 .*Info: macro .*
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.12'

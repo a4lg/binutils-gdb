@@ -773,6 +773,10 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+24d59073[ 	]+csrw[ 	]+vstimecmp,a1
 [ 	]+[0-9a-f]+:[ 	]+25d02573[ 	]+csrr[ 	]+a0,vstimecmph
 [ 	]+[0-9a-f]+:[ 	]+25d59073[ 	]+csrw[ 	]+vstimecmph,a1
+[ 	]+[0-9a-f]+:[ 	]+80002573[ 	]+csrr[ 	]+a0,lplr
+[ 	]+[0-9a-f]+:[ 	]+80059073[ 	]+csrw[ 	]+lplr,a1
+[ 	]+[0-9a-f]+:[ 	]+80102573[ 	]+csrr[ 	]+a0,ssp
+[ 	]+[0-9a-f]+:[ 	]+80159073[ 	]+csrw[ 	]+ssp,a1
 [ 	]+[0-9a-f]+:[ 	]+04302573[ 	]+csrr[ 	]+a0,0x43
 [ 	]+[0-9a-f]+:[ 	]+04359073[ 	]+csrw[ 	]+0x43,a1
 [ 	]+[0-9a-f]+:[ 	]+14302573[ 	]+csrr[ 	]+a0,stval

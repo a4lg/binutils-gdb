@@ -1087,6 +1087,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zhinx", "zhinxmin",	check_implicit_always},
   {"zhinxmin", "zfinx",	check_implicit_always},
   {"zfinx", "zicsr",	check_implicit_always},
+  {"zisslpcfi", "zicsr",	check_implicit_always},
+  {"zisslpcfi", "zimop",	check_implicit_always},
   {"zk", "zkn",		check_implicit_always},
   {"zk", "zkr",		check_implicit_always},
   {"zk", "zkt",		check_implicit_always},
@@ -1173,6 +1175,8 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zifencei",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
   {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
+  {"zimop",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
+  {"zisslpcfi",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
   {"zmmul",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zawrs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfh",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -2258,6 +2262,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zicbop");
     case INSN_CLASS_ZICBOZ:
       return riscv_subset_supports (rps, "zicboz");
+    case INSN_CLASS_ZISSLPCFI:
+      return riscv_subset_supports (rps, "zisslpcfi");
     case INSN_CLASS_ZICSR:
       return riscv_subset_supports (rps, "zicsr");
     case INSN_CLASS_ZIFENCEI:
@@ -2407,6 +2413,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zicbop";
     case INSN_CLASS_ZICBOZ:
       return "zicboz";
+    case INSN_CLASS_ZISSLPCFI:
+      return "zisslpcfi";
     case INSN_CLASS_ZICSR:
       return "zicsr";
     case INSN_CLASS_ZIFENCEI:

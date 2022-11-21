@@ -1,0 +1,20 @@
+.*: Assembler messages:
+.*: Error: illegal operands `sspush x0'
+.*: Error: illegal operands `sspop x0'
+.*: Error: illegal operands `ssprr x0'
+.*: Error: illegal operands `ssamoswap x0,t1,t2'
+.*: Error: illegal operands `sschkra x0,x0'
+.*: Error: illegal operands `sschkra x1,x5'
+.*: Error: illegal operands `sschkra x31,x31'
+.*: Error: improper immediate value \(-?[0-9]+\)
+.*: Error: improper immediate value \(512\)
+.*: Error: improper immediate value \(-?[0-9]+\)
+.*: Error: improper immediate value \(512\)
+.*: Error: improper immediate value \(-?[0-9]+\)
+.*: Error: improper immediate value \(256\)
+.*: Error: improper immediate value \(-?[0-9]+\)
+.*: Error: improper immediate value \(256\)
+.*: Error: improper immediate value \(-?[0-9]+\)
+.*: Error: improper immediate value \(256\)
+.*: Error: improper immediate value \(-?[0-9]+\)
+.*: Error: improper immediate value \(256\)

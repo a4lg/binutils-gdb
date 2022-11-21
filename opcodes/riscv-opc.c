@@ -172,6 +172,12 @@ match_rd_nonzero (const struct riscv_opcode *op, insn_t insn)
 }
 
 static int
+match_rs1_nonzero (const struct riscv_opcode *op, insn_t insn)
+{
+  return match_opcode (op, insn) && ((insn & MASK_RS1) != 0);
+}
+
+static int
 match_c_add (const struct riscv_opcode *op, insn_t insn)
 {
   return match_rd_nonzero (op, insn) && ((insn & MASK_CRS2) != 0);
@@ -317,6 +323,19 @@ const struct riscv_opcode riscv_opcodes[] =
 {"prefetch.r",  0, INSN_CLASS_ZICBOP, "f(s)", MATCH_PREFETCH_R, MASK_PREFETCH_R, match_opcode, 0 },
 {"prefetch.w",  0, INSN_CLASS_ZICBOP, "f(s)", MATCH_PREFETCH_W, MASK_PREFETCH_W, match_opcode, 0 },
 {"pause",       0, INSN_CLASS_ZIHINTPAUSE, "", MATCH_PAUSE, MASK_PAUSE, match_opcode, 0 },
+
+/* Standard "May Be Ops".  */
+{"sspush",     0, INSN_CLASS_ZISSLPCFI, "s",      MATCH_SSPUSH, MASK_SSPUSH, match_rs1_nonzero, INSN_DREF },
+{"sspop",      0, INSN_CLASS_ZISSLPCFI, "d",      MATCH_SSPOP, MASK_SSPOP, match_rd_nonzero, INSN_DREF },
+{"ssprr",      0, INSN_CLASS_ZISSLPCFI, "d",      MATCH_SSPRR, MASK_SSPRR, match_rd_nonzero, 0 },
+{"ssamoswap",  0, INSN_CLASS_ZISSLPCFI, "d,s,t",  MATCH_SSAMOSWAP, MASK_SSAMOSWAP, match_rd_nonzero, INSN_DREF },
+{"sschkra",    0, INSN_CLASS_ZISSLPCFI, "s,t",    MATCH_SSCHKRA, MASK_SSCHKRA, match_opcode, 0 },
+{"lpsll",      0, INSN_CLASS_ZISSLPCFI, "XU9@15", MATCH_LPSLL, MASK_LPSLL, match_opcode, 0 },
+{"lpcll",      0, INSN_CLASS_ZISSLPCFI, "XU9@15", MATCH_LPCLL, MASK_LPCLL, match_opcode, 0 },
+{"lpsml",      0, INSN_CLASS_ZISSLPCFI, "XU8@15", MATCH_LPSML, MASK_LPSML, match_opcode, 0 },
+{"lpcml",      0, INSN_CLASS_ZISSLPCFI, "XU8@15", MATCH_LPCML, MASK_LPCML, match_opcode, 0 },
+{"lpsul",      0, INSN_CLASS_ZISSLPCFI, "XU8@15", MATCH_LPSUL, MASK_LPSUL, match_opcode, 0 },
+{"lpcul",      0, INSN_CLASS_ZISSLPCFI, "XU8@15", MATCH_LPCUL, MASK_LPCUL, match_opcode, 0 },
 
 /* Basic RVI instructions and aliases.  */
 {"unimp",       0, INSN_CLASS_C, "",          0, 0xffffU, match_opcode, INSN_ALIAS },

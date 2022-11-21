@@ -1,0 +1,23 @@
+.*: Assembler messages:
+.*: Error: unrecognized opcode `sspush x1', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `sspush x5', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `sspop x1', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `sspop x5', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `ssprr a0', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `ssamoswap a1,a2,a3', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `ssamoswap t0,a0,x0', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `ssamoswap a4,x0,a5', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `sschkra x5,x1', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `sschkra t0,ra', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `lpsll 0x000', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `lpsll 0x1ff', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `lpcll 0x000', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `lpcll 0x1ff', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `lpsml 0x00', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `lpsml 0xff', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `lpcml 0x00', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `lpcml 0xff', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `lpsul 0x00', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `lpsul 0xff', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `lpcul 0x00', extension `zisslpcfi' required
+.*: Error: unrecognized opcode `lpcul 0xff', extension `zisslpcfi' required
