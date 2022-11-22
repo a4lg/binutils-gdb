@@ -2401,6 +2401,23 @@
 #define MASK_WRS_NTO 0xffffffff
 #define MATCH_WRS_STO 0x01d00073
 #define MASK_WRS_STO 0xffffffff
+/* Zcmop "may be" operations.  */
+#define MATCH_C_MOP_0 0x6081
+#define MASK_C_MOP_0 0xffff
+#define MATCH_C_MOP_1 0x6181
+#define MASK_C_MOP_1 0xffff
+#define MATCH_C_MOP_2 0x6281
+#define MASK_C_MOP_2 0xffff
+#define MATCH_C_MOP_3 0x6381
+#define MASK_C_MOP_3 0xffff
+#define MATCH_C_MOP_4 0x6481
+#define MASK_C_MOP_4 0xffff
+#define MATCH_C_MOP_5 0x6581
+#define MASK_C_MOP_5 0xffff
+#define MATCH_C_MOP_6 0x6681
+#define MASK_C_MOP_6 0xffff
+#define MATCH_C_MOP_7 0x6781
+#define MASK_C_MOP_7 0xffff
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 #define MATCH_TH_ADDSL 0x0000100b
 #define MASK_TH_ADDSL 0xf800707f
@@ -3556,6 +3573,15 @@ DECLARE_INSN(c_lhu, MATCH_C_LHU, MASK_C_LHU)
 DECLARE_INSN(c_lh, MATCH_C_LH, MASK_C_LH)
 DECLARE_INSN(c_sb, MATCH_C_SB, MASK_C_SB)
 DECLARE_INSN(c_sh, MATCH_C_SH, MASK_C_SH)
+/* Zcmop "may be" operations.  */
+DECLARE_INSN(c_mop_0, MATCH_C_MOP_0, MASK_C_MOP_0)
+DECLARE_INSN(c_mop_1, MATCH_C_MOP_1, MASK_C_MOP_1)
+DECLARE_INSN(c_mop_2, MATCH_C_MOP_2, MASK_C_MOP_2)
+DECLARE_INSN(c_mop_3, MATCH_C_MOP_3, MASK_C_MOP_3)
+DECLARE_INSN(c_mop_4, MATCH_C_MOP_4, MASK_C_MOP_4)
+DECLARE_INSN(c_mop_5, MATCH_C_MOP_5, MASK_C_MOP_5)
+DECLARE_INSN(c_mop_6, MATCH_C_MOP_6, MASK_C_MOP_6)
+DECLARE_INSN(c_mop_7, MATCH_C_MOP_7, MASK_C_MOP_7)
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 DECLARE_INSN(th_addsl, MATCH_TH_ADDSL, MASK_TH_ADDSL)
 /* Vendor-specific (T-Head) XTheadBb instructions.  */

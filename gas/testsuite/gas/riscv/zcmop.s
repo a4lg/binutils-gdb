@@ -1,0 +1,9 @@
+target:
+	c.mop.0
+	c.mop.1
+	c.mop.2
+	c.mop.3
+	c.mop.4
+	c.mop.5
+	c.mop.6
+	c.mop.7

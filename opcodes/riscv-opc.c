@@ -2021,6 +2021,16 @@ const struct riscv_opcode riscv_opcodes[] =
 {"mop.rr.6",  0, INSN_CLASS_ZIMOP, "d,s,t", MATCH_MOP_RR_6, MASK_MOP_RR_6, match_opcode, 0 },
 {"mop.rr.7",  0, INSN_CLASS_ZIMOP, "d,s,t", MATCH_MOP_RR_7, MASK_MOP_RR_7, match_opcode, 0 },
 
+/* Zcmop "may be" operations.  */
+{"c.mop.0",   0, INSN_CLASS_ZCMOP, "", MATCH_C_MOP_0, MASK_C_MOP_0, match_opcode, 0 },
+{"c.mop.1",   0, INSN_CLASS_ZCMOP, "", MATCH_C_MOP_1, MASK_C_MOP_1, match_opcode, 0 },
+{"c.mop.2",   0, INSN_CLASS_ZCMOP, "", MATCH_C_MOP_2, MASK_C_MOP_2, match_opcode, 0 },
+{"c.mop.3",   0, INSN_CLASS_ZCMOP, "", MATCH_C_MOP_3, MASK_C_MOP_3, match_opcode, 0 },
+{"c.mop.4",   0, INSN_CLASS_ZCMOP, "", MATCH_C_MOP_4, MASK_C_MOP_4, match_opcode, 0 },
+{"c.mop.5",   0, INSN_CLASS_ZCMOP, "", MATCH_C_MOP_5, MASK_C_MOP_5, match_opcode, 0 },
+{"c.mop.6",   0, INSN_CLASS_ZCMOP, "", MATCH_C_MOP_6, MASK_C_MOP_6, match_opcode, 0 },
+{"c.mop.7",   0, INSN_CLASS_ZCMOP, "", MATCH_C_MOP_7, MASK_C_MOP_7, match_opcode, 0 },
+
 /* Supervisor instructions.  */
 {"csrr",       0, INSN_CLASS_ZICSR, "d,E",   MATCH_CSRRS, MASK_CSRRS|MASK_RS1, match_opcode, INSN_ALIAS },
 {"csrwi",      0, INSN_CLASS_ZICSR, "E,Z",   MATCH_CSRRWI, MASK_CSRRWI|MASK_RD, match_opcode, INSN_ALIAS },
