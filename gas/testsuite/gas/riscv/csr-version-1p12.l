@@ -1199,6 +1199,370 @@
 .*Info: macro .*
 .*Warning: invalid CSR `mhpmevent31h', needs `sscofpmf' extension
 .*Info: macro .*
+.*Warning: invalid CSR `spmpcfg0', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg0', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg1', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg1', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg1', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg1', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg2', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg2', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg3', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg3', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg3', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg3', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg4', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg4', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg5', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg5', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg5', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg5', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg6', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg6', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg7', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg7', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg7', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg7', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg8', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg8', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg9', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg9', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg9', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg9', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg10', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg10', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg11', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg11', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg11', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg11', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg12', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg12', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg13', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg13', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg13', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg13', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg14', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg14', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg15', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg15', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg15', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpcfg15', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpswitch0', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpswitch0', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpswitch1', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpswitch1', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpswitch1', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpswitch1', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr0', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr0', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr1', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr1', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr2', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr2', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr3', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr3', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr4', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr4', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr5', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr5', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr6', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr6', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr7', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr7', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr8', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr8', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr9', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr9', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr10', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr10', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr11', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr11', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr12', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr12', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr13', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr13', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr14', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr14', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr15', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr15', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr16', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr16', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr17', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr17', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr18', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr18', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr19', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr19', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr20', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr20', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr21', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr21', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr22', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr22', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr23', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr23', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr24', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr24', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr25', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr25', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr26', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr26', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr27', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr27', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr28', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr28', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr29', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr29', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr30', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr30', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr31', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr31', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr32', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr32', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr33', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr33', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr34', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr34', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr35', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr35', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr36', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr36', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr37', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr37', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr38', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr38', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr39', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr39', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr40', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr40', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr41', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr41', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr42', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr42', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr43', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr43', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr44', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr44', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr45', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr45', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr46', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr46', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr47', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr47', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr48', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr48', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr49', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr49', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr50', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr50', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr51', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr51', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr52', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr52', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr53', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr53', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr54', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr54', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr55', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr55', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr56', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr56', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr57', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr57', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr58', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr58', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr59', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr59', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr60', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr60', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr61', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr61', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr62', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr62', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr63', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpaddr63', needs `sspmp' extension
+.*Info: macro .*
 .*Warning: invalid CSR `stimecmp', needs `sstc' extension
 .*Info: macro .*
 .*Warning: invalid CSR `stimecmp', needs `sstc' extension
