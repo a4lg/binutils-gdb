@@ -20,6 +20,7 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include "diagnostics.h"
 #include "portability.h"
 #include "sim-main.h"
 #include "sim-signal.h"
@@ -38,9 +39,14 @@
    NB: The emulation is also missing argument conversion (endian & bitsize)
    even on Linux hosts.  */
 #ifdef __linux__
+#include <sys/file.h>
+#include <sys/fsuid.h>
+#include <sys/ioctl.h>
+#include <sys/klog.h>
 #include <sys/mman.h>
 #include <sys/poll.h>
 #include <sys/resource.h>
+#include <sys/sendfile.h>
 #include <sys/sysinfo.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -54,6 +60,21 @@
 #include <linux/types.h>
 #include <linux/unistd.h>
 #endif
+
+/* From cpu.h, cpux.h and cpu2.h.  */
+SI m32rbf_h_gr_get (SIM_CPU *, UINT);
+void m32rbf_h_gr_set (SIM_CPU *, UINT, SI);
+USI m32rbf_h_cr_get (SIM_CPU *, UINT);
+void m32rbf_h_cr_set (SIM_CPU *, UINT, USI);
+UQI m32rbf_h_psw_get (SIM_CPU *);
+void m32rbf_h_psw_set (SIM_CPU *, UQI);
+void m32rbf_h_bpsw_set (SIM_CPU *, UQI);
+UQI m32rxf_h_psw_get (SIM_CPU *);
+void m32rxf_h_psw_set (SIM_CPU *, UQI);
+void m32rxf_h_bpsw_set (SIM_CPU *, UQI);
+UQI m32r2f_h_psw_get (SIM_CPU *);
+void m32r2f_h_psw_set (SIM_CPU *, UQI);
+void m32r2f_h_bpsw_set (SIM_CPU *, UQI);
 
 #define TRAP_LINUX_SYSCALL 2
 #define TRAP_FLUSH_CACHE 12
@@ -382,7 +403,10 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	    {
 	      struct timeb t;
 
+DIAGNOSTIC_PUSH
+DIAGNOSTIC_IGNORE_DEPRECATED_DECLARATIONS
 	      result = ftime (&t);
+DIAGNOSTIC_POP
 	      errcode = errno;
 
 	      if (result != 0)
@@ -836,7 +860,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	    break;
 
 	  case TARGET_LINUX_SYS_syslog:
-	    result = syslog (arg1, (char *) t2h_addr (cb, &s, arg2));
+	    result = klogctl (arg1, (char *) t2h_addr (cb, &s, arg2), arg3);
 	    errcode = errno;
 	    break;
 

@@ -48,7 +48,6 @@
 
 #ifdef HAVE_GETRUSAGE
 #include <sys/resource.h>
-int getrusage();
 #endif
 
 #if HAVE_SYS_IOCTL_H
