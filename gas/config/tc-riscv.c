@@ -82,11 +82,11 @@ enum riscv_csr_class
   CSR_CLASS_SSAIA_AND_H,	/* Ssaia with H */
   CSR_CLASS_SSAIA_32,		/* Ssaia, rv32 only */
   CSR_CLASS_SSAIA_AND_H_32,	/* Ssaia with H, rv32 only */
+  CSR_CLASS_SSCOFPMF,		/* Sscofpmf only */
+  CSR_CLASS_SSCOFPMF_32,	/* Sscofpmf RV32 only */
   CSR_CLASS_SSSTATEEN,		/* S[ms]stateen only */
   CSR_CLASS_SSSTATEEN_AND_H,	/* S[ms]stateen only (with H) */
   CSR_CLASS_SSSTATEEN_AND_H_32,	/* S[ms]stateen RV32 only (with H) */
-  CSR_CLASS_SSCOFPMF,		/* Sscofpmf only */
-  CSR_CLASS_SSCOFPMF_32,	/* Sscofpmf RV32 only */
   CSR_CLASS_SSTC,		/* Sstc only */
   CSR_CLASS_SSTC_AND_H,		/* Sstc only (with H) */
   CSR_CLASS_SSTC_32,		/* Sstc RV32 only */
@@ -1077,6 +1077,12 @@ riscv_csr_address (const char *csr_name,
 		       || csr_class == CSR_CLASS_SSAIA_AND_H_32);
       extension = "ssaia";
       break;
+    case CSR_CLASS_SSCOFPMF_32:
+      is_rv32_only = true;
+      /* Fall through.  */
+    case CSR_CLASS_SSCOFPMF:
+      extension = "sscofpmf";
+      break;
     case CSR_CLASS_SSSTATEEN_AND_H_32:
       is_rv32_only = true;
       /* Fall through.  */
@@ -1085,12 +1091,6 @@ riscv_csr_address (const char *csr_name,
       /* Fall through.  */
     case CSR_CLASS_SSSTATEEN:
       extension = "ssstateen";
-      break;
-    case CSR_CLASS_SSCOFPMF_32:
-      is_rv32_only = true;
-      /* Fall through.  */
-    case CSR_CLASS_SSCOFPMF:
-      extension = "sscofpmf";
       break;
     case CSR_CLASS_SSTC:
     case CSR_CLASS_SSTC_AND_H:
