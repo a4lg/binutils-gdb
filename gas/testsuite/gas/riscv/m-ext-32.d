@@ -1,4 +1,4 @@
-#as: -march=rv32im
+#as: -march=rv32i -I$srcdir/$subdir -defsym XLEN=32
 #source: m-ext.s
 #objdump: -d
 

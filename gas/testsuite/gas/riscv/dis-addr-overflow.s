@@ -1,26 +1,26 @@
-.set __global_pointer$, 0x00000200
+.set	__global_pointer$, 0x00000200
 
-.ifdef rv64
-topbase = 0xffffffff00000000
+.ifge	XLEN-64
+.set	topbase, 0xffffffff00000000
 .else
-topbase = 0
+.set	topbase, 0
 .endif
 
-.set addr_load,              topbase + 0xffffeffc  # -0x1000 -4
-.set addr_store,             topbase + 0xffffdff8  # -0x2000 -8
-.set addr_jalr_1,            topbase + 0xffffd000  # -0x3000
-.set addr_jalr_2,            topbase + 0xffffbff4  # -0x4000 -12
-.set addr_jalr_3,            topbase + 0xffffb000  # -0x5000
-.set addr_loadaddr,          topbase + 0xffff9ff0  # -0x6000 -16
-.set addr_loadaddr_c,        topbase + 0xffff8fec  # -0x7000 -20
-.set addr_loadaddr_w,        topbase + 0xffff7fe8  # -0x8000 -24
-.set addr_loadaddr_w_c,      topbase + 0xffff6fe4  # -0x9000 -28
-.set addr_rel_gp_pos,                  0x00000600  # __global_pointer$ + 0x400
-.set addr_rel_gp_neg,        topbase + 0xfffffe00  # __global_pointer$ - 0x400
-.set addr_rel_zero_pos,                0x00000100
-.set addr_rel_zero_neg,      topbase + 0xfffff800  # -0x800
-.set addr_jalr_rel_zero_pos,           0x00000104
-.set addr_jalr_rel_zero_neg, topbase + 0xfffff804  # -0x7fc
+.set	addr_load,              topbase + 0xffffeffc	# -0x1000 -4
+.set	addr_store,             topbase + 0xffffdff8	# -0x2000 -8
+.set	addr_jalr_1,            topbase + 0xffffd000	# -0x3000
+.set	addr_jalr_2,            topbase + 0xffffbff4	# -0x4000 -12
+.set	addr_jalr_3,            topbase + 0xffffb000	# -0x5000
+.set	addr_loadaddr,          topbase + 0xffff9ff0	# -0x6000 -16
+.set	addr_loadaddr_c,        topbase + 0xffff8fec	# -0x7000 -20
+.set	addr_loadaddr_w,        topbase + 0xffff7fe8	# -0x8000 -24
+.set	addr_loadaddr_w_c,      topbase + 0xffff6fe4	# -0x9000 -28
+.set	addr_rel_gp_pos,                  0x00000600	# __global_pointer$ + 0x400
+.set	addr_rel_gp_neg,        topbase + 0xfffffe00	# __global_pointer$ - 0x400
+.set	addr_rel_zero_pos,                0x00000100
+.set	addr_rel_zero_neg,      topbase + 0xfffff800	# -0x800
+.set	addr_jalr_rel_zero_pos,           0x00000104
+.set	addr_jalr_rel_zero_neg, topbase + 0xfffff804	# -0x7fc
 
 target:
 	.option	push
@@ -48,7 +48,7 @@ target:
 	lui	t6, 0xffff9
 	.option	pop
 	c.addi	t6, -20
-.ifdef rv64
+.ifge	XLEN-64
 	.option	push
 	.option	arch, -c
 	# ADDIW (not compressed)

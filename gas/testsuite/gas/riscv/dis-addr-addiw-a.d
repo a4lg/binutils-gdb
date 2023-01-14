@@ -2,7 +2,7 @@
 #source: dis-addr-addiw.s
 #objdump: -d --adjust-vma=0xffffffe0
 
-.*:     file format elf64-(little|big)riscv
+.*:[ 	]+file format .*
 
 
 Disassembly of section .text:
