@@ -1099,6 +1099,32 @@ check_implicit_for_i (riscv_parse_subset_t *rps ATTRIBUTE_UNUSED,
 	      && subset->minor_version < 1));
 }
 
+/* Compatibility measure for counters (Zicntr and Zihpm):
+   Do or do not add the IMPLICIT only when the ISA version is
+   less than the border.  */
+
+static bool
+check_implicit_compat_counter_from_i (riscv_parse_subset_t *rps,
+				      const riscv_implicit_subset_t *implicit
+					  ATTRIBUTE_UNUSED,
+				      const riscv_subset_t *subset
+					  ATTRIBUTE_UNUSED)
+{
+  /* When rps->isa_spec is NULL, we don't need to care about implicit
+     extensions because the caller is the linker.  */
+  return rps->isa_spec && *rps->isa_spec <= ISA_SPEC_CLASS_20191213;
+}
+
+static bool
+check_implicit_compat_counter_to_zicsr (riscv_parse_subset_t *rps,
+					const riscv_implicit_subset_t
+					    *implicit,
+					const riscv_subset_t *subset)
+{
+  return (rps->isa_spec
+	  && !check_implicit_compat_counter_from_i (rps, implicit, subset));
+}
+
 /* All extension implications.  */
 
 static riscv_implicit_subset_t riscv_implicit_subsets[] =
@@ -1106,6 +1132,8 @@ static riscv_implicit_subset_t riscv_implicit_subsets[] =
   {"e", "i",		check_implicit_always},
   {"i", "zicsr",	check_implicit_for_i},
   {"i", "zifencei",	check_implicit_for_i},
+  {"i", "zicntr",	check_implicit_compat_counter_from_i},
+  {"i", "zihpm",	check_implicit_compat_counter_from_i},
   {"g", "i",		check_implicit_always},
   {"g", "m",		check_implicit_always},
   {"g", "a",		check_implicit_always},
@@ -1191,6 +1219,8 @@ static riscv_implicit_subset_t riscv_implicit_subsets[] =
   {"zcf", "zca",	check_implicit_always},
   {"zcd", "zca",	check_implicit_always},
   {"zcb", "zca",	check_implicit_always},
+  {"zicntr", "zicsr",	check_implicit_compat_counter_to_zicsr},
+  {"zihpm", "zicsr",	check_implicit_compat_counter_to_zicsr},
   {"smaia", "ssaia",		check_implicit_always},
   {"smcntrpmf", "zicsr",	check_implicit_always},
   {"smstateen", "ssstateen",	check_implicit_always},
@@ -1260,6 +1290,10 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zicbom",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicbop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicboz",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zicntr",		ISA_SPEC_CLASS_2P2,		RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION,  0 }, /* Compat.  */
+  {"zicntr",		ISA_SPEC_CLASS_20190608,	RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION,  0 }, /* Compat.  */
+  {"zicntr",		ISA_SPEC_CLASS_20191213,	RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION,  0 }, /* Compat.  */
+  {"zicntr",		ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
   {"zicond",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
@@ -1267,6 +1301,10 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zifencei",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
   {"zihintntl",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
+  {"zihpm",		ISA_SPEC_CLASS_2P2,		RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION,  0 }, /* Compat.  */
+  {"zihpm",		ISA_SPEC_CLASS_20190608,	RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION,  0 }, /* Compat.  */
+  {"zihpm",		ISA_SPEC_CLASS_20191213,	RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION,  0 }, /* Compat.  */
+  {"zihpm",		ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
   {"zmmul",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zawrs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfa",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
@@ -1686,9 +1724,12 @@ riscv_parse_add_subset (riscv_parse_subset_t *rps,
 	rps->error_handler
 	  (_("x ISA extension `%s' must be set with the versions"),
 	   subset);
-      /* Allow old ISA spec can recognize zicsr and zifencei.  */
+      /* Allow old ISA spec (version 2.2) can recognize extensions
+	 effectively split from the base 'I' extension version 2.0.  */
       else if (strcmp (subset, "zicsr") != 0
-	       && strcmp (subset, "zifencei") != 0)
+	       && strcmp (subset, "zifencei") != 0
+	       && strcmp (subset, "zicntr") != 0
+	       && strcmp (subset, "zihpm") != 0)
 	rps->error_handler
 	  (_("cannot find default versions of the ISA extension `%s'"),
 	   subset);
@@ -2398,6 +2439,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zicbop");
     case INSN_CLASS_ZICBOZ:
       return riscv_subset_supports (rps, "zicboz");
+    case INSN_CLASS_ZICNTR:
+      return riscv_subset_supports (rps, "zicntr");
     case INSN_CLASS_ZICOND:
       return riscv_subset_supports (rps, "zicond");
     case INSN_CLASS_ZICSR:
@@ -2601,6 +2644,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zicbop";
     case INSN_CLASS_ZICBOZ:
       return "zicboz";
+    case INSN_CLASS_ZICNTR:
+      return "zicntr";
     case INSN_CLASS_ZICOND:
       return "zicond";
     case INSN_CLASS_ZICSR:
