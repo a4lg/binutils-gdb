@@ -1084,6 +1084,16 @@ check_implicit_for_i (const char *implicit ATTRIBUTE_UNUSED,
 	      && subset->minor_version < 1));
 }
 
+/* Add the IMPLICIT only when the version of SUBSET is determined.  */
+
+static bool
+check_implicit_for_counters (const char *implicit ATTRIBUTE_UNUSED,
+		      riscv_subset_t *subset)
+{
+  return (subset->major_version != RISCV_UNKNOWN_VERSION
+	  && subset->minor_version != RISCV_UNKNOWN_VERSION);
+}
+
 /* Record all implicit information for the subsets.  */
 struct riscv_implicit_subset
 {
@@ -1097,6 +1107,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"e", "i",		check_implicit_always},
   {"i", "zicsr",	check_implicit_for_i},
   {"i", "zifencei",	check_implicit_for_i},
+  {"i", "zicntr",	check_implicit_always}, /* Mock.  */
+  {"i", "zihpm",	check_implicit_always}, /* Mock.  */
   {"g", "i",		check_implicit_always},
   {"g", "m",		check_implicit_always},
   {"g", "a",		check_implicit_always},
@@ -1182,6 +1194,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zcf", "zca",	check_implicit_always},
   {"zcd", "zca",	check_implicit_always},
   {"zcb", "zca",	check_implicit_always},
+  {"zicntr", "zicsr",	check_implicit_for_counters},
+  {"zihpm", "zicsr",	check_implicit_for_counters},
   {"smaia", "ssaia",		check_implicit_always},
   {"smstateen", "ssstateen",	check_implicit_always},
   {"smepmp", "zicsr",		check_implicit_always},
@@ -1249,12 +1263,14 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zicbom",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicbop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicboz",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zicntr",		ISA_SPEC_CLASS_NONE,		RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION,  0 }, /* Mock.  */
   {"zicond",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
   {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
+  {"zihpm",		ISA_SPEC_CLASS_NONE,		RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION,  0 }, /* Mock.  */
   {"zmmul",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zawrs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfa",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
@@ -1674,9 +1690,12 @@ riscv_parse_add_subset (riscv_parse_subset_t *rps,
 	rps->error_handler
 	  (_("x ISA extension `%s' must be set with the versions"),
 	   subset);
-      /* Allow old ISA spec can recognize zicsr and zifencei.  */
+      /* Allow old ISA spec can recognize extensions
+	 effectively split from the base 'I' ISA version 2.2.  */
       else if (strcmp (subset, "zicsr") != 0
-	       && strcmp (subset, "zifencei") != 0)
+	       && strcmp (subset, "zifencei") != 0
+	       && strcmp (subset, "zicntr") != 0
+	       && strcmp (subset, "zihpm") != 0)
 	rps->error_handler
 	  (_("cannot find default versions of the ISA extension `%s'"),
 	   subset);
@@ -2386,6 +2405,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zicbop");
     case INSN_CLASS_ZICBOZ:
       return riscv_subset_supports (rps, "zicboz");
+    case INSN_CLASS_ZICNTR:
+      return riscv_subset_supports (rps, "zicntr");
     case INSN_CLASS_ZICOND:
       return riscv_subset_supports (rps, "zicond");
     case INSN_CLASS_ZICSR:
@@ -2579,6 +2600,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zicbop";
     case INSN_CLASS_ZICBOZ:
       return "zicboz";
+    case INSN_CLASS_ZICNTR:
+      return "zicntr";
     case INSN_CLASS_ZICOND:
       return "zicond";
     case INSN_CLASS_ZICSR:

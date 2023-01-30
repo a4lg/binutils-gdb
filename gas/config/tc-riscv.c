@@ -66,6 +66,10 @@ enum riscv_csr_class
 
   CSR_CLASS_I,
   CSR_CLASS_I_32,	/* rv32 only */
+  CSR_CLASS_ZICNTR,	/* basic hardware perf counter */
+  CSR_CLASS_ZICNTR_32,	/* basic hardware perf counter, rv32 only */
+  CSR_CLASS_ZIHPM,	/* additional hardware perf counter */
+  CSR_CLASS_ZIHPM_32,	/* additional hardware perf counter, rv32 only */
   CSR_CLASS_F,		/* f-ext only */
   CSR_CLASS_ZKR,	/* zkr only */
   CSR_CLASS_V,		/* rvv only */
@@ -1030,6 +1034,18 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_I:
       need_check_version = true;
       extension = "i";
+      break;
+    case CSR_CLASS_ZICNTR_32:
+      is_rv32_only = true;
+      /* Fall through.  */
+    case CSR_CLASS_ZICNTR:
+      extension = "zicntr";
+      break;
+    case CSR_CLASS_ZIHPM_32:
+      is_rv32_only = true;
+      /* Fall through.  */
+    case CSR_CLASS_ZIHPM:
+      extension = "zihpm";
       break;
     case CSR_CLASS_H_32:
       is_rv32_only = true;
