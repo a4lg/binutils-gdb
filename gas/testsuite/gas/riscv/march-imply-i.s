@@ -22,3 +22,11 @@ target:
 
 	# zifencei
 	fence.i
+
+	# zicntr
+	rdcycle		t0
+	rdtime		t0
+	rdinstret	t0
+	rdcycleh	t0
+	rdtimeh		t0
+	rdinstreth	t0
