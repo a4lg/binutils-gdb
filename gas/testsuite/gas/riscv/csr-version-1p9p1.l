@@ -297,6 +297,14 @@
 .*Info: macro .*
 .*Warning: invalid CSR `mstatush' for the privileged spec `1.9.1'
 .*Info: macro .*
+.*Warning: invalid CSR `medelegh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `medelegh', needs `ssecorrupt' extension
+.*Info: macro .*
+.*Warning: invalid CSR `medelegh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `medelegh', needs `ssecorrupt' extension
+.*Info: macro .*
 .*Warning: invalid CSR `mtval' for the privileged spec `1.9.1'
 .*Info: macro .*
 .*Warning: invalid CSR `mtval' for the privileged spec `1.9.1'
@@ -832,6 +840,18 @@
 .*Warning: invalid CSR `hcounteren', needs `h' extension
 .*Info: macro .*
 .*Warning: invalid CSR `hcounteren', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hedelegh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hedelegh', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hedelegh', needs `ssecorrupt' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hedelegh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hedelegh', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hedelegh', needs `ssecorrupt' extension
 .*Info: macro .*
 .*Warning: invalid CSR `hgeie', needs `h' extension
 .*Info: macro .*

@@ -105,6 +105,7 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4869 \(mtvec\) at cfa\+3092
   DW_CFA_offset_extended_sf: r4870 \(mcounteren\) at cfa\+3096
   DW_CFA_offset_extended_sf: r4880 \(mstatush\) at cfa\+3136
+  DW_CFA_offset_extended_sf: r4882 \(medelegh\) at cfa\+3144
   DW_CFA_offset_extended_sf: r4928 \(mscratch\) at cfa\+3328
   DW_CFA_offset_extended_sf: r4929 \(mepc\) at cfa\+3332
   DW_CFA_offset_extended_sf: r4930 \(mcause\) at cfa\+3336
@@ -293,6 +294,7 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r5635 \(hideleg\) at cfa\+6156
   DW_CFA_offset_extended_sf: r5636 \(hie\) at cfa\+6160
   DW_CFA_offset_extended_sf: r5638 \(hcounteren\) at cfa\+6168
+  DW_CFA_offset_extended_sf: r5650 \(hedelegh\) at cfa\+6216
   DW_CFA_offset_extended_sf: r5639 \(hgeie\) at cfa\+6172
   DW_CFA_offset_extended_sf: r5699 \(htval\) at cfa\+6412
   DW_CFA_offset_extended_sf: r5700 \(hip\) at cfa\+6416

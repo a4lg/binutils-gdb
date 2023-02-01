@@ -106,6 +106,7 @@
 	csr mtvec
 	csr mcounteren		# Added in 1.10
 	csr mstatush		# Added in 1.12
+	csr medelegh		# New in Ssecorrupt extension
 
 	# Machine Trap Handling
 	csr mscratch
@@ -306,6 +307,7 @@
 	csr hideleg
 	csr hie
 	csr hcounteren
+	csr hedelegh		# New in Ssecorrupt extension
 	csr hgeie
 
 	# Hypervisor Trap Handling

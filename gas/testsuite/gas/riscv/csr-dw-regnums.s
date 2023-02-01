@@ -100,6 +100,7 @@ _start:
 	.cfi_offset mtvec, 3092
 	.cfi_offset mcounteren, 3096
 	.cfi_offset mstatush, 3136
+	.cfi_offset medelegh, 3144	# New in Ssecorrupt extension
 	.cfi_offset mscratch, 3328
 	.cfi_offset mepc, 3332
 	.cfi_offset mcause, 3336
@@ -289,6 +290,7 @@ _start:
 	.cfi_offset hideleg, 6156
 	.cfi_offset hie, 6160
 	.cfi_offset hcounteren, 6168
+	.cfi_offset hedelegh, 6216	# New in Ssecorrupt extension
 	.cfi_offset hgeie, 6172
 	.cfi_offset htval, 6412
 	.cfi_offset hip, 6416
