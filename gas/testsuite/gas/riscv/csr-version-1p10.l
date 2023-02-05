@@ -1217,6 +1217,736 @@
 .*Info: macro .*
 .*Warning: invalid CSR `vsiph', needs `ssaia' extension
 .*Info: macro .*
+.*Warning: invalid CSR `smcounteren', needs `sscdeleg' extension
+.*Info: macro .*
+.*Warning: invalid CSR `smcounteren', needs `sscdeleg' extension
+.*Info: macro .*
+.*Warning: read-only CSR is written `csrw smcounteren,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `scycle', needs `sscdeleg' and `zicntr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `scycle', needs `sscdeleg' and `zicntr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sinstret', needs `sscdeleg' and `zicntr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sinstret', needs `sscdeleg' and `zicntr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter3', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter3', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter4', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter4', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter5', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter5', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter6', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter6', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter7', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter7', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter8', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter8', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter9', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter9', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter10', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter10', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter11', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter11', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter12', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter12', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter13', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter13', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter14', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter14', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter15', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter15', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter16', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter16', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter17', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter17', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter18', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter18', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter19', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter19', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter20', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter20', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter21', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter21', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter22', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter22', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter23', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter23', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter24', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter24', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter25', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter25', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter26', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter26', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter27', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter27', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter28', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter28', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter29', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter29', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter30', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter30', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter31', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter31', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `scycleh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `scycleh', needs `sscdeleg' and `zicntr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `scycleh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `scycleh', needs `sscdeleg' and `zicntr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sinstreth', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `sinstreth', needs `sscdeleg' and `zicntr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sinstreth', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `sinstreth', needs `sscdeleg' and `zicntr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter3h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter3h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter3h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter3h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter4h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter4h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter4h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter4h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter5h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter5h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter5h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter5h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter6h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter6h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter6h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter6h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter7h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter7h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter7h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter7h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter8h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter8h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter8h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter8h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter9h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter9h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter9h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter9h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter10h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter10h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter10h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter10h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter11h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter11h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter11h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter11h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter12h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter12h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter12h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter12h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter13h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter13h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter13h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter13h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter14h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter14h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter14h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter14h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter15h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter15h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter15h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter15h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter16h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter16h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter16h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter16h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter17h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter17h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter17h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter17h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter18h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter18h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter18h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter18h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter19h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter19h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter19h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter19h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter20h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter20h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter20h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter20h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter21h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter21h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter21h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter21h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter22h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter22h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter22h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter22h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter23h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter23h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter23h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter23h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter24h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter24h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter24h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter24h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter25h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter25h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter25h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter25h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter26h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter26h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter26h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter26h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter27h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter27h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter27h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter27h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter28h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter28h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter28h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter28h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter29h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter29h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter29h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter29h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter30h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter30h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter30h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter30h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter31h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter31h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter31h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmcounter31h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `scountinhibit', needs `sscdeleg' extension
+.*Info: macro .*
+.*Warning: invalid CSR `scountinhibit', needs `sscdeleg' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent3', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent3', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent4', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent4', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent5', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent5', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent6', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent6', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent7', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent7', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent8', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent8', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent9', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent9', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent10', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent10', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent11', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent11', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent12', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent12', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent13', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent13', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent14', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent14', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent15', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent15', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent16', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent16', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent17', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent17', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent18', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent18', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent19', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent19', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent20', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent20', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent21', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent21', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent22', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent22', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent23', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent23', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent24', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent24', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent25', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent25', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent26', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent26', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent27', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent27', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent28', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent28', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent29', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent29', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent30', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent30', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent31', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent31', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent3h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent3h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent3h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent3h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent4h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent4h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent4h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent4h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent5h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent5h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent5h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent5h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent6h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent6h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent6h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent6h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent7h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent7h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent7h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent7h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent8h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent8h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent8h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent8h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent9h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent9h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent9h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent9h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent10h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent10h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent10h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent10h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent11h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent11h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent11h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent11h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent12h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent12h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent12h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent12h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent13h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent13h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent13h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent13h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent14h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent14h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent14h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent14h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent15h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent15h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent15h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent15h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent16h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent16h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent16h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent16h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent17h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent17h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent17h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent17h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent18h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent18h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent18h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent18h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent19h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent19h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent19h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent19h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent20h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent20h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent20h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent20h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent21h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent21h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent21h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent21h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent22h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent22h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent22h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent22h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent23h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent23h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent23h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent23h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent24h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent24h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent24h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent24h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent25h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent25h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent25h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent25h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent26h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent26h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent26h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent26h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent27h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent27h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent27h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent27h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent28h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent28h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent28h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent28h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent29h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent29h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent29h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent29h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent30h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent30h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent30h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent30h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent31h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent31h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent31h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `shpmevent31h', needs `sscdeleg' and `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `scountovf', needs `sscofpmf' extension
 .*Info: macro .*
 .*Warning: invalid CSR `scountovf', needs `sscofpmf' extension

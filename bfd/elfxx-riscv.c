@@ -1200,6 +1200,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"smstateen", "ssstateen",	check_implicit_always},
   {"smepmp", "zicsr",		check_implicit_always},
   {"ssaia", "zicsr",		check_implicit_always},
+  {"sscdeleg", "zicsr",		check_implicit_always},
   {"sscofpmf", "zicsr",		check_implicit_always},
   {"ssstateen", "zicsr",	check_implicit_always},
   {"sstc", "zicsr",		check_implicit_always},
@@ -1347,6 +1348,7 @@ static struct riscv_supported_ext riscv_supported_std_s_ext[] =
   {"smepmp",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smstateen",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ssaia",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"sscdeleg",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"sscofpmf",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ssstateen",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"sstc",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
@@ -2009,6 +2011,15 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
     {
       rps->error_handler
 	(_("zvl*b extensions need to enable either `v' or `zve' extension"));
+      no_conflict = false;
+    }
+
+  if (riscv_subset_supports (rps, "sscdeleg")
+      && !riscv_subset_supports (rps, "zicntr")
+      && !riscv_subset_supports (rps, "zihpm"))
+    {
+      rps->error_handler
+	(_("`sscdeleg' extension requires either `zicntr' or `zihpm' extension"));
       no_conflict = false;
     }
 
