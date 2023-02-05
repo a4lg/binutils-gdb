@@ -84,6 +84,11 @@ enum riscv_csr_class
   CSR_CLASS_SSAIA_AND_H,	/* Ssaia with H */
   CSR_CLASS_SSAIA_32,		/* Ssaia, rv32 only */
   CSR_CLASS_SSAIA_AND_H_32,	/* Ssaia with H, rv32 only */
+  CSR_CLASS_SSCDELEG,			/* Sscdeleg */
+  CSR_CLASS_SSCDELEG_AND_ZICNTR,	/* Sscdeleg+Zicntr */
+  CSR_CLASS_SSCDELEG_AND_ZICNTR_32,	/* Sscdeleg+Zicntr, rv32 only */
+  CSR_CLASS_SSCDELEG_AND_ZIHPM,		/* Sscdeleg+Zicntr */
+  CSR_CLASS_SSCDELEG_AND_ZIHPM_32,	/* Sscdeleg+Zicntr, rv32 only */
   CSR_CLASS_SSSTATEEN,		/* S[ms]stateen only */
   CSR_CLASS_SSSTATEEN_AND_H,	/* S[ms]stateen only (with H) */
   CSR_CLASS_SSSTATEEN_AND_H_32,	/* S[ms]stateen RV32 only (with H) */
@@ -1085,6 +1090,27 @@ riscv_csr_address (const char *csr_name,
       is_h_required = (csr_class == CSR_CLASS_SSAIA_AND_H
 		       || csr_class == CSR_CLASS_SSAIA_AND_H_32);
       extension = "ssaia";
+      break;
+    case CSR_CLASS_SSCDELEG:
+      extension = "sscdeleg";
+      break;
+    case CSR_CLASS_SSCDELEG_AND_ZICNTR_32:
+      is_rv32_only = true;
+      /* Fall through.  */
+    case CSR_CLASS_SSCDELEG_AND_ZICNTR:
+      is_csr_req_complex = true;
+      csr_ok = riscv_subset_supports (&riscv_rps_as, "sscdeleg")
+	       && riscv_subset_supports (&riscv_rps_as, "zicntr");
+      extension = _ ("sscdeleg' and `zicntr");
+      break;
+    case CSR_CLASS_SSCDELEG_AND_ZIHPM_32:
+      is_rv32_only = true;
+      /* Fall through.  */
+    case CSR_CLASS_SSCDELEG_AND_ZIHPM:
+      is_csr_req_complex = true;
+      csr_ok = riscv_subset_supports (&riscv_rps_as, "sscdeleg")
+	       && riscv_subset_supports (&riscv_rps_as, "zihpm");
+      extension = _ ("sscdeleg' and `zihpm");
       break;
     case CSR_CLASS_SSSTATEEN_AND_H_32:
       is_rv32_only = true;
