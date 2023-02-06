@@ -1024,6 +1024,8 @@ riscv_csr_address (const char *csr_name,
   bool need_check_version = false;
   bool is_rv32_only = false;
   bool is_h_required = false;
+  bool is_csr_req_complex = false;
+  bool csr_ok = false;
   const char* extension = NULL;
 
   switch (csr_class)
@@ -1122,8 +1124,10 @@ riscv_csr_address (const char *csr_name,
       if (is_h_required && !riscv_subset_supports (&riscv_rps_as, "h"))
 	as_warn (_("invalid CSR `%s', needs `h' extension"), csr_name);
 
-      if (extension != NULL
-	  && !riscv_subset_supports (&riscv_rps_as, extension))
+      if (is_csr_req_complex
+	      ? !csr_ok
+	      : (extension != NULL
+		 && !riscv_subset_supports (&riscv_rps_as, extension)))
 	as_warn (_("invalid CSR `%s', needs `%s' extension"),
 		 csr_name, extension);
     }
