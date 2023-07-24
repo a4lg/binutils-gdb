@@ -1946,8 +1946,7 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
       rps->error_handler (_("rv%d does not support the `q' extension"), xlen);
       no_conflict = false;
     }
-  if (riscv_lookup_subset (rps->subset_list, "zfinx", &subset)
-      && riscv_lookup_subset (rps->subset_list, "f", &subset))
+  if (riscv_subset_supports (rps, "zfinx") && riscv_subset_supports (rps, "f"))
     {
       rps->error_handler
 	(_("`zfinx' is conflict with the `f/d/q/zfh/zfhmin' extension"));
