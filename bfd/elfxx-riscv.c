@@ -1099,6 +1099,29 @@ check_implicit_for_i (riscv_parse_subset_t *rps ATTRIBUTE_UNUSED,
 	      && subset->minor_version < 1));
 }
 
+/* Add the IMPLICIT only when the 'C' extension is also available.  */
+
+static bool
+check_implicit_for_d_c (riscv_parse_subset_t *rps,
+			const riscv_implicit_subset_t *implicit
+			    ATTRIBUTE_UNUSED,
+			const riscv_subset_t *subset ATTRIBUTE_UNUSED)
+{
+  return riscv_subset_supports (rps, "c");
+}
+
+/* Add the IMPLICIT only when the 'C' extension is also available
+   and XLEN is 32.  */
+
+static bool
+check_implicit_for_f_c (riscv_parse_subset_t *rps,
+			const riscv_implicit_subset_t *implicit
+			    ATTRIBUTE_UNUSED,
+			const riscv_subset_t *subset ATTRIBUTE_UNUSED)
+{
+  return *rps->xlen == 32 && check_implicit_for_d_c (rps, implicit, subset);
+}
+
 /* All extension implications.  */
 
 static riscv_implicit_subset_t riscv_implicit_subsets[] =
@@ -1188,6 +1211,7 @@ static riscv_implicit_subset_t riscv_implicit_subsets[] =
   {"zvksg", "zvkg",	check_implicit_always},
   {"zvksc", "zvks",	check_implicit_always},
   {"zvksc", "zvbc",	check_implicit_always},
+  {"c", "zca",		check_implicit_always},
   {"zcf", "zca",	check_implicit_always},
   {"zcd", "zca",	check_implicit_always},
   {"zcb", "zca",	check_implicit_always},
@@ -1200,6 +1224,10 @@ static riscv_implicit_subset_t riscv_implicit_subsets[] =
   {"ssstateen", "zicsr",	check_implicit_always},
   {"sstc", "zicsr",		check_implicit_always},
   {"svadu", "zicsr",		check_implicit_always},
+  /* Complex implications (that should be checked after others).  */
+  {"d", "zcd",		check_implicit_for_d_c},
+  {"f", "zcf",		check_implicit_for_f_c},
+  /* Tail of the list.  */
   {NULL, NULL, NULL}
 };
 
