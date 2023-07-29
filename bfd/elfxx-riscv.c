@@ -1099,6 +1099,19 @@ check_implicit_for_i (riscv_parse_subset_t *rps ATTRIBUTE_UNUSED,
 	      && subset->minor_version < 1));
 }
 
+/* Add the IMPLICIT only when the 'Zce' extension is also available
+   and XLEN is 32.  */
+
+static bool
+check_implicit_for_f_zce (riscv_parse_subset_t *rps,
+			  const riscv_implicit_subset_t *implicit
+			      ATTRIBUTE_UNUSED,
+			  const riscv_subset_t *subset ATTRIBUTE_UNUSED)
+{
+  return *rps->xlen == 32
+	 && riscv_subset_supports (rps, "zce");
+}
+
 /* All extension implications.  */
 
 static riscv_implicit_subset_t riscv_implicit_subsets[] =
@@ -1188,6 +1201,10 @@ static riscv_implicit_subset_t riscv_implicit_subsets[] =
   {"zvksg", "zvkg",	check_implicit_always},
   {"zvksc", "zvks",	check_implicit_always},
   {"zvksc", "zvbc",	check_implicit_always},
+  {"zce", "zca",	check_implicit_always},
+  {"zce", "zcb",	check_implicit_always},
+  {"zce", "zcmp",	check_implicit_always},
+  {"zce", "zcmt",	check_implicit_always},
   {"zcf", "zca",	check_implicit_always},
   {"zcd", "zca",	check_implicit_always},
   {"zcb", "zca",	check_implicit_always},
@@ -1200,6 +1217,9 @@ static riscv_implicit_subset_t riscv_implicit_subsets[] =
   {"ssstateen", "zicsr",	check_implicit_always},
   {"sstc", "zicsr",		check_implicit_always},
   {"svadu", "zicsr",		check_implicit_always},
+  /* Complex implications (that should be checked after others).  */
+  {"f", "zcf",		check_implicit_for_f_zce},
+  /* Tail of the list.  */
   {NULL, NULL, NULL}
 };
 
@@ -1333,6 +1353,10 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zcb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zcf",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zcd",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  /* MOCK: uncomment those lines once ready.  */
+  // {"zce",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  // {"zcmp",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  // {"zcmt",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {NULL, 0, 0, 0, 0}
 };
 
