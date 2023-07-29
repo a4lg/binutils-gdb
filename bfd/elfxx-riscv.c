@@ -1353,10 +1353,9 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zcb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zcf",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zcd",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
-  /* MOCK: uncomment those lines once ready.  */
-  // {"zce",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
-  // {"zcmp",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
-  // {"zcmt",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zce",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zcmp",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zcmt",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {NULL, 0, 0, 0, 0}
 };
 
