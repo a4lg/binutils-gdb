@@ -986,6 +986,11 @@ const struct riscv_opcode riscv_opcodes[] =
 {"wrs.nto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_NTO, MASK_WRS_NTO, match_opcode, 0 },
 {"wrs.sto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_STO, MASK_WRS_STO, match_opcode, 0 },
 
+/* Zfbfmin instructions.  */
+{"fcvt.bf16.s", 0, INSN_CLASS_ZFBFMIN,     "D,S",   MATCH_FCVT_BF16_S|MASK_RM, MASK_FCVT_BF16_S|MASK_RM, match_opcode, 0 },
+{"fcvt.bf16.s", 0, INSN_CLASS_ZFBFMIN,     "D,S,m", MATCH_FCVT_BF16_S, MASK_FCVT_BF16_S, match_opcode, 0 },
+{"fcvt.s.bf16", 0, INSN_CLASS_ZFBFMIN,     "D,S",   MATCH_FCVT_S_BF16, MASK_FCVT_S_BF16|MASK_RM, match_opcode, 0 },
+
 /* Zfa instructions.  */
 {"fli.s",       0, INSN_CLASS_ZFA,         "D,Wfv", MATCH_FLI_S, MASK_FLI_S, match_opcode, 0 },
 {"fli.d",       0, INSN_CLASS_D_AND_ZFA,   "D,Wfv", MATCH_FLI_D, MASK_FLI_D, match_opcode, 0 },
