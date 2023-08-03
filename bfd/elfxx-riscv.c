@@ -1113,12 +1113,10 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zvfh", "zvfhmin",	check_implicit_always},
   {"zvfh", "zfhmin",	check_implicit_always},
   {"zvfhmin", "zve32f",	check_implicit_always},
-  {"zve64d", "d",	check_implicit_always},
   {"zve64d", "zve64f",	check_implicit_always},
   {"zve64f", "zve32f",	check_implicit_always},
   {"zve64f", "zve64x",	check_implicit_always},
   {"zve64f", "zvl64b",	check_implicit_always},
-  {"zve32f", "f",	check_implicit_always},
   {"zve32f", "zvl32b",	check_implicit_always},
   {"zve32f", "zve32x",	check_implicit_always},
   {"zve64x", "zve32x",	check_implicit_always},
@@ -1970,6 +1968,27 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
       rps->error_handler
 	(_("`zfinx' is conflict with the `f/d/q/zfh/zfhmin' extension"));
       no_conflict = false;
+    }
+
+  if (riscv_lookup_subset (rps->subset_list, "zve32f", &subset)
+      && !riscv_lookup_subset (rps->subset_list, "v", &subset))
+    {
+      if (riscv_lookup_subset (rps->subset_list, "zve32f", &subset)
+	  && !riscv_lookup_subset (rps->subset_list, "f", &subset)
+	  && !riscv_lookup_subset (rps->subset_list, "zfinx", &subset))
+	{
+	  rps->error_handler
+	    (_("`zve32f' requires either `f/zfinx' extension"));
+	  no_conflict = false;
+	}
+      if (riscv_lookup_subset (rps->subset_list, "zve64d", &subset)
+	  && !riscv_lookup_subset (rps->subset_list, "d", &subset)
+	  && !riscv_lookup_subset (rps->subset_list, "zdinx", &subset))
+	{
+	  rps->error_handler
+	    (_("`zve64d' requires either `d/zdinx' extension"));
+	  no_conflict = false;
+	}
     }
 
   bool support_zve = false;
