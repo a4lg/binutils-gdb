@@ -1725,6 +1725,7 @@ riscv_parsing_subset_version (const char *p,
 			      int *minor_version)
 {
   bool major_p = true;
+  bool find_any_version = false;
   int version = 0;
   char np;
 
@@ -1745,7 +1746,10 @@ riscv_parsing_subset_version (const char *p,
 	  version = 0;
 	}
       else if (ISDIGIT (*p))
-	version = (version * 10) + (*p - '0');
+	{
+	  find_any_version = true;
+	  version = (version * 10) + (*p - '0');
+	}
       else
 	break;
     }
@@ -1756,7 +1760,7 @@ riscv_parsing_subset_version (const char *p,
     *minor_version = version;
 
   /* We can not find any version in string.  */
-  if (*major_version == 0 && *minor_version == 0)
+  if (!find_any_version)
     {
       *major_version = RISCV_UNKNOWN_VERSION;
       *minor_version = RISCV_UNKNOWN_VERSION;
