@@ -1222,11 +1222,15 @@ static riscv_implicit_subset_t riscv_implicit_subsets[] =
   {"zicntr", "zicsr",	check_implicit_compat_counter_to_zicsr},
   {"zihpm", "zicsr",	check_implicit_compat_counter_to_zicsr},
   {"smaia", "ssaia",		check_implicit_always},
+  {"smcdeleg", "zicsr",		check_implicit_always}, /* Compat.  */
+  {"smcdeleg", "sscsrind",	check_implicit_always},
   {"smcntrpmf", "zicsr",	check_implicit_always},
   {"smcsrind", "zicsr",		check_implicit_always},
   {"smstateen", "ssstateen",	check_implicit_always},
   {"smepmp", "zicsr",		check_implicit_always},
   {"ssaia", "zicsr",		check_implicit_always},
+  {"ssccfg", "zicsr",		check_implicit_always}, /* Compat.  */
+  {"ssccfg", "sscsrind",	check_implicit_always},
   {"sscofpmf", "zicsr",		check_implicit_always},
   {"sscsrind", "zicsr",		check_implicit_always},
   {"ssstateen", "zicsr",	check_implicit_always},
@@ -1379,11 +1383,13 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
 static struct riscv_supported_ext riscv_supported_std_s_ext[] =
 {
   {"smaia",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"smcdeleg",		ISA_SPEC_CLASS_DRAFT,		0, 1, 0 },
   {"smcntrpmf",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smcsrind",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smepmp",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smstateen",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ssaia",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"ssccfg",		ISA_SPEC_CLASS_DRAFT,		0, 1, 0 },
   {"sscofpmf",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"sscsrind",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ssstateen",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
@@ -2027,6 +2033,24 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
       rps->error_handler
 	(_("`zfinx' is conflict with the `f/d/q/zfh/zfhmin' extension"));
       no_conflict = false;
+    }
+
+  bool support_counters = (riscv_subset_supports (rps, "zicntr")
+			   || riscv_subset_supports (rps, "zihpm"));
+  if (!support_counters)
+    {
+      if (riscv_subset_supports(rps, "smcdeleg"))
+	{
+	  rps->error_handler
+	    (_("`smcdeleg' requires either `zicntr' or `zihpm' extension"));
+	  no_conflict = false;
+	}
+      if (riscv_subset_supports(rps, "ssccfg"))
+	{
+	  rps->error_handler
+	    (_("`ssccfg' requires either `zicntr' or `zihpm' extension"));
+	  no_conflict = false;
+	}
     }
 
   bool support_zve = false;
