@@ -499,6 +499,10 @@ struct riscv_opcode
 /* Instruction is a simple alias (e.g. "mv" for "addi").  */
 #define	INSN_ALIAS		0x00000001
 
+/* Instruction can be a simple instruction or an alias
+   depending on enabled ISA extensions. */
+#define INSN_GENERICS		0x00000100
+
 /* These are for setting insn_info fields.
 
    Nonbranch is the default.  Noninsn is used only if there is no match.
