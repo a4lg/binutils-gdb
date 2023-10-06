@@ -119,3 +119,13 @@ addi	a0, zero, 1		# $x, won't added
 .align	3			# $x, won't added
 addi	a0, zero, 2		# $xrv32i
 .option pop
+
+.section .text.dis.zfinx, "ax"
+.option push
+.option arch, rv32if
+fadd.s	fa0, fa1, fa2		# $xrv32if
+.option arch, rv32i_zfinx
+fadd.s	a0, a1, a2		# $xrv32i_zfinx
+.option arch, rv32if
+fadd.s	fa0, fa1, fa2		# $xrv32if
+.option pop
