@@ -350,6 +350,25 @@
 	csr mviph
 	csr miph
 
+	# Smclic/Ssclic/Suclic extensions
+	csr mtvt
+	csr mnxti
+	csr mintstatus
+	csr mintthresh
+	csr mscratchcsw
+	csr mscratchcswl
+	csr stvt
+	csr snxti
+	csr sintstatus
+	csr sintthresh
+	csr sscratchcsw
+	csr sscratchcswl
+	csr utvt
+	csr unxti
+	csr uintstatus
+	csr uintthresh
+	csr uscratchcswl
+
 	# Smcntrpmf extension
 	csr mcyclecfg
 	csr minstretcfg

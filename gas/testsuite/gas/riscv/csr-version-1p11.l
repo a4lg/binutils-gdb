@@ -885,6 +885,80 @@
 .*Info: macro .*
 .*Warning: invalid CSR `miph', needs `smaia' extension
 .*Info: macro .*
+.*Warning: invalid CSR `mtvt', needs `smclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mtvt', needs `smclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mnxti', needs `smclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mnxti', needs `smclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mintstatus', needs `smclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mintstatus', needs `smclic' extension
+.*Info: macro .*
+.*Warning: read-only CSR is written `csrw mintstatus,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `mintthresh', needs `smclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mintthresh', needs `smclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mscratchcsw', needs `smclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mscratchcsw', needs `smclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mscratchcswl', needs `smclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mscratchcswl', needs `smclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `stvt', needs `ssclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `stvt', needs `ssclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `snxti', needs `ssclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `snxti', needs `ssclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sintstatus', needs `ssclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sintstatus', needs `ssclic' extension
+.*Info: macro .*
+.*Warning: read-only CSR is written `csrw sintstatus,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `sintthresh', needs `ssclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sintthresh', needs `ssclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sscratchcsw', needs `ssclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sscratchcsw', needs `ssclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sscratchcswl', needs `ssclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sscratchcswl', needs `ssclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `utvt', needs `suclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `utvt', needs `suclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `unxti', needs `suclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `unxti', needs `suclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `uintstatus', needs `suclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `uintstatus', needs `suclic' extension
+.*Info: macro .*
+.*Warning: read-only CSR is written `csrw uintstatus,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `uintthresh', needs `suclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `uintthresh', needs `suclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `uscratchcswl', needs `suclic' extension
+.*Info: macro .*
+.*Warning: invalid CSR `uscratchcswl', needs `suclic' extension
+.*Info: macro .*
 .*Warning: invalid CSR `mcyclecfg', needs `smcntrpmf' extension
 .*Info: macro .*
 .*Warning: invalid CSR `mcyclecfg', needs `smcntrpmf' extension
