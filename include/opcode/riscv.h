@@ -227,6 +227,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define RISCV_BRANCH_ALIGN_BITS RISCV_JUMP_ALIGN_BITS
 #define RISCV_BRANCH_ALIGN (1 << RISCV_BRANCH_ALIGN_BITS)
 #define RISCV_BRANCH_REACH (RISCV_IMM_REACH * RISCV_BRANCH_ALIGN)
+#define RISCV_IMM5_BITS 5
+#define RISCV_IMM5_REACH (1LL << RISCV_IMM5_BITS)
 
 /* RV fields.  */
 
@@ -522,7 +524,7 @@ struct riscv_opcode
 /* Instruction is allowed when eew >= 64.  */
 #define INSN_V_EEW64		0x10000000
 
-/* We have 5 data reference sizes, which we can encode in 3 bits.  */
+/* We have 6 data reference sizes, which we can encode in 3 bits.  */
 #define INSN_DATA_SIZE		0x00000070
 #define INSN_DATA_SIZE_SHIFT	4
 #define INSN_1_BYTE		0x00000010
@@ -530,6 +532,7 @@ struct riscv_opcode
 #define INSN_4_BYTE		0x00000030
 #define INSN_8_BYTE		0x00000040
 #define INSN_16_BYTE		0x00000050
+#define INSN_32_BYTE		0x00000060
 
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */
