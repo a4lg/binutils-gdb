@@ -2325,6 +2325,10 @@
 #define MASK_BEQI 0x707f
 #define MATCH_BNEI 0x3063
 #define MASK_BNEI 0x707f
+#define MATCH_MVP0 0x2000033
+#define MASK_MVP0 0xfe007fff
+#define MATCH_MVP1 0x4000033
+#define MASK_MVP1 0xfe007fff
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 #define MATCH_TH_ADDSL 0x0000100b
 #define MASK_TH_ADDSL 0xf800707f

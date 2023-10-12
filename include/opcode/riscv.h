@@ -332,6 +332,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define X_T0 5
 #define X_T1 6
 #define X_T2 7
+#define X_A0 10
+#define X_A2 12
 #define X_T3 28
 
 #define NGPR 32

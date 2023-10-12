@@ -638,11 +638,18 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    {
 	    case 'q': /* Vendor-specific (Qualcomm) operands.  */
 	      {
+		unsigned long regno;
 		switch (*++oparg)
 		  {
 		  case 'c': /* CIMM: Immediate for conditional branch.  */
 		    print (info->stream, dis_style_immediate, "%d",
 			   (int) EXTRACT_S_IMM (RISCV_IMM5_BITS, OP_SH_RS2, l));
+		    break;
+		  case 'r':
+		    regno = strtoul (oparg + 1, (char **)&oparg, 10);
+		    oparg--;
+		    print (info->stream, dis_style_register, "%s",
+			   riscv_gpr_names[regno]);
 		    break;
 		  default:
 		    goto undefined_modifier;

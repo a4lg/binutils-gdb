@@ -1461,6 +1461,10 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		  case 'c': /* CIMM: Immediate for conditional branch.  */
 		    USE_IMM (RISCV_IMM5_BITS, OP_SH_RS2);
 		    break;
+		  case 'r': /* Implicit register. */
+		    strtoul (oparg + 1, (char **)&oparg, 10);
+		    oparg--;
+		    break;
 		  default:
 		    goto unknown_validate_operand;
 		  }
@@ -3613,6 +3617,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		{
 		case 'q': /* Vendor-specific (Qualcomm) operands.  */
 		  {
+		    unsigned long regno_i;
 		    switch (*++oparg)
 		      {
 		      case 'c': /* CIMM: Immediate for conditional branch.  */
@@ -3625,6 +3630,13 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 				    imm_expr->X_add_number);
 			imm_expr->X_op = O_absent;
 			asarg = expr_parse_end;
+			continue;
+		      case 'r': /* Implicit register.  */
+			regno_i = strtoul (oparg + 1, (char **)&oparg, 10);
+			oparg--;
+			if (!reg_lookup (&asarg, RCLASS_GPR, &regno)
+			    || regno != regno_i)
+			  break;
 			continue;
 		      default:
 			goto unknown_riscv_ip_operand;

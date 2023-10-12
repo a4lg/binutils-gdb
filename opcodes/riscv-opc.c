@@ -291,6 +291,24 @@ match_vd_eq_vs1_eq_vs2 (const struct riscv_opcode *op,
 }
 
 static int
+match_mvp0 (const struct riscv_opcode *op,
+	    insn_t insn)
+{
+  /* rs2 cannot be 10 (a0) otherwise undefined.  */
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  return match_opcode (op, insn) && rs2 != X_A0;
+}
+
+static int
+match_mvp2 (const struct riscv_opcode *op,
+	    insn_t insn)
+{
+  /* rs2 cannot be 12 (a2) otherwise undefined.  */
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  return match_opcode (op, insn) && rs2 != X_A2;
+}
+
+static int
 match_th_load_inc(const struct riscv_opcode *op,
 		  insn_t insn)
 {
@@ -2042,6 +2060,8 @@ const struct riscv_opcode riscv_opcodes[] =
 /* Qualcomm's Proposal of Code Size Reduction Instructions (non-prefixed).  */
 {"beqi",         0, INSN_CLASS_ZICS, "s,Xqc,p", MATCH_BEQI, MASK_BEQI, match_opcode, INSN_CONDBRANCH },
 {"bnei",         0, INSN_CLASS_ZICS, "s,Xqc,p", MATCH_BNEI, MASK_BNEI, match_opcode, INSN_CONDBRANCH },
+{"mvp0",         0, INSN_CLASS_ZICS, "Xqr10,Xqr11,s,t", MATCH_MVP0, MASK_MVP0, match_mvp0, 0 },
+{"mvp2",         0, INSN_CLASS_ZICS, "Xqr12,Xqr13,s,t", MATCH_MVP2, MASK_MVP2, match_mvp2, 0 },
 
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
