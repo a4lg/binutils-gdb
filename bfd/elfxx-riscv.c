@@ -2394,6 +2394,18 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zicond");
     case INSN_CLASS_ZICS:
       return riscv_subset_supports (rps, "zics");
+    case INSN_CLASS_ZICS_AND_F:
+      return (riscv_subset_supports (rps, "zics")
+	      && riscv_subset_supports (rps, "f"));
+    case INSN_CLASS_ZICS_AND_D:
+      return (riscv_subset_supports (rps, "zics")
+	      && riscv_subset_supports (rps, "d"));
+    case INSN_CLASS_ZICS_AND_Q:
+      return (riscv_subset_supports (rps, "zics")
+	      && riscv_subset_supports (rps, "q"));
+    case INSN_CLASS_ZICS_AND_ZFHMIN:
+      return (riscv_subset_supports (rps, "zics")
+	      && riscv_subset_supports (rps, "zfhmin"));
     case INSN_CLASS_ZICSR:
       return riscv_subset_supports (rps, "zicsr");
     case INSN_CLASS_ZIFENCEI:
@@ -2599,6 +2611,38 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zicond";
     case INSN_CLASS_ZICS:
       return "zics";
+    case INSN_CLASS_ZICS_AND_F:
+      if (!riscv_subset_supports (rps, "f")
+	  && !riscv_subset_supports (rps, "zics"))
+	return _("f' and `zics");
+      else if (!riscv_subset_supports (rps, "f"))
+	return "f";
+      else
+	return "zics";
+    case INSN_CLASS_ZICS_AND_D:
+      if (!riscv_subset_supports (rps, "d")
+	  && !riscv_subset_supports (rps, "zics"))
+	return _("d' and `zics");
+      else if (!riscv_subset_supports (rps, "d"))
+	return "d";
+      else
+	return "zics";
+    case INSN_CLASS_ZICS_AND_Q:
+      if (!riscv_subset_supports (rps, "q")
+	  && !riscv_subset_supports (rps, "zics"))
+	return _("q' and `zics");
+      else if (!riscv_subset_supports (rps, "q"))
+	return "q";
+      else
+	return "zics";
+    case INSN_CLASS_ZICS_AND_ZFHMIN:
+      if (!riscv_subset_supports (rps, "zfhmin")
+	  && !riscv_subset_supports (rps, "zics"))
+	return _("zics' and `zfhmin");
+      else if (!riscv_subset_supports (rps, "zfhmin"))
+	return "zfhmin";
+      else
+	return "zics";
     case INSN_CLASS_ZICSR:
       return "zicsr";
     case INSN_CLASS_ZIFENCEI:
