@@ -185,6 +185,14 @@ match_rd_neq_rs1 (const struct riscv_opcode *op, insn_t insn)
 }
 
 static int
+match_rd_neq_rs2 (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  return match_opcode (op, insn) && rd != rs2;
+}
+
+static int
 match_rd_nonzero (const struct riscv_opcode *op, insn_t insn)
 {
   return match_opcode (op, insn) && ((insn & MASK_RD) != 0);
@@ -314,6 +322,16 @@ match_mvp2 (const struct riscv_opcode *op,
   /* rs2 cannot be 12 (a2) otherwise undefined.  */
   int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
   return match_opcode (op, insn) && rs2 != X_A2;
+}
+
+static int
+match_qc_load_pair_with_update(const struct riscv_opcode *op,
+			       insn_t insn)
+{
+  int rd1 = (insn & MASK_RD) >> OP_SH_RD;
+  int rd2 = (insn & MASK_RS2) >> OP_SH_RS2;
+
+  return match_opcode (op, insn) && rd1 != rd2 && rd1 != X_SP && rd2 != X_SP;
 }
 
 static int
@@ -2222,6 +2240,39 @@ const struct riscv_opcode riscv_opcodes[] =
 {"bnei",         0, INSN_CLASS_ZICS, "s,Xqc,p", MATCH_BNEI, MASK_BNEI, match_opcode, INSN_CONDBRANCH },
 {"mvp0",         0, INSN_CLASS_ZICS, "Xqr10,Xqr11,s,t", MATCH_MVP0, MASK_MVP0, match_mvp0, 0 },
 {"mvp2",         0, INSN_CLASS_ZICS, "Xqr12,Xqr13,s,t", MATCH_MVP2, MASK_MVP2, match_mvp2, 0 },
+{"lbp",          0, INSN_CLASS_ZICS, "d,t,Xqp0(Xqr2)", MATCH_QC_LBPISP, MASK_QC_LBPISP, match_rd_neq_rs2, INSN_ALIAS },
+{"lbp",          0, INSN_CLASS_ZICS, "d,t,Xqp0(+Xqr2)", MATCH_QC_LBPISPB, MASK_QC_LBPISPB, match_qc_load_pair_with_update, INSN_ALIAS },
+{"lbp",          0, INSN_CLASS_ZICS, "d,t,Xqp0(Xqr2+)", MATCH_QC_LBPISPA, MASK_QC_LBPISPA, match_qc_load_pair_with_update, INSN_ALIAS },
+{"lbup",         0, INSN_CLASS_ZICS, "d,t,Xqp0(Xqr2)", MATCH_QC_LBUPISP, MASK_QC_LBUPISP, match_rd_neq_rs2, INSN_ALIAS },
+{"lbup",         0, INSN_CLASS_ZICS, "d,t,Xqp0(+Xqr2)", MATCH_QC_LBUPISPB, MASK_QC_LBUPISPB, match_qc_load_pair_with_update, INSN_ALIAS },
+{"lbup",         0, INSN_CLASS_ZICS, "d,t,Xqp0(Xqr2+)", MATCH_QC_LBUPISPA, MASK_QC_LBUPISPA, match_qc_load_pair_with_update, INSN_ALIAS },
+{"lhp",          0, INSN_CLASS_ZICS, "d,t,Xqp1(Xqr2)", MATCH_QC_LHPISP, MASK_QC_LHPISP, match_rd_neq_rs2, INSN_ALIAS },
+{"lhp",          0, INSN_CLASS_ZICS, "d,t,Xqp1(+Xqr2)", MATCH_QC_LHPISPB, MASK_QC_LHPISPB, match_qc_load_pair_with_update, INSN_ALIAS },
+{"lhp",          0, INSN_CLASS_ZICS, "d,t,Xqp1(Xqr2+)", MATCH_QC_LHPISPA, MASK_QC_LHPISPA, match_qc_load_pair_with_update, INSN_ALIAS },
+{"lhup",         0, INSN_CLASS_ZICS, "d,t,Xqp1(Xqr2)", MATCH_QC_LHUPISP, MASK_QC_LHUPISP, match_rd_neq_rs2, INSN_ALIAS },
+{"lhup",         0, INSN_CLASS_ZICS, "d,t,Xqp1(+Xqr2)", MATCH_QC_LHUPISPB, MASK_QC_LHUPISPB, match_qc_load_pair_with_update, INSN_ALIAS },
+{"lhup",         0, INSN_CLASS_ZICS, "d,t,Xqp1(Xqr2+)", MATCH_QC_LHUPISPA, MASK_QC_LHUPISPA, match_qc_load_pair_with_update, INSN_ALIAS },
+{"lwp",          0, INSN_CLASS_ZICS, "d,t,Xqp2(Xqr2)", MATCH_QC_LWPISP, MASK_QC_LWPISP, match_rd_neq_rs2, INSN_ALIAS },
+{"lwp",          0, INSN_CLASS_ZICS, "d,t,Xqp2(+Xqr2)", MATCH_QC_LWPISPB, MASK_QC_LWPISPB, match_qc_load_pair_with_update, INSN_ALIAS },
+{"lwp",          0, INSN_CLASS_ZICS, "d,t,Xqp2(Xqr2+)", MATCH_QC_LWPISPA, MASK_QC_LWPISPA, match_qc_load_pair_with_update, INSN_ALIAS },
+{"lwup",        64, INSN_CLASS_ZICS, "d,t,Xqp2(Xqr2)", MATCH_QC_LWUPISP, MASK_QC_LWUPISP, match_rd_neq_rs2, INSN_ALIAS },
+{"lwup",        64, INSN_CLASS_ZICS, "d,t,Xqp2(+Xqr2)", MATCH_QC_LWUPISPB, MASK_QC_LWUPISPB, match_qc_load_pair_with_update, INSN_ALIAS },
+{"lwup",        64, INSN_CLASS_ZICS, "d,t,Xqp2(Xqr2+)", MATCH_QC_LWUPISPA, MASK_QC_LWUPISPA, match_qc_load_pair_with_update, INSN_ALIAS },
+{"ldp",         64, INSN_CLASS_ZICS, "d,t,Xqp3(Xqr2)", MATCH_QC_LDPISP, MASK_QC_LDPISP, match_rd_neq_rs2, INSN_ALIAS },
+{"ldp",         64, INSN_CLASS_ZICS, "d,t,Xqp3(+Xqr2)", MATCH_QC_LDPISPB, MASK_QC_LDPISPB, match_qc_load_pair_with_update, INSN_ALIAS },
+{"ldp",         64, INSN_CLASS_ZICS, "d,t,Xqp3(Xqr2+)", MATCH_QC_LDPISPA, MASK_QC_LDPISPA, match_qc_load_pair_with_update, INSN_ALIAS },
+{"sbp",          0, INSN_CLASS_ZICS, "d,t,Xqp0(Xqr2)", MATCH_QC_SBPISP, MASK_QC_SBPISP, match_opcode, INSN_ALIAS },
+{"sbp",          0, INSN_CLASS_ZICS, "d,t,Xqp0(+Xqr2)", MATCH_QC_SBPISPB, MASK_QC_SBPISPB, match_opcode, INSN_ALIAS },
+{"sbp",          0, INSN_CLASS_ZICS, "d,t,Xqp0(Xqr2+)", MATCH_QC_SBPISPA, MASK_QC_SBPISPA, match_opcode, INSN_ALIAS },
+{"shp",          0, INSN_CLASS_ZICS, "d,t,Xqp1(Xqr2)", MATCH_QC_SHPISP, MASK_QC_SHPISP, match_opcode, INSN_ALIAS },
+{"shp",          0, INSN_CLASS_ZICS, "d,t,Xqp1(+Xqr2)", MATCH_QC_SHPISPB, MASK_QC_SHPISPB, match_opcode, INSN_ALIAS },
+{"shp",          0, INSN_CLASS_ZICS, "d,t,Xqp1(Xqr2+)", MATCH_QC_SHPISPA, MASK_QC_SHPISPA, match_opcode, INSN_ALIAS },
+{"swp",          0, INSN_CLASS_ZICS, "d,t,Xqp2(Xqr2)", MATCH_QC_SWPISP, MASK_QC_SWPISP, match_opcode, INSN_ALIAS },
+{"swp",          0, INSN_CLASS_ZICS, "d,t,Xqp2(+Xqr2)", MATCH_QC_SWPISPB, MASK_QC_SWPISPB, match_opcode, INSN_ALIAS },
+{"swp",          0, INSN_CLASS_ZICS, "d,t,Xqp2(Xqr2+)", MATCH_QC_SWPISPA, MASK_QC_SWPISPA, match_opcode, INSN_ALIAS },
+{"sdp",         64, INSN_CLASS_ZICS, "d,t,Xqp3(Xqr2)", MATCH_QC_SDPISP, MASK_QC_SDPISP, match_opcode, INSN_ALIAS },
+{"sdp",         64, INSN_CLASS_ZICS, "d,t,Xqp3(+Xqr2)", MATCH_QC_SDPISPB, MASK_QC_SDPISPB, match_opcode, INSN_ALIAS },
+{"sdp",         64, INSN_CLASS_ZICS, "d,t,Xqp3(Xqr2+)", MATCH_QC_SDPISPA, MASK_QC_SDPISPA, match_opcode, INSN_ALIAS },
 
 /* Qualcomm's Proposal of Code Size Reduction Instructions (prefixed).  */
 {"qc.lbib",      0, INSN_CLASS_ZICS, "d,(s),Xqo0", MATCH_QC_LBIB, MASK_QC_LBIB, match_rd_neq_rs1, INSN_DREF|INSN_1_BYTE },
@@ -2274,6 +2325,27 @@ const struct riscv_opcode riscv_opcodes[] =
 {"qc.ldsri",    64, INSN_CLASS_ZICS, "d,(s),t", MATCH_QC_LDSRI, MASK_QC_LDSRI, match_opcode, INSN_DREF|INSN_8_BYTE },
 {"qc.ldsrib",   64, INSN_CLASS_ZICS, "d,(s),t", MATCH_QC_LDSRIB, MASK_QC_LDSRIB, match_rd_neq_rs1, INSN_DREF|INSN_8_BYTE },
 {"qc.ldsria",   64, INSN_CLASS_ZICS, "d,(s),t", MATCH_QC_LDSRIA, MASK_QC_LDSRIA, match_rd_neq_rs1, INSN_DREF|INSN_8_BYTE },
+{"qc.lbpisp",    0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp0", MATCH_QC_LBPISP, MASK_QC_LBPISP, match_rd_neq_rs2, INSN_DREF|INSN_2_BYTE },
+{"qc.lbpispb",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp0", MATCH_QC_LBPISPB, MASK_QC_LBPISPB, match_qc_load_pair_with_update, INSN_DREF|INSN_2_BYTE },
+{"qc.lbpispa",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp0", MATCH_QC_LBPISPA, MASK_QC_LBPISPA, match_qc_load_pair_with_update, INSN_DREF|INSN_2_BYTE },
+{"qc.lbupisp",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp0", MATCH_QC_LBUPISP, MASK_QC_LBUPISP, match_rd_neq_rs2, INSN_DREF|INSN_2_BYTE },
+{"qc.lbupispb",  0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp0", MATCH_QC_LBUPISPB, MASK_QC_LBUPISPB, match_qc_load_pair_with_update, INSN_DREF|INSN_2_BYTE },
+{"qc.lbupispa",  0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp0", MATCH_QC_LBUPISPA, MASK_QC_LBUPISPA, match_qc_load_pair_with_update, INSN_DREF|INSN_2_BYTE },
+{"qc.lhpisp",    0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp1", MATCH_QC_LHPISP, MASK_QC_LHPISP, match_rd_neq_rs2, INSN_DREF|INSN_4_BYTE },
+{"qc.lhpispb",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp1", MATCH_QC_LHPISPB, MASK_QC_LHPISPB, match_qc_load_pair_with_update, INSN_DREF|INSN_4_BYTE },
+{"qc.lhpispa",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp1", MATCH_QC_LHPISPA, MASK_QC_LHPISPA, match_qc_load_pair_with_update, INSN_DREF|INSN_4_BYTE },
+{"qc.lhupisp",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp1", MATCH_QC_LHUPISP, MASK_QC_LHUPISP, match_rd_neq_rs2, INSN_DREF|INSN_4_BYTE },
+{"qc.lhupispb",  0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp1", MATCH_QC_LHUPISPB, MASK_QC_LHUPISPB, match_qc_load_pair_with_update, INSN_DREF|INSN_4_BYTE },
+{"qc.lhupispa",  0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp1", MATCH_QC_LHUPISPA, MASK_QC_LHUPISPA, match_qc_load_pair_with_update, INSN_DREF|INSN_4_BYTE },
+{"qc.lwpisp",    0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp2", MATCH_QC_LWPISP, MASK_QC_LWPISP, match_rd_neq_rs2, INSN_DREF|INSN_8_BYTE },
+{"qc.lwpispb",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp2", MATCH_QC_LWPISPB, MASK_QC_LWPISPB, match_qc_load_pair_with_update, INSN_DREF|INSN_8_BYTE },
+{"qc.lwpispa",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp2", MATCH_QC_LWPISPA, MASK_QC_LWPISPA, match_qc_load_pair_with_update, INSN_DREF|INSN_8_BYTE },
+{"qc.lwupisp",  64, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp2", MATCH_QC_LWUPISP, MASK_QC_LWUPISP, match_rd_neq_rs2, INSN_DREF|INSN_8_BYTE },
+{"qc.lwupispb", 64, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp2", MATCH_QC_LWUPISPB, MASK_QC_LWUPISPB, match_qc_load_pair_with_update, INSN_DREF|INSN_8_BYTE },
+{"qc.lwupispa", 64, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp2", MATCH_QC_LWUPISPA, MASK_QC_LWUPISPA, match_qc_load_pair_with_update, INSN_DREF|INSN_8_BYTE },
+{"qc.ldpisp",   64, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp3", MATCH_QC_LDPISP, MASK_QC_LDPISP, match_rd_neq_rs2, INSN_DREF|INSN_16_BYTE },
+{"qc.ldpispb",  64, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp3", MATCH_QC_LDPISPB, MASK_QC_LDPISPB, match_qc_load_pair_with_update, INSN_DREF|INSN_16_BYTE },
+{"qc.ldpispa",  64, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp3", MATCH_QC_LDPISPA, MASK_QC_LDPISPA, match_qc_load_pair_with_update, INSN_DREF|INSN_16_BYTE },
 {"qc.sbib",      0, INSN_CLASS_ZICS, "t,(s),Xqq0", MATCH_QC_SBIB, MASK_QC_SBIB, match_opcode, INSN_DREF|INSN_1_BYTE },
 {"qc.sbia",      0, INSN_CLASS_ZICS, "t,(s),Xqq0", MATCH_QC_SBIA, MASK_QC_SBIA, match_opcode, INSN_DREF|INSN_1_BYTE },
 {"qc.shib",      0, INSN_CLASS_ZICS, "t,(s),Xqq1", MATCH_QC_SHIB, MASK_QC_SHIB, match_opcode, INSN_DREF|INSN_2_BYTE },
@@ -2303,6 +2375,18 @@ const struct riscv_opcode riscv_opcodes[] =
 {"qc.sdsri",    64, INSN_CLASS_ZICS, "d,(s),t", MATCH_QC_SDSRI, MASK_QC_SDSRI, match_opcode, INSN_DREF|INSN_8_BYTE },
 {"qc.sdsrib",   64, INSN_CLASS_ZICS, "d,(s),t", MATCH_QC_SDSRIB, MASK_QC_SDSRIB, match_opcode, INSN_DREF|INSN_8_BYTE },
 {"qc.sdsria",   64, INSN_CLASS_ZICS, "d,(s),t", MATCH_QC_SDSRIA, MASK_QC_SDSRIA, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"qc.sbpisp",    0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp0", MATCH_QC_SBPISP, MASK_QC_SBPISP, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"qc.sbpispb",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp0", MATCH_QC_SBPISPB, MASK_QC_SBPISPB, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"qc.sbpispa",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp0", MATCH_QC_SBPISPA, MASK_QC_SBPISPA, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"qc.shpisp",    0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp1", MATCH_QC_SHPISP, MASK_QC_SHPISP, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"qc.shpispb",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp1", MATCH_QC_SHPISPB, MASK_QC_SHPISPB, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"qc.shpispa",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp1", MATCH_QC_SHPISPA, MASK_QC_SHPISPA, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"qc.swpisp",    0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp2", MATCH_QC_SWPISP, MASK_QC_SWPISP, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"qc.swpispb",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp2", MATCH_QC_SWPISPB, MASK_QC_SWPISPB, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"qc.swpispa",   0, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp2", MATCH_QC_SWPISPA, MASK_QC_SWPISPA, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"qc.sdpisp",   64, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp3", MATCH_QC_SDPISP, MASK_QC_SDPISP, match_opcode, INSN_DREF|INSN_16_BYTE },
+{"qc.sdpispb",  64, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp3", MATCH_QC_SDPISPB, MASK_QC_SDPISPB, match_opcode, INSN_DREF|INSN_16_BYTE },
+{"qc.sdpispa",  64, INSN_CLASS_ZICS, "d,t,(Xqr2),Xqp3", MATCH_QC_SDPISPA, MASK_QC_SDPISPA, match_opcode, INSN_DREF|INSN_16_BYTE },
 {"qc.flhib",     0, INSN_CLASS_ZICS_AND_ZFHMIN, "D,(s),Xqo1", MATCH_QC_FLHIB, MASK_QC_FLHIB, match_opcode, INSN_DREF|INSN_2_BYTE },
 {"qc.flhia",     0, INSN_CLASS_ZICS_AND_ZFHMIN, "D,(s),Xqo1", MATCH_QC_FLHIA, MASK_QC_FLHIA, match_opcode, INSN_DREF|INSN_2_BYTE },
 {"qc.flhri",     0, INSN_CLASS_ZICS_AND_ZFHMIN, "D,(s),t", MATCH_QC_FLHRI, MASK_QC_FLHRI, match_opcode, INSN_DREF|INSN_2_BYTE },

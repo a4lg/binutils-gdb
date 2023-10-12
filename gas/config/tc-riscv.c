@@ -1465,7 +1465,10 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		    break;
 		  case 'o': /* Scaled offset for load.  */
 		  case 'q': /* Scaled offset for store.  */
-		    s = (*oparg == 'o' ? OP_SH_RS2 : OP_SH_RD);
+		  case 'p': /* Scaled offset for pair load/store.  */
+		    s = (*oparg == 'o'   ? OP_SH_RS2
+			 : *oparg == 'p' ? OP_SH_RS1
+					 : OP_SH_RD);
 		    strtoul (oparg + 1, (char **)&oparg, 10);
 		    oparg--;
 		    USE_IMM (RISCV_IMM5_BITS, s);
@@ -3646,7 +3649,10 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			continue;
 		      case 'o': /* Scaled offset for load.  */
 		      case 'q': /* Scaled offset for store.  */
-			s = (*oparg == 'o' ? OP_SH_RS2 : OP_SH_RD);
+		      case 'p': /* Scaled offset for pair load/store.  */
+			s = (*oparg == 'o'   ? OP_SH_RS2
+			     : *oparg == 'p' ? OP_SH_RS1
+					     : OP_SH_RD);
 			scale = 1u << strtoul (oparg + 1, (char **)&oparg, 10);
 			oparg--;
 			if (riscv_handle_implicit_zero_offset (imm_expr, asarg))

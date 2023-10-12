@@ -52,3 +52,60 @@ target:
 	lwu	a0, [a2](a0+)
 	ld	a0, [a2](+a0)
 	ld	a0, [a2](a0+)
+
+
+	## Pair load/stores
+
+	# Invalid on loads: rs1 == rs2
+	lwup	a0, a0, (sp)
+	lwup	a0, a0, (+sp)
+	lwup	a0, a0, (sp+)
+	ldp	a0, a0, (sp)
+	ldp	a0, a0, (+sp)
+	ldp	a0, a0, (sp+)
+
+	# Invalid on loads with SP update: rs1 == sp
+	lwup	sp, a0, (+sp)
+	lwup	sp, a0, (sp+)
+	ldp	sp, a0, (+sp)
+	ldp	sp, a0, (sp+)
+
+	# Invalid on loads with SP update: rs2 == sp
+	lwup	a0, sp, (+sp)
+	lwup	a0, sp, (sp+)
+	ldp	a0, sp, (+sp)
+	ldp	a0, sp, (sp+)
+
+	# Out of Range
+	lwup	a0, a1, 64(sp)
+	lwup	a0, a1, 64(+sp)
+	lwup	a0, a1, 64(sp+)
+	lwup	a0, a1, -68(sp)
+	lwup	a0, a1, -68(+sp)
+	lwup	a0, a1, -68(sp+)
+	ldp	a0, a1, 128(sp)
+	ldp	a0, a1, 128(+sp)
+	ldp	a0, a1, 128(sp+)
+	ldp	a0, a1, -136(sp)
+	ldp	a0, a1, -136(+sp)
+	ldp	a0, a1, -136(sp+)
+
+	# Unaligned
+	lwup	a0, a1, 2(sp)
+	lwup	a0, a1, 2(+sp)
+	lwup	a0, a1, 2(sp+)
+	lwup	a0, a1, -2(sp)
+	lwup	a0, a1, -2(+sp)
+	lwup	a0, a1, -2(sp+)
+	ldp	a0, a1, 4(sp)
+	ldp	a0, a1, 4(+sp)
+	ldp	a0, a1, 4(sp+)
+	ldp	a0, a1, -4(sp)
+	ldp	a0, a1, -4(+sp)
+	ldp	a0, a1, -4(sp+)
+	sdp	a0, a1, 4(sp)
+	sdp	a0, a1, 4(+sp)
+	sdp	a0, a1, 4(sp+)
+	sdp	a0, a1, -4(sp)
+	sdp	a0, a1, -4(+sp)
+	sdp	a0, a1, -4(sp+)

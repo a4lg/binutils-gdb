@@ -650,7 +650,10 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		    break;
 		  case 'o': /* Scaled offset for load.  */
 		  case 'q': /* Scaled offset for store.  */
-		    s = (*oparg == 'o' ? OP_SH_RS2 : OP_SH_RD);
+		  case 'p': /* Scaled offset for pair load/store.  */
+		    s = (*oparg == 'o'   ? OP_SH_RS2
+			 : *oparg == 'p' ? OP_SH_RS1
+					 : OP_SH_RD);
 		    scale = 1 << strtol (oparg + 1, (char **)&oparg, 10);
 		    oparg--;
 		    print (info->stream, dis_style_immediate, "%d",
