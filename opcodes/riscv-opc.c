@@ -2039,6 +2039,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"hsv.w",       0, INSN_CLASS_H, "t,0(s)", MATCH_HSV_W, MASK_HSV_W, match_opcode, INSN_DREF|INSN_4_BYTE },
 {"hsv.d",      64, INSN_CLASS_H, "t,0(s)", MATCH_HSV_D, MASK_HSV_D, match_opcode, INSN_DREF|INSN_8_BYTE },
 
+/* Qualcomm's Proposal of Code Size Reduction Instructions (non-prefixed).  */
+{"beqi",         0, INSN_CLASS_ZICS, "s,Xqc,p", MATCH_BEQI, MASK_BEQI, match_opcode, INSN_CONDBRANCH },
+{"bnei",         0, INSN_CLASS_ZICS, "s,Xqc,p", MATCH_BNEI, MASK_BNEI, match_opcode, INSN_CONDBRANCH },
+
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
 

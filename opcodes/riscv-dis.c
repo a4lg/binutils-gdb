@@ -636,6 +636,19 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	case 'X': /* Vendor-specific operands.  */
 	  switch (*++oparg)
 	    {
+	    case 'q': /* Vendor-specific (Qualcomm) operands.  */
+	      {
+		switch (*++oparg)
+		  {
+		  case 'c': /* CIMM: Immediate for conditional branch.  */
+		    print (info->stream, dis_style_immediate, "%d",
+			   (int) EXTRACT_S_IMM (RISCV_IMM5_BITS, OP_SH_RS2, l));
+		    break;
+		  default:
+		    goto undefined_modifier;
+		  }
+	      }
+	      break;
 	    case 't': /* Vendor-specific (T-head) operands.  */
 	      {
 		size_t n;

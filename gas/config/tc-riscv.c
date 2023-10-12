@@ -1454,6 +1454,18 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	case 'X': /* Vendor-specific operands.  */
 	  switch (*++oparg)
 	    {
+	    case 'q': /* Vendor-specific (Qualcomm) operands.  */
+	      {
+		switch (*++oparg)
+		  {
+		  case 'c': /* CIMM: Immediate for conditional branch.  */
+		    USE_IMM (RISCV_IMM5_BITS, OP_SH_RS2);
+		    break;
+		  default:
+		    goto unknown_validate_operand;
+		  }
+	      }
+	      break;
 	    case 't': /* Vendor-specific (T-head) operands.  */
 	      {
 		size_t n;
@@ -3599,6 +3611,26 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	    case 'X': /* Vendor-specific operands.  */
 	      switch (*++oparg)
 		{
+		case 'q': /* Vendor-specific (Qualcomm) operands.  */
+		  {
+		    switch (*++oparg)
+		      {
+		      case 'c': /* CIMM: Immediate for conditional branch.  */
+			my_getExpression (imm_expr, asarg);
+			check_absolute_expr (ip, imm_expr, FALSE);
+			if (imm_expr->X_add_number >= RISCV_IMM5_REACH / 2
+			    || imm_expr->X_add_number < -RISCV_IMM5_REACH / 2)
+			  break;
+			INSERT_IMM (RISCV_IMM5_BITS, OP_SH_RS2, *ip,
+				    imm_expr->X_add_number);
+			imm_expr->X_op = O_absent;
+			asarg = expr_parse_end;
+			continue;
+		      default:
+			goto unknown_riscv_ip_operand;
+		      }
+		  }
+		  break;
 		case 't': /* Vendor-specific (T-head) operands.  */
 		  {
 		    size_t n;

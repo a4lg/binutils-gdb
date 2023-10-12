@@ -2320,6 +2320,11 @@
 #define MASK_WRS_NTO 0xffffffff
 #define MATCH_WRS_STO 0x01d00073
 #define MASK_WRS_STO 0xffffffff
+/* Qualcomm's Proposal of Code Size Reduction Instructions.  */
+#define MATCH_BEQI 0x2063
+#define MASK_BEQI 0x707f
+#define MATCH_BNEI 0x3063
+#define MASK_BNEI 0x707f
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 #define MATCH_TH_ADDSL 0x0000100b
 #define MASK_TH_ADDSL 0xf800707f
