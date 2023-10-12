@@ -1252,6 +1252,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zicbop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicboz",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicond",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zics",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
@@ -2391,6 +2392,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zicboz");
     case INSN_CLASS_ZICOND:
       return riscv_subset_supports (rps, "zicond");
+    case INSN_CLASS_ZICS:
+      return riscv_subset_supports (rps, "zics");
     case INSN_CLASS_ZICSR:
       return riscv_subset_supports (rps, "zicsr");
     case INSN_CLASS_ZIFENCEI:
@@ -2594,6 +2597,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zicboz";
     case INSN_CLASS_ZICOND:
       return "zicond";
+    case INSN_CLASS_ZICS:
+      return "zics";
     case INSN_CLASS_ZICSR:
       return "zicsr";
     case INSN_CLASS_ZIFENCEI:
