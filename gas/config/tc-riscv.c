@@ -1362,6 +1362,7 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	case ',': break;
 	case '(': break;
 	case ')': break;
+	case '+': break;
 	case '<': USE_BITS (OP_MASK_SHAMTW, OP_SH_SHAMTW); break;
 	case '>': USE_BITS (OP_MASK_SHAMT, OP_SH_SHAMT); break;
 	case 'A': break; /* Macro operand, must be symbol.  */
@@ -1456,10 +1457,18 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	    {
 	    case 'q': /* Vendor-specific (Qualcomm) operands.  */
 	      {
+		unsigned s;
 		switch (*++oparg)
 		  {
 		  case 'c': /* CIMM: Immediate for conditional branch.  */
 		    USE_IMM (RISCV_IMM5_BITS, OP_SH_RS2);
+		    break;
+		  case 'o': /* Scaled offset for load.  */
+		  case 'q': /* Scaled offset for store.  */
+		    s = (*oparg == 'o' ? OP_SH_RS2 : OP_SH_RD);
+		    strtoul (oparg + 1, (char **)&oparg, 10);
+		    oparg--;
+		    USE_IMM (RISCV_IMM5_BITS, s);
 		    break;
 		  case 'r': /* Implicit register. */
 		    strtoul (oparg + 1, (char **)&oparg, 10);
@@ -3137,6 +3146,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	    case ')':
 	    case '[':
 	    case ']':
+	    case '+':
 	      if (*asarg++ == *oparg)
 		continue;
 	      break;
@@ -3618,6 +3628,9 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		case 'q': /* Vendor-specific (Qualcomm) operands.  */
 		  {
 		    unsigned long regno_i;
+		    unsigned s;
+		    unsigned scale;
+		    offsetT encoded_offset;
 		    switch (*++oparg)
 		      {
 		      case 'c': /* CIMM: Immediate for conditional branch.  */
@@ -3628,6 +3641,25 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			  break;
 			INSERT_IMM (RISCV_IMM5_BITS, OP_SH_RS2, *ip,
 				    imm_expr->X_add_number);
+			imm_expr->X_op = O_absent;
+			asarg = expr_parse_end;
+			continue;
+		      case 'o': /* Scaled offset for load.  */
+		      case 'q': /* Scaled offset for store.  */
+			s = (*oparg == 'o' ? OP_SH_RS2 : OP_SH_RD);
+			scale = 1u << strtoul (oparg + 1, (char **)&oparg, 10);
+			oparg--;
+			if (riscv_handle_implicit_zero_offset (imm_expr, asarg))
+			  continue;
+			if (my_getSmallExpression (imm_expr, imm_reloc, asarg, p)
+			    || imm_expr->X_op != O_constant)
+			  break;
+			encoded_offset = imm_expr->X_add_number / scale;
+			if (((unsigned) (imm_expr->X_add_number) & (scale - 1))
+			    || encoded_offset >= RISCV_IMM5_REACH / 2
+			    || encoded_offset < -RISCV_IMM5_REACH / 2)
+			  break;
+			INSERT_IMM (RISCV_IMM5_BITS, s, *ip, encoded_offset);
 			imm_expr->X_op = O_absent;
 			asarg = expr_parse_end;
 			continue;
