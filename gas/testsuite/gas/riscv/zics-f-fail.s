@@ -68,3 +68,20 @@ target:
 	fsq	fa0, 8(a1+)
 	fsq	fa0, -8(+a1)
 	fsq	fa0, -8(a1+)
+
+
+	## Pair loads
+
+	# Invalid on loads: rs1 == rs2
+	flhp	fa0, fa0, (sp)
+	flhp	fa0, fa0, (+sp)
+	flhp	fa0, fa0, (sp+)
+	flwp	fa0, fa0, (sp)
+	flwp	fa0, fa0, (+sp)
+	flwp	fa0, fa0, (sp+)
+	fldp	fa0, fa0, (sp)
+	fldp	fa0, fa0, (+sp)
+	fldp	fa0, fa0, (sp+)
+	flqp	fa0, fa0, (sp)
+	flqp	fa0, fa0, (+sp)
+	flqp	fa0, fa0, (sp+)
