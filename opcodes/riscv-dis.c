@@ -648,6 +648,14 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		    print (info->stream, dis_style_immediate, "%d",
 			   (int) EXTRACT_S_IMM (RISCV_IMM5_BITS, OP_SH_RS2, l));
 		    break;
+		  case 'l': /* PC-relative load offset (label).  */
+		    s = (size_t) strtoul (oparg + 1, (char **)&oparg, 10);
+		    scale = 1 << s;
+		    oparg--;
+		    info->target = EXTRACT_S_IMM (12, 15, l) * scale + pc;
+		    info->target &= ~(((bfd_vma) scale) - 1);
+		    (*info->print_address_func) (info->target, info);
+		    break;
 		  case 'o': /* Scaled offset for load.  */
 		  case 'q': /* Scaled offset for store.  */
 		  case 'p': /* Scaled offset for pair load/store.  */

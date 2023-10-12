@@ -1463,6 +1463,11 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		  case 'c': /* CIMM: Immediate for conditional branch.  */
 		    USE_IMM (RISCV_IMM5_BITS, OP_SH_RS2);
 		    break;
+		  case 'l': /* PC-relative load offset (label).  */
+		    strtoul (oparg + 1, (char **)&oparg, 10);
+		    oparg--;
+		    USE_IMM (12, 15);
+		    break;
 		  case 'o': /* Scaled offset for load.  */
 		  case 'q': /* Scaled offset for store.  */
 		  case 'p': /* Scaled offset for pair load/store.  */
@@ -3647,6 +3652,10 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			imm_expr->X_op = O_absent;
 			asarg = expr_parse_end;
 			continue;
+		      case 'l': /* PC-relative load offset (label).  */
+			/* Available to the disassembler only (all variants
+			   are generated through linker relaxation).  */
+			break;
 		      case 'o': /* Scaled offset for load.  */
 		      case 'q': /* Scaled offset for store.  */
 		      case 'p': /* Scaled offset for pair load/store.  */
