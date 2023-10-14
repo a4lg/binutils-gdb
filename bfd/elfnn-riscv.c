@@ -4091,10 +4091,10 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 #define RISCV_RELAX_PIC   0x04U
 
 /* A second format for recording PC-relative hi relocations.  This stores the
-   information required to relax them to GP-relative addresses.  */
+   information required to relax them to other kinds of relative addresses.  */
 
-typedef struct riscv_pcgp_hi_reloc riscv_pcgp_hi_reloc;
-struct riscv_pcgp_hi_reloc
+typedef struct riscv_pc_relax_hi_reloc riscv_pc_relax_hi_reloc;
+struct riscv_pc_relax_hi_reloc
 {
   bfd_vma hi_sec_off;
   bfd_vma hi_addend;
@@ -4102,68 +4102,69 @@ struct riscv_pcgp_hi_reloc
   unsigned hi_sym;
   asection *sym_sec;
   bool undefined_weak;
-  riscv_pcgp_hi_reloc *next;
+  riscv_pc_relax_hi_reloc *next;
 };
 
-typedef struct riscv_pcgp_lo_reloc riscv_pcgp_lo_reloc;
-struct riscv_pcgp_lo_reloc
+typedef struct riscv_pc_relax_lo_reloc riscv_pc_relax_lo_reloc;
+struct riscv_pc_relax_lo_reloc
 {
   bfd_vma hi_sec_off;
-  riscv_pcgp_lo_reloc *next;
+  riscv_pc_relax_lo_reloc *next;
 };
 
 typedef struct
 {
-  riscv_pcgp_hi_reloc *hi;
-  riscv_pcgp_lo_reloc *lo;
-} riscv_pcgp_relocs;
+  riscv_pc_relax_hi_reloc *hi;
+  riscv_pc_relax_lo_reloc *lo;
+} riscv_pc_relax_relocs;
 
-/* Initialize the pcgp reloc info in P.  */
+/* Initialize the pc relaxation reloc info in P.  */
 
 static bool
-riscv_init_pcgp_relocs (riscv_pcgp_relocs *p)
+riscv_init_pc_relax_relocs (riscv_pc_relax_relocs *p)
 {
   p->hi = NULL;
   p->lo = NULL;
   return true;
 }
 
-/* Free the pcgp reloc info in P.  */
+/* Free the pc relaxation reloc info in P.  */
 
 static void
-riscv_free_pcgp_relocs (riscv_pcgp_relocs *p,
-			bfd *abfd ATTRIBUTE_UNUSED,
-			asection *sec ATTRIBUTE_UNUSED)
+riscv_free_pc_relax_relocs (riscv_pc_relax_relocs *p,
+			    bfd *abfd ATTRIBUTE_UNUSED,
+			    asection *sec ATTRIBUTE_UNUSED)
 {
-  riscv_pcgp_hi_reloc *c;
-  riscv_pcgp_lo_reloc *l;
+  riscv_pc_relax_hi_reloc *c;
+  riscv_pc_relax_lo_reloc *l;
 
   for (c = p->hi; c != NULL; )
     {
-      riscv_pcgp_hi_reloc *next = c->next;
+      riscv_pc_relax_hi_reloc *next = c->next;
       free (c);
       c = next;
     }
 
   for (l = p->lo; l != NULL; )
     {
-      riscv_pcgp_lo_reloc *next = l->next;
+      riscv_pc_relax_lo_reloc *next = l->next;
       free (l);
       l = next;
     }
 }
 
-/* Record pcgp hi part reloc info in P, using HI_SEC_OFF as the lookup index.
-   The HI_ADDEND, HI_ADDR, HI_SYM, and SYM_SEC args contain info required to
-   relax the corresponding lo part reloc.  */
+/* Record pc relaxation hi part reloc info in P, using HI_SEC_OFF as
+   the lookup index.  The HI_ADDEND, HI_ADDR, HI_SYM, and SYM_SEC args
+   contain info required to relax the corresponding lo part reloc.  */
 
 static bool
-riscv_record_pcgp_hi_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off,
-			    bfd_vma hi_addend, bfd_vma hi_addr,
-			    unsigned hi_sym, asection *sym_sec,
-			    bool undefined_weak)
+riscv_record_pc_relax_hi_reloc (riscv_pc_relax_relocs *p,
+				bfd_vma hi_sec_off,
+				bfd_vma hi_addend, bfd_vma hi_addr,
+				unsigned hi_sym, asection *sym_sec,
+				bool undefined_weak)
 {
-  riscv_pcgp_hi_reloc *new = bfd_malloc (sizeof (*new));
+  riscv_pc_relax_hi_reloc *new = bfd_malloc (sizeof (*new));
   if (!new)
     return false;
   new->hi_sec_off = hi_sec_off;
@@ -4180,10 +4181,10 @@ riscv_record_pcgp_hi_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off,
 /* Look up hi part pcgp reloc info in P, using HI_SEC_OFF as the lookup index.
    This is used by a lo part reloc to find the corresponding hi part reloc.  */
 
-static riscv_pcgp_hi_reloc *
-riscv_find_pcgp_hi_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
+static riscv_pc_relax_hi_reloc *
+riscv_find_pc_relax_hi_reloc (riscv_pc_relax_relocs *p, bfd_vma hi_sec_off)
 {
-  riscv_pcgp_hi_reloc *c;
+  riscv_pc_relax_hi_reloc *c;
 
   for (c = p->hi; c != NULL; c = c->next)
     if (c->hi_sec_off == hi_sec_off)
@@ -4195,9 +4196,10 @@ riscv_find_pcgp_hi_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
    This is used to record relocs that can't be relaxed.  */
 
 static bool
-riscv_record_pcgp_lo_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
+riscv_record_pc_relax_lo_reloc (riscv_pc_relax_relocs *p,
+				bfd_vma hi_sec_off)
 {
-  riscv_pcgp_lo_reloc *new = bfd_malloc (sizeof (*new));
+  riscv_pc_relax_lo_reloc *new = bfd_malloc (sizeof (*new));
   if (!new)
     return false;
   new->hi_sec_off = hi_sec_off;
@@ -4210,9 +4212,9 @@ riscv_record_pcgp_lo_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
    This is used by a hi part reloc to find the corresponding lo part reloc.  */
 
 static bool
-riscv_find_pcgp_lo_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
+riscv_find_pc_relax_lo_reloc (riscv_pc_relax_relocs *p, bfd_vma hi_sec_off)
 {
-  riscv_pcgp_lo_reloc *c;
+  riscv_pc_relax_lo_reloc *c;
 
   for (c = p->lo; c != NULL; c = c->next)
     if (c->hi_sec_off == hi_sec_off)
@@ -4221,14 +4223,16 @@ riscv_find_pcgp_lo_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
 }
 
 static void
-riscv_update_pcgp_relocs (riscv_pcgp_relocs *p, asection *deleted_sec,
-			  bfd_vma deleted_addr, size_t deleted_count)
+riscv_update_pc_relax_relocs (riscv_pc_relax_relocs *p,
+			      asection *deleted_sec,
+			      bfd_vma deleted_addr,
+			      size_t deleted_count)
 {
   /* Bytes have already been deleted and toaddr should match the old section
      size for our checks, so adjust it here.  */
   bfd_vma toaddr = deleted_sec->size + deleted_count;
-  riscv_pcgp_lo_reloc *l;
-  riscv_pcgp_hi_reloc *h;
+  riscv_pc_relax_lo_reloc *l;
+  riscv_pc_relax_hi_reloc *h;
 
   /* Update section offsets of corresponding pcrel_hi relocs for the pcrel_lo
      entries where they occur after the deleted bytes.  */
@@ -4259,7 +4263,7 @@ _riscv_relax_delete_bytes (bfd *abfd,
 			   bfd_vma addr,
 			   size_t count,
 			   struct bfd_link_info *link_info,
-			   riscv_pcgp_relocs *p,
+			   riscv_pc_relax_relocs *p,
 			   bfd_vma delete_total,
 			   bfd_vma toaddr)
 {
@@ -4288,7 +4292,7 @@ _riscv_relax_delete_bytes (bfd *abfd,
   /* Adjust the hi_sec_off, and the hi_addr of any entries in the pcgp relocs
      table for which these values occur after the deleted bytes.  */
   if (p)
-    riscv_update_pcgp_relocs (p, sec, addr, count);
+    riscv_update_pc_relax_relocs (p, sec, addr, count);
 
   /* Adjust the local symbols defined in this section.  */
   for (i = 0; i < symtab_hdr->sh_info; i++)
@@ -4377,7 +4381,7 @@ _riscv_relax_delete_bytes (bfd *abfd,
 typedef bool (*relax_delete_t) (bfd *, asection *,
 				bfd_vma, size_t,
 				struct bfd_link_info *,
-				riscv_pcgp_relocs *,
+				riscv_pc_relax_relocs *,
 				Elf_Internal_Rela *);
 
 static relax_delete_t riscv_relax_delete_bytes;
@@ -4391,7 +4395,7 @@ _riscv_relax_delete_piecewise (bfd *abfd ATTRIBUTE_UNUSED,
 			       bfd_vma addr,
 			       size_t count,
 			       struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
-			       riscv_pcgp_relocs *p ATTRIBUTE_UNUSED,
+			       riscv_pc_relax_relocs *p ATTRIBUTE_UNUSED,
 			       Elf_Internal_Rela *rel)
 {
   if (rel == NULL)
@@ -4410,7 +4414,7 @@ _riscv_relax_delete_immediate (bfd *abfd,
 			       bfd_vma addr,
 			       size_t count,
 			       struct bfd_link_info *link_info,
-			       riscv_pcgp_relocs *p,
+			       riscv_pc_relax_relocs *p,
 			       Elf_Internal_Rela *rel)
 {
   if (rel != NULL)
@@ -4475,7 +4479,7 @@ typedef bool (*relax_func_t) (bfd *, asection *, asection *,
 			      struct bfd_link_info *,
 			      Elf_Internal_Rela *,
 			      bfd_vma, bfd_vma, bfd_vma, bool *,
-			      riscv_pcgp_relocs *,
+			      riscv_pc_relax_relocs *,
 			      bool undefined_weak,
 			      unsigned relax_features);
 
@@ -4489,7 +4493,7 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
 		       bfd_vma max_alignment,
 		       bfd_vma reserve_size ATTRIBUTE_UNUSED,
 		       bool *again,
-		       riscv_pcgp_relocs *pcgp_relocs,
+		       riscv_pc_relax_relocs *pc_relax_relocs,
 		       bool undefined_weak ATTRIBUTE_UNUSED,
 		       unsigned relax_features)
 {
@@ -4556,7 +4560,7 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
   /* Delete unnecessary JALR and reuse the R_RISCV_RELAX reloc.  */
   *again = true;
   return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + len, 8 - len,
-				   link_info, pcgp_relocs, rel + 1);
+				   link_info, pc_relax_relocs, rel + 1);
 }
 
 /* Traverse all output sections and return the max alignment.
@@ -4586,7 +4590,8 @@ _bfd_riscv_get_max_alignment (asection *sec, bfd_vma gp)
   return (bfd_vma) 1 << max_alignment_power;
 }
 
-/* Relax non-PIC global variable references to GP-relative references.  */
+/* Relax non-PIC global variable references to
+   GP/zero-relative references.  */
 
 static bool
 _bfd_riscv_relax_lui (bfd *abfd,
@@ -4598,7 +4603,7 @@ _bfd_riscv_relax_lui (bfd *abfd,
 		      bfd_vma max_alignment,
 		      bfd_vma reserve_size,
 		      bool *again,
-		      riscv_pcgp_relocs *pcgp_relocs,
+		      riscv_pc_relax_relocs *pc_relax_relocs,
 		      bool undefined_weak,
 		      unsigned relax_features)
 {
@@ -4660,7 +4665,8 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	  /* Delete unnecessary LUI and reuse the reloc.  */
 	  *again = true;
 	  return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4,
-					   link_info, pcgp_relocs, rel);
+					   link_info, pc_relax_relocs,
+					   rel);
 
 	default:
 	  abort ();
@@ -4694,7 +4700,8 @@ _bfd_riscv_relax_lui (bfd *abfd,
       /* Delete extra bytes and reuse the R_RISCV_RELAX reloc.  */
       *again = true;
       return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + 2, 2,
-				       link_info, pcgp_relocs, rel + 1);
+				       link_info, pc_relax_relocs,
+				       rel + 1);
     }
 
   return true;
@@ -4712,7 +4719,7 @@ _bfd_riscv_relax_tls_le (bfd *abfd,
 			 bfd_vma max_alignment ATTRIBUTE_UNUSED,
 			 bfd_vma reserve_size ATTRIBUTE_UNUSED,
 			 bool *again,
-			 riscv_pcgp_relocs *pcgp_relocs,
+			 riscv_pc_relax_relocs *pc_relax_relocs,
 			 bool undefined_weak ATTRIBUTE_UNUSED,
 			 unsigned relax_features ATTRIBUTE_UNUSED)
 {
@@ -4736,7 +4743,7 @@ _bfd_riscv_relax_tls_le (bfd *abfd,
       /* Delete unnecessary instruction and reuse the reloc.  */
       *again = true;
       return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info,
-				       pcgp_relocs, rel);
+				       pc_relax_relocs, rel);
 
     default:
       abort ();
@@ -4755,7 +4762,7 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
 			bfd_vma max_alignment ATTRIBUTE_UNUSED,
 			bfd_vma reserve_size ATTRIBUTE_UNUSED,
 			bool *again ATTRIBUTE_UNUSED,
-			riscv_pcgp_relocs *pcgp_relocs ATTRIBUTE_UNUSED,
+			riscv_pc_relax_relocs *pc_relax_relocs ATTRIBUTE_UNUSED,
 			bool undefined_weak ATTRIBUTE_UNUSED,
 			unsigned relax_features ATTRIBUTE_UNUSED)
 {
@@ -4804,7 +4811,7 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
 				   NULL, NULL);
 }
 
-/* Relax PC-relative references to GP-relative references.  */
+/* Relax PC-relative references to GP/zero-relative references.  */
 
 static bool
 _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
@@ -4816,7 +4823,7 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 		     bfd_vma max_alignment,
 		     bfd_vma reserve_size,
 		     bool *again,
-		     riscv_pcgp_relocs *pcgp_relocs,
+		     riscv_pc_relax_relocs *pc_relax_relocs,
 		     bool undefined_weak,
 		     unsigned relax_features)
 {
@@ -4830,7 +4837,7 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 
   /* Chain the _LO relocs to their cooresponding _HI reloc to compute the
      actual target address.  */
-  riscv_pcgp_hi_reloc hi_reloc;
+  riscv_pc_relax_hi_reloc hi_reloc;
   memset (&hi_reloc, 0, sizeof (hi_reloc));
   switch (ELFNN_R_TYPE (rel->r_info))
     {
@@ -4842,11 +4849,11 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 	   hi part instruction.  So we must subtract it here for the lookup.
 	   It is still used below in the final symbol address.  */
 	bfd_vma hi_sec_off = symval - sec_addr (sym_sec) - rel->r_addend;
-	riscv_pcgp_hi_reloc *hi = riscv_find_pcgp_hi_reloc (pcgp_relocs,
-							    hi_sec_off);
+	riscv_pc_relax_hi_reloc *hi =
+	    riscv_find_pc_relax_hi_reloc (pc_relax_relocs, hi_sec_off);
 	if (hi == NULL)
 	  {
-	    riscv_record_pcgp_lo_reloc (pcgp_relocs, hi_sec_off);
+	    riscv_record_pc_relax_lo_reloc (pc_relax_relocs, hi_sec_off);
 	    return true;
 	  }
 
@@ -4857,7 +4864,7 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 	/* We can not know whether the undefined weak symbol is referenced
 	   according to the information of R_RISCV_PCREL_LO12_I/S.  Therefore,
 	   we have to record the 'undefined_weak' flag when handling the
-	   corresponding R_RISCV_HI20 reloc in riscv_record_pcgp_hi_reloc.  */
+	   corresponding R_RISCV_HI20 reloc in riscv_record_pc_relax_hi_reloc.  */
 	undefined_weak = hi_reloc.undefined_weak;
       }
       break;
@@ -4870,7 +4877,7 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 
       /* If the cooresponding lo relocation has already been seen then it's not
          safe to relax this relocation.  */
-      if (riscv_find_pcgp_lo_reloc (pcgp_relocs, rel->r_offset))
+      if (riscv_find_pc_relax_lo_reloc (pc_relax_relocs, rel->r_offset))
 	return true;
 
       break;
@@ -4926,7 +4933,7 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 	  return true;
 
 	case R_RISCV_PCREL_HI20:
-	  riscv_record_pcgp_hi_reloc (pcgp_relocs,
+	  riscv_record_pc_relax_hi_reloc (pc_relax_relocs,
 				      rel->r_offset,
 				      rel->r_addend,
 				      symval,
@@ -4936,7 +4943,7 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 	  /* Delete unnecessary AUIPC and reuse the reloc.  */
 	  *again = true;
 	  riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info,
-				    pcgp_relocs, rel);
+				    pc_relax_relocs, rel);
 	  return true;
 
 	default:
@@ -4976,7 +4983,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
   bool ret = false;
   unsigned int i;
   bfd_vma max_alignment, reserve_size = 0;
-  riscv_pcgp_relocs pcgp_relocs;
+  riscv_pc_relax_relocs pc_relax_relocs;
   static asection *first_section = NULL;
   unsigned relax_features = 0;
 
@@ -5009,7 +5016,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
   else if (first_section == sec)
     htab->max_alignment_for_gp = -1;
 
-  riscv_init_pcgp_relocs (&pcgp_relocs);
+  riscv_init_pc_relax_relocs (&pc_relax_relocs);
 
   /* Read this BFD's relocs if we haven't done so already.  */
   if (data->relocs)
@@ -5236,7 +5243,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 
       if (!relax_func (abfd, sec, sym_sec, info, rel, symval,
 		       max_alignment, reserve_size, again,
-		       &pcgp_relocs, undefined_weak, relax_features))
+		       &pc_relax_relocs, undefined_weak, relax_features))
 	goto fail;
     }
 
@@ -5249,7 +5256,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
  fail:
   if (relocs != data->relocs)
     free (relocs);
-  riscv_free_pcgp_relocs (&pcgp_relocs, abfd, sec);
+  riscv_free_pc_relax_relocs (&pc_relax_relocs, abfd, sec);
 
   return ret;
 }
