@@ -4085,6 +4085,11 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   return false;
 }
 
+/* Enabled relaxation features to use.  */
+#define RISCV_RELAX_RVC   0x01U
+#define RISCV_RELAX_GP    0x02U
+#define RISCV_RELAX_PIC   0x04U
+
 /* A second format for recording PC-relative hi relocations.  This stores the
    information required to relax them to GP-relative addresses.  */
 
@@ -4471,7 +4476,8 @@ typedef bool (*relax_func_t) (bfd *, asection *, asection *,
 			      Elf_Internal_Rela *,
 			      bfd_vma, bfd_vma, bfd_vma, bool *,
 			      riscv_pcgp_relocs *,
-			      bool undefined_weak);
+			      bool undefined_weak,
+			      unsigned relax_features);
 
 /* Relax AUIPC + JALR into JAL.  */
 
@@ -4484,13 +4490,15 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
 		       bfd_vma reserve_size ATTRIBUTE_UNUSED,
 		       bool *again,
 		       riscv_pcgp_relocs *pcgp_relocs,
-		       bool undefined_weak ATTRIBUTE_UNUSED)
+		       bool undefined_weak ATTRIBUTE_UNUSED,
+		       unsigned relax_features)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   bfd_vma foff = symval - (sec_addr (sec) + rel->r_offset);
   bool near_zero = (symval + RISCV_IMM_REACH / 2) < RISCV_IMM_REACH;
+  bool rvc = (relax_features & RISCV_RELAX_RVC) != 0;
   bfd_vma auipc, jalr;
-  int rd, r_type, len = 4, rvc = elf_elfheader (abfd)->e_flags & EF_RISCV_RVC;
+  int rd, r_type, len = 4;
 
   /* If the call crosses section boundaries, an alignment directive could
      cause the PC-relative offset to later increase, so we need to add in the
@@ -4505,7 +4513,8 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
     }
 
   /* See if this function call can be shortened.  */
-  if (!VALID_JTYPE_IMM (foff) && !(!bfd_link_pic (link_info) && near_zero))
+  if (!VALID_JTYPE_IMM (foff)
+      && !(!(relax_features & RISCV_RELAX_PIC) && near_zero))
     return true;
 
   /* Shorten the function call.  */
@@ -4590,15 +4599,16 @@ _bfd_riscv_relax_lui (bfd *abfd,
 		      bfd_vma reserve_size,
 		      bool *again,
 		      riscv_pcgp_relocs *pcgp_relocs,
-		      bool undefined_weak)
+		      bool undefined_weak,
+		      unsigned relax_features)
 {
   struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (link_info);
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   /* Can relax to x0 even when gp relaxation is disabled.  */
-  bfd_vma gp = htab->params->relax_gp
+  bfd_vma gp = (relax_features & RISCV_RELAX_GP) != 0
 	       ? riscv_global_pointer_value (link_info)
 	       : 0;
-  int use_rvc = elf_elfheader (abfd)->e_flags & EF_RISCV_RVC;
+  bool use_rvc = (relax_features & RISCV_RELAX_RVC) != 0;
 
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
 
@@ -4703,7 +4713,8 @@ _bfd_riscv_relax_tls_le (bfd *abfd,
 			 bfd_vma reserve_size ATTRIBUTE_UNUSED,
 			 bool *again,
 			 riscv_pcgp_relocs *pcgp_relocs,
-			 bool undefined_weak ATTRIBUTE_UNUSED)
+			 bool undefined_weak ATTRIBUTE_UNUSED,
+			 unsigned relax_features ATTRIBUTE_UNUSED)
 {
   /* See if this symbol is in range of tp.  */
   if (RISCV_CONST_HIGH_PART (tpoff (link_info, symval)) != 0)
@@ -4745,7 +4756,8 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
 			bfd_vma reserve_size ATTRIBUTE_UNUSED,
 			bool *again ATTRIBUTE_UNUSED,
 			riscv_pcgp_relocs *pcgp_relocs ATTRIBUTE_UNUSED,
-			bool undefined_weak ATTRIBUTE_UNUSED)
+			bool undefined_weak ATTRIBUTE_UNUSED,
+			unsigned relax_features ATTRIBUTE_UNUSED)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   bfd_vma alignment = 1, pos;
@@ -4805,11 +4817,12 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 		     bfd_vma reserve_size,
 		     bool *again,
 		     riscv_pcgp_relocs *pcgp_relocs,
-		     bool undefined_weak)
+		     bool undefined_weak,
+		     unsigned relax_features)
 {
   struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (link_info);
   /* Can relax to x0 even when gp relaxation is disabled.  */
-  bfd_vma gp = htab->params->relax_gp
+  bfd_vma gp = (relax_features & RISCV_RELAX_GP) != 0
 	       ? riscv_global_pointer_value (link_info)
 	       : 0;
 
@@ -4965,6 +4978,15 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
   bfd_vma max_alignment, reserve_size = 0;
   riscv_pcgp_relocs pcgp_relocs;
   static asection *first_section = NULL;
+  unsigned relax_features = 0;
+
+  /* Detect available/enabled relaxation features.  */
+  if (elf_elfheader (abfd)->e_flags & EF_RISCV_RVC)
+    relax_features |= RISCV_RELAX_RVC;
+  if (htab->params->relax_gp)
+    relax_features |= RISCV_RELAX_GP;
+  if (bfd_link_pic (info))
+    relax_features |= RISCV_RELAX_PIC;
 
   *again = false;
 
@@ -5032,7 +5054,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 		   || type == R_RISCV_TPREL_LO12_I
 		   || type == R_RISCV_TPREL_LO12_S)
 	    relax_func = _bfd_riscv_relax_tls_le;
-	  else if (!bfd_link_pic (info)
+	  else if (!(relax_features & RISCV_RELAX_PIC)
 		   && (type == R_RISCV_PCREL_HI20
 		       || type == R_RISCV_PCREL_LO12_I
 		       || type == R_RISCV_PCREL_LO12_S))
@@ -5151,7 +5173,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 
 	  /* This line has to match the check in riscv_elf_relocate_section
 	     in the R_RISCV_CALL[_PLT] case.  */
-	  if (bfd_link_pic (info) && h->plt.offset != MINUS_ONE)
+	  if ((relax_features & RISCV_RELAX_PIC) && h->plt.offset != MINUS_ONE)
 	    {
 	      sym_sec = htab->elf.splt;
 	      symval = h->plt.offset;
@@ -5214,7 +5236,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 
       if (!relax_func (abfd, sec, sym_sec, info, rel, symval,
 		       max_alignment, reserve_size, again,
-		       &pcgp_relocs, undefined_weak))
+		       &pcgp_relocs, undefined_weak, relax_features))
 	goto fail;
     }
 
