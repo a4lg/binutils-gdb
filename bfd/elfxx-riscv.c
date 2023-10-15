@@ -601,9 +601,35 @@ static reloc_howto_type howto_table[] =
 	 MINUS_ONE,			/* dst_mask */
 	 false),			/* pcrel_offset */
 
-  /* 41 and 42 are reserved.  */
-  EMPTY_HOWTO (0),
-  EMPTY_HOWTO (0),
+  /* GP-relative load.  */
+  HOWTO (R_RISCV_GPREL_I,		/* type */
+	 0,				/* rightshift */
+	 4,				/* size */
+	 32,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_GPREL_I",		/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
+	 false),			/* pcrel_offset */
+
+  /* GP-relative store.  */
+  HOWTO (R_RISCV_GPREL_S,		/* type */
+	 0,				/* rightshift */
+	 4,				/* size */
+	 32,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_GPREL_S",		/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
+	 false),			/* pcrel_offset */
 
   /* Indicates an alignment statement.  The addend field encodes how many
      bytes of NOPs follow the statement.  The desired alignment is the
@@ -667,65 +693,17 @@ static reloc_howto_type howto_table[] =
 	 ENCODE_CITYPE_IMM (-1U),	/* dst_mask */
 	 false),			/* pcrel_offset */
 
-  /* GP-relative load.  */
-  HOWTO (R_RISCV_GPREL_I,		/* type */
-	 0,				/* rightshift */
-	 4,				/* size */
-	 32,				/* bitsize */
-	 false,				/* pc_relative */
-	 0,				/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,		/* special_function */
-	 "R_RISCV_GPREL_I",		/* name */
-	 false,				/* partial_inplace */
-	 0,				/* src_mask */
-	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
-	 false),			/* pcrel_offset */
+  /* Reserved for R_RISCV_GPREL_LO12_I.  */
+  EMPTY_HOWTO (47),
 
-  /* GP-relative store.  */
-  HOWTO (R_RISCV_GPREL_S,		/* type */
-	 0,				/* rightshift */
-	 4,				/* size */
-	 32,				/* bitsize */
-	 false,				/* pc_relative */
-	 0,				/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,		/* special_function */
-	 "R_RISCV_GPREL_S",		/* name */
-	 false,				/* partial_inplace */
-	 0,				/* src_mask */
-	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
-	 false),			/* pcrel_offset */
+  /* Reserved for R_RISCV_GPREL_LO12_S.  */
+  EMPTY_HOWTO (48),
 
-  /* TP-relative TLS LE load.  */
-  HOWTO (R_RISCV_TPREL_I,		/* type */
-	 0,				/* rightshift */
-	 4,				/* size */
-	 32,				/* bitsize */
-	 false,				/* pc_relative */
-	 0,				/* bitpos */
-	 complain_overflow_signed,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,		/* special_function */
-	 "R_RISCV_TPREL_I",		/* name */
-	 false,				/* partial_inplace */
-	 0,				/* src_mask */
-	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
-	 false),			/* pcrel_offset */
+  /* Reserved for R_RISCV_GPREL_HI20.  */
+  EMPTY_HOWTO (49),
 
-  /* TP-relative TLS LE store.  */
-  HOWTO (R_RISCV_TPREL_S,		/* type */
-	 0,				/* rightshift */
-	 4,				/* size */
-	 32,				/* bitsize */
-	 false,				/* pc_relative */
-	 0,				/* bitpos */
-	 complain_overflow_signed,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,		/* special_function */
-	 "R_RISCV_TPREL_S",		/* name */
-	 false,				/* partial_inplace */
-	 0,				/* src_mask */
-	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
-	 false),			/* pcrel_offset */
+  /* 50 is reserved.  */
+  EMPTY_HOWTO (50),
 
   /* The paired relocation may be relaxed.  */
   HOWTO (R_RISCV_RELAX,			/* type */
@@ -878,6 +856,48 @@ static reloc_howto_type howto_table[] =
 	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0,				/* dst_mask */
+	 false),			/* pcrel_offset */
+
+  /* Reserved for R_RISCV_TLSDESC_HI20.  */
+  EMPTY_HOWTO (62),
+
+  /* Reserved for R_RISCV_TLSDESC_LOAD_LO12.  */
+  EMPTY_HOWTO (63),
+
+  /* Reserved for R_RISCV_TLSDESC_ADD_LO12.  */
+  EMPTY_HOWTO (64),
+
+  /* Reserved for R_RISCV_TLSDESC_CALL.  */
+  EMPTY_HOWTO (65),
+
+  /* TP-relative TLS LE load.  */
+  HOWTO (R_RISCV_TPREL_I,		/* type */
+	 0,				/* rightshift */
+	 4,				/* size */
+	 32,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_TPREL_I",		/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
+	 false),			/* pcrel_offset */
+
+  /* TP-relative TLS LE store.  */
+  HOWTO (R_RISCV_TPREL_S,		/* type */
+	 0,				/* rightshift */
+	 4,				/* size */
+	 32,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_TPREL_S",		/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
 	 false),			/* pcrel_offset */
 };
 
