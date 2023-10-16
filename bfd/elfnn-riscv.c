@@ -263,11 +263,36 @@ riscv_elfNN_set_options (struct bfd_link_info *link_info,
 }
 
 static bool
+riscv_reloc_is_internal_use_only (unsigned int r_type)
+{
+  switch (r_type)
+    {
+      case R_RISCV_RVC_LUI:
+      case R_RISCV_GPREL_I:
+      case R_RISCV_GPREL_S:
+      case R_RISCV_TPREL_I:
+      case R_RISCV_TPREL_S:
+      case R_RISCV_DELETE:
+	return true;
+      default:
+	return false;
+    }
+}
+
+static bool
 riscv_info_to_howto_rela (bfd *abfd,
 			  arelent *cache_ptr,
 			  Elf_Internal_Rela *dst)
 {
-  cache_ptr->howto = riscv_elf_rtype_to_howto (abfd, ELFNN_R_TYPE (dst->r_info));
+  unsigned int r_type = ELFNN_R_TYPE (dst->r_info);
+  cache_ptr->howto = riscv_elf_rtype_to_howto (abfd, r_type);
+  if (cache_ptr->howto && riscv_reloc_is_internal_use_only (r_type))
+    {
+      (*_bfd_error_handler) (_("%pB: unsupported relocation type %#x"),
+			     abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      cache_ptr->howto = NULL;
+    }
   return cache_ptr->howto != NULL;
 }
 
@@ -834,8 +859,53 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  h->ref_regular = 1;
 	}
 
+      /* Explicitly reject internal use only relocation types.  */
+      if (riscv_reloc_is_internal_use_only (r_type))
+	{
+	  _bfd_error_handler
+	    (_("%pB: internal error: unsupported relocation type %#x"),
+	     abfd, r_type);
+	  return false;
+	}
+
       switch (r_type)
 	{
+	case R_RISCV_NONE:
+	case R_RISCV_TLS_DTPMOD32:
+	case R_RISCV_TLS_DTPMOD64:
+	case R_RISCV_TLS_DTPREL32:
+	case R_RISCV_TLS_DTPREL64:
+	case R_RISCV_TLS_TPREL32:
+	case R_RISCV_TLS_TPREL64:
+	case R_RISCV_PCREL_LO12_I:
+	case R_RISCV_PCREL_LO12_S:
+	case R_RISCV_LO12_I:
+	case R_RISCV_LO12_S:
+	case R_RISCV_TPREL_LO12_I:
+	case R_RISCV_TPREL_LO12_S:
+	case R_RISCV_TPREL_ADD:
+	case R_RISCV_ADD8:
+	case R_RISCV_ADD16:
+	case R_RISCV_ADD32:
+	case R_RISCV_ADD64:
+	case R_RISCV_SUB8:
+	case R_RISCV_SUB16:
+	case R_RISCV_SUB32:
+	case R_RISCV_SUB64:
+	case R_RISCV_ALIGN:
+	case R_RISCV_RELAX:
+	case R_RISCV_SUB6:
+	case R_RISCV_SET6:
+	case R_RISCV_SET8:
+	case R_RISCV_SET16:
+	case R_RISCV_SET32:
+	case R_RISCV_32_PCREL:
+	case R_RISCV_IRELATIVE:
+	case R_RISCV_SET_ULEB128:
+	case R_RISCV_SUB_ULEB128:
+	  /* Known relocation types without additional checks here.  */
+	  break;
+
 	case R_RISCV_TLS_GD_HI20:
 	  if (!riscv_elf_record_got_reference (abfd, info, h, r_symndx)
 	      || !riscv_elf_record_tls_type (abfd, h, r_symndx, GOT_TLS_GD))
@@ -1064,7 +1134,10 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	default:
-	  break;
+	  _bfd_error_handler
+	    (_("%pB: internal error: unsupported relocation type %#x"),
+	     abfd, r_type);
+	  return false;
 	}
     }
 
