@@ -290,6 +290,24 @@ match_vd_eq_vs1_eq_vs2 (const struct riscv_opcode *op,
   return match_opcode (op, insn) && vd == vs1 && vs1 == vs2;
 }
 
+/* Instructions with register groups.  */
+
+#define DEFINE_MATCH_FUNC_R(G_RD,G_RS1,G_RS2) \
+  static int \
+  match_reggroup_r_##G_RD##_##G_RS1##_##G_RS2 (const struct riscv_opcode *op, \
+					       insn_t insn) \
+  { \
+    int rd = (insn & MASK_RD) >> OP_SH_RD; \
+    int rs1 = (insn & MASK_RS1) >> OP_SH_RS1; \
+    int rs2 = (insn & MASK_RS2) >> OP_SH_RS2; \
+    return match_opcode (op, insn) \
+	   && (rd % G_RD == 0) \
+	   && (rs1 % G_RS1 == 0) \
+	   && (rs2 % G_RS2 == 0); \
+  }
+DEFINE_MATCH_FUNC_R(1, 1, 1)
+DEFINE_MATCH_FUNC_R(2, 1, 2)
+
 static int
 match_th_load_inc(const struct riscv_opcode *op,
 		  insn_t insn)
@@ -981,6 +999,24 @@ const struct riscv_opcode riscv_opcodes[] =
 /* Zicond instructions.  */
 {"czero.eqz",  0, INSN_CLASS_ZICOND, "d,s,t", MATCH_CZERO_EQZ, MASK_CZERO_EQZ, match_opcode, 0 },
 {"czero.nez",  0, INSN_CLASS_ZICOND, "d,s,t", MATCH_CZERO_NEZ, MASK_CZERO_NEZ, match_opcode, 0 },
+
+/* Zacas instructions.  */
+{"amocas.w",       0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_W, MASK_AMOCAS_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"amocas.w.aq",    0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_W|MASK_AQ, MASK_AMOCAS_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"amocas.w.rl",    0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_W|MASK_RL, MASK_AMOCAS_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"amocas.w.aqrl",  0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_W|MASK_AQRL, MASK_AMOCAS_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"amocas.d",      32, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_D, MASK_AMOCAS_D|MASK_AQRL, match_reggroup_r_2_1_2, INSN_DREF|INSN_8_BYTE },
+{"amocas.d",      64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_D, MASK_AMOCAS_D|MASK_AQRL, match_reggroup_r_1_1_1, INSN_DREF|INSN_8_BYTE },
+{"amocas.d.aq",   32, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_D|MASK_AQ, MASK_AMOCAS_D|MASK_AQRL, match_reggroup_r_2_1_2, INSN_DREF|INSN_8_BYTE },
+{"amocas.d.aq",   64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_D|MASK_AQ, MASK_AMOCAS_D|MASK_AQRL, match_reggroup_r_1_1_1, INSN_DREF|INSN_8_BYTE },
+{"amocas.d.rl",   32, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_D|MASK_RL, MASK_AMOCAS_D|MASK_AQRL, match_reggroup_r_2_1_2, INSN_DREF|INSN_8_BYTE },
+{"amocas.d.rl",   64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_D|MASK_RL, MASK_AMOCAS_D|MASK_AQRL, match_reggroup_r_1_1_1, INSN_DREF|INSN_8_BYTE },
+{"amocas.d.aqrl", 32, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_D|MASK_AQRL, MASK_AMOCAS_D|MASK_AQRL, match_reggroup_r_2_1_2, INSN_DREF|INSN_8_BYTE },
+{"amocas.d.aqrl", 64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_D|MASK_AQRL, MASK_AMOCAS_D|MASK_AQRL, match_reggroup_r_1_1_1, INSN_DREF|INSN_8_BYTE },
+{"amocas.q",      64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_Q, MASK_AMOCAS_Q|MASK_AQRL, match_reggroup_r_2_1_2, INSN_DREF|INSN_16_BYTE },
+{"amocas.q.aq",   64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_Q|MASK_AQ, MASK_AMOCAS_Q|MASK_AQRL, match_reggroup_r_2_1_2, INSN_DREF|INSN_16_BYTE },
+{"amocas.q.rl",   64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_Q|MASK_RL, MASK_AMOCAS_Q|MASK_AQRL, match_reggroup_r_2_1_2, INSN_DREF|INSN_16_BYTE },
+{"amocas.q.aqrl", 64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_AMOCAS_Q|MASK_AQRL, MASK_AMOCAS_Q|MASK_AQRL, match_reggroup_r_2_1_2, INSN_DREF|INSN_16_BYTE },
 
 /* Zawrs instructions.  */
 {"wrs.nto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_NTO, MASK_WRS_NTO, match_opcode, 0 },
