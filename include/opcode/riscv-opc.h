@@ -2315,6 +2315,23 @@
 #define MASK_C_NTL_S1 0xffff
 #define MATCH_C_NTL_ALL 0x9016
 #define MASK_C_NTL_ALL 0xffff
+/* Zalasr instructions.  */
+#define MATCH_LB_AQ 0x3400002f
+#define MASK_LB_AQ 0xfdf0707f
+#define MATCH_LD_AQ 0x3400302f
+#define MASK_LD_AQ 0xfdf0707f
+#define MATCH_LH_AQ 0x3400102f
+#define MASK_LH_AQ 0xfdf0707f
+#define MATCH_LW_AQ 0x3400202f
+#define MASK_LW_AQ 0xfdf0707f
+#define MATCH_SB_RL 0x3a00002f
+#define MASK_SB_RL 0xfa007fff
+#define MATCH_SD_RL 0x3a00302f
+#define MASK_SD_RL 0xfa007fff
+#define MATCH_SH_RL 0x3a00102f
+#define MASK_SH_RL 0xfa007fff
+#define MATCH_SW_RL 0x3a00202f
+#define MASK_SW_RL 0xfa007fff
 /* Zawrs instructions.  */
 #define MATCH_WRS_NTO 0x00d00073
 #define MASK_WRS_NTO 0xffffffff
@@ -3370,6 +3387,15 @@ DECLARE_INSN(c_ntl_p1, MATCH_C_NTL_P1, MASK_C_NTL_P1)
 DECLARE_INSN(c_ntl_pall, MATCH_C_NTL_PALL, MASK_C_NTL_PALL)
 DECLARE_INSN(c_ntl_s1, MATCH_C_NTL_S1, MASK_C_NTL_S1)
 DECLARE_INSN(c_ntl_all, MATCH_C_NTL_ALL, MASK_C_NTL_ALL)
+/* Zalasr instructions.  */
+DECLARE_INSN(lb_aq, MATCH_LB_AQ, MASK_LB_AQ)
+DECLARE_INSN(ld_aq, MATCH_LD_AQ, MASK_LD_AQ)
+DECLARE_INSN(lh_aq, MATCH_LH_AQ, MASK_LH_AQ)
+DECLARE_INSN(lw_aq, MATCH_LW_AQ, MASK_LW_AQ)
+DECLARE_INSN(sb_aq, MATCH_SB_AQ, MASK_SB_AQ)
+DECLARE_INSN(sd_aq, MATCH_SD_AQ, MASK_SD_AQ)
+DECLARE_INSN(sh_aq, MATCH_SH_AQ, MASK_SH_AQ)
+DECLARE_INSN(sw_aq, MATCH_SW_AQ, MASK_SW_AQ)
 /* Zawrs instructions.  */
 DECLARE_INSN(wrs_nto, MATCH_WRS_NTO, MASK_WRS_NTO)
 DECLARE_INSN(wrs_sto, MATCH_WRS_STO, MASK_WRS_STO)
