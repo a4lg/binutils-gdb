@@ -74,11 +74,9 @@ START_RELOC_NUMBERS (elf_riscv_reloc_type)
   RELOC_NUMBER (R_RISCV_ALIGN, 43)
   RELOC_NUMBER (R_RISCV_RVC_BRANCH, 44)
   RELOC_NUMBER (R_RISCV_RVC_JUMP, 45)
-  RELOC_NUMBER (R_RISCV_RVC_LUI, 46)
-  RELOC_NUMBER (R_RISCV_GPREL_I, 47)
-  RELOC_NUMBER (R_RISCV_GPREL_S, 48)
-  RELOC_NUMBER (R_RISCV_TPREL_I, 49)
-  RELOC_NUMBER (R_RISCV_TPREL_S, 50)
+  /* Reserved 47 for R_RISCV_GPREL_LO12_I.  */
+  /* Reserved 48 for R_RISCV_GPREL_LO12_S.  */
+  /* Reserved 49 for R_RISCV_GPREL_HI20.  */
   RELOC_NUMBER (R_RISCV_RELAX, 51)
   RELOC_NUMBER (R_RISCV_SUB6, 52)
   RELOC_NUMBER (R_RISCV_SET6, 53)
@@ -90,7 +88,34 @@ START_RELOC_NUMBERS (elf_riscv_reloc_type)
   /* Reserved 59 for R_RISCV_PLT32.  */
   RELOC_NUMBER (R_RISCV_SET_ULEB128, 60)
   RELOC_NUMBER (R_RISCV_SUB_ULEB128, 61)
-END_RELOC_NUMBERS (R_RISCV_max)
+  /* Reserved 62 for R_RISCV_TLSDESC_HI20.  */
+  /* Reserved 63 for R_RISCV_TLSDESC_LOAD_LO12.  */
+  /* Reserved 64 for R_RISCV_TLSDESC_ADD_LO12.  */
+  /* Reserved 65 for R_RISCV_TLSDESC_CALL.  */
+  EMPTY_RELOC (R_RISCV_max)
+
+  /* Internal relocations used exclusively by the relaxation pass.
+     R_RISCV_DELETE must be the first entry.  */
+  EMPTY_RELOC (R_RISCV_DELETE)
+  EMPTY_RELOC (R_RISCV_RVC_LUI)
+  EMPTY_RELOC (R_RISCV_GPREL_I)
+  EMPTY_RELOC (R_RISCV_GPREL_S)
+  EMPTY_RELOC (R_RISCV_TPREL_I)
+  EMPTY_RELOC (R_RISCV_TPREL_S)
+END_RELOC_NUMBERS (R_RISCV_internal_max)
+
+/* Safety guard for all relocation types.  */
+#ifndef RELOC_MACROS_GEN_FUNC
+#if !defined (__STDC_VERSION__) || __STDC_VERSION__ < 201112L
+#define _Static_assert(cond, err)
+#endif
+_Static_assert (R_RISCV_internal_max <= 256,
+		"All relocation types including internal ones must fit"
+		"into an 8-bit value.");
+#ifdef _Static_assert
+#undef _Static_assert
+#endif
+#endif
 
 /* Processor specific flags for the ELF header e_flags field.  */
 

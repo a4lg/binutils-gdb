@@ -130,9 +130,6 @@
     } \
   while (0)
 
-/* Internal relocations used exclusively by the relaxation pass.  */
-#define R_RISCV_DELETE (R_RISCV_max + 1)
-
 #define ARCH_SIZE NN
 
 #define MINUS_ONE ((bfd_vma)0 - 1)
@@ -267,7 +264,8 @@ riscv_info_to_howto_rela (bfd *abfd,
 			  arelent *cache_ptr,
 			  Elf_Internal_Rela *dst)
 {
-  cache_ptr->howto = riscv_elf_rtype_to_howto (abfd, ELFNN_R_TYPE (dst->r_info));
+  cache_ptr->howto =
+      riscv_elf_rtype_to_howto (abfd, ELFNN_R_TYPE (dst->r_info), false);
   return cache_ptr->howto != NULL;
 }
 
@@ -714,7 +712,7 @@ riscv_elf_record_got_reference (bfd *abfd, struct bfd_link_info *info,
 static bool
 bad_static_reloc (bfd *abfd, unsigned r_type, struct elf_link_hash_entry *h)
 {
-  reloc_howto_type * r = riscv_elf_rtype_to_howto (abfd, r_type);
+  reloc_howto_type * r = riscv_elf_rtype_to_howto (abfd, r_type, false);
 
   /* We propably can improve the information to tell users that they
      should be recompile the code with -fPIC or -fPIE, just like what
@@ -756,11 +754,17 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
     {
       unsigned int r_type;
       unsigned int r_symndx;
+      reloc_howto_type *howto;
       struct elf_link_hash_entry *h;
       bool is_abs_symbol = false;
 
       r_symndx = ELFNN_R_SYM (rel->r_info);
       r_type = ELFNN_R_TYPE (rel->r_info);
+      howto = riscv_elf_rtype_to_howto (abfd, r_type, false);
+
+      /* Reject unknown relocs.  */
+      if (!howto)
+	return false;
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
@@ -916,12 +920,10 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		      name = bfd_elf_sym_name (abfd, symtab_hdr, sym, NULL);
 		    }
 
-		  reloc_howto_type *r_t =
-			riscv_elf_rtype_to_howto (abfd, r_type);
 		  _bfd_error_handler
 		    (_("%pB: relocation %s against absolute symbol `%s' can "
 		       "not be used when making a shared object"),
-		     abfd, r_t ? r_t->name : _("<unknown>"), name);
+		     abfd, howto ? howto->name : _("<unknown>"), name);
 		  bfd_set_error (bfd_error_bad_value);
 		  return false;
 		}
@@ -959,11 +961,10 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      if (is_abs_symbol)
 		break;
 
-	      reloc_howto_type *r_t = riscv_elf_rtype_to_howto (abfd, r_type);
 	      _bfd_error_handler
 		(_("%pB: relocation %s against non-absolute symbol `%s' can "
 		   "not be used in RVNN when making a shared object"),
-		 abfd, r_t ? r_t->name : _("<unknown>"),
+		 abfd, howto ? howto->name : _("<unknown>"),
 		 h != NULL ? h->root.root.string : "a local symbol");
 	      bfd_set_error (bfd_error_bad_value);
 	      return false;
@@ -996,8 +997,7 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		}
 	    }
 
-	  reloc_howto_type *r = riscv_elf_rtype_to_howto (abfd, r_type);
-	  if (RISCV_NEED_DYNAMIC_RELOC (r->pc_relative, info, h, sec))
+	  if (RISCV_NEED_DYNAMIC_RELOC (howto->pc_relative, info, h, sec))
 	    {
 	      struct elf_dyn_relocs *p;
 	      struct elf_dyn_relocs **head;
@@ -1058,7 +1058,7 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		}
 
 	      p->count += 1;
-	      p->pc_count += r == NULL ? 0 : r->pc_relative;
+	      p->pc_count += howto == NULL ? 0 : howto->pc_relative;
 	    }
 
 	  break;
@@ -2182,7 +2182,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
       bool unresolved_reloc, is_ie = false;
       bfd_vma pc = sec_addr (input_section) + rel->r_offset;
       int r_type = ELFNN_R_TYPE (rel->r_info), tls_type;
-      reloc_howto_type *howto = riscv_elf_rtype_to_howto (input_bfd, r_type);
+      reloc_howto_type *howto =
+	  riscv_elf_rtype_to_howto (input_bfd, r_type, true);
       const char *msg = NULL;
       bool resolved_to_zero;
 
@@ -2615,7 +2616,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
 						    howto);
 	      /* Update howto if relocation is changed.  */
 	      howto = riscv_elf_rtype_to_howto (input_bfd,
-						ELFNN_R_TYPE (rel->r_info));
+						ELFNN_R_TYPE (rel->r_info),
+						false);
 	      if (howto == NULL)
 		r = bfd_reloc_notsupported;
 	      else if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
@@ -2766,7 +2768,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
 						contents, howto);
 	  /* Update howto if relocation is changed.  */
 	  howto = riscv_elf_rtype_to_howto (input_bfd,
-					    ELFNN_R_TYPE (rel->r_info));
+					    ELFNN_R_TYPE (rel->r_info),
+					    false);
 	  if (howto == NULL)
 	    r = bfd_reloc_notsupported;
 	  else if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
@@ -3007,6 +3010,11 @@ riscv_elf_relocate_section (bfd *output_bfd,
       if (r == bfd_reloc_ok)
 	r = perform_relocation (howto, rel, relocation, input_section,
 				input_bfd, contents);
+
+      /* Delete internal only relocations
+	 (overwrite with R_RISCV_NONE).  */
+      if (r_type >= R_RISCV_max)
+	rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
 
       /* We should have already detected the error and set message before.
 	 If the error message isn't set since the linker runs out of memory
