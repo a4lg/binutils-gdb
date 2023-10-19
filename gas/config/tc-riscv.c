@@ -76,6 +76,8 @@ enum riscv_csr_class
   CSR_CLASS_SMAIA_32,		/* Smaia, rv32 only */
   CSR_CLASS_SMCNTRPMF,		/* Smcntrpmf */
   CSR_CLASS_SMCNTRPMF_32,	/* Smcntrpmf, rv32 only */
+  CSR_CLASS_SMSDIA,		/* Smsdia only */
+  CSR_CLASS_SMSDID,		/* Smsdid only */
   CSR_CLASS_SMSTATEEN,		/* Smstateen only */
   CSR_CLASS_SMSTATEEN_32,	/* Smstateen RV32 only */
   CSR_CLASS_SSAIA,		/* Ssaia */
@@ -91,6 +93,7 @@ enum riscv_csr_class
   CSR_CLASS_SSTC_AND_H,		/* Sstc only (with H) */
   CSR_CLASS_SSTC_32,		/* Sstc RV32 only */
   CSR_CLASS_SSTC_AND_H_32,	/* Sstc RV32 only (with H) */
+  CSR_CLASS_SVPAMS,		/* Svpams only */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -1061,6 +1064,12 @@ riscv_csr_address (const char *csr_name,
       need_check_version = true;
       extension = "smcntrpmf";
       break;
+    case CSR_CLASS_SMSDIA:
+      extension = "smsdia";
+      break;
+    case CSR_CLASS_SMSDID:
+      extension = "smsdid";
+      break;
     case CSR_CLASS_SMSTATEEN_32:
       is_rv32_only = true;
       /* Fall through.  */
@@ -1101,6 +1110,9 @@ riscv_csr_address (const char *csr_name,
       is_h_required = (csr_class == CSR_CLASS_SSTC_AND_H
 		      || csr_class == CSR_CLASS_SSTC_AND_H_32);
       extension = "sstc";
+      break;
+    case CSR_CLASS_SVPAMS:
+      extension = "svpams";
       break;
     case CSR_CLASS_DEBUG:
       break;

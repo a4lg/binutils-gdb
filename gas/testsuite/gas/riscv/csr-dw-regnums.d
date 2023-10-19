@@ -328,6 +328,9 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4898 \(minstretcfg\) at cfa\+3208
   DW_CFA_offset_extended_sf: r5921 \(mcyclecfgh\) at cfa\+7300
   DW_CFA_offset_extended_sf: r5922 \(minstretcfgh\) at cfa\+7304
+  DW_CFA_offset_extended_sf: r7105 \(msdeia\) at cfa\+12036
+  DW_CFA_offset_extended_sf: r7106 \(msdeie\) at cfa\+12040
+  DW_CFA_offset_extended_sf: r7104 \(mttp\) at cfa\+12032
   DW_CFA_offset_extended_sf: r4876 \(mstateen0\) at cfa\+3120
   DW_CFA_offset_extended_sf: r4877 \(mstateen1\) at cfa\+3124
   DW_CFA_offset_extended_sf: r4878 \(mstateen2\) at cfa\+3128

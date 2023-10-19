@@ -356,6 +356,13 @@
 	csr mcyclecfgh
 	csr minstretcfgh
 
+	# Smsdia
+	csr msdeia
+	csr msdeie
+
+	# Smsdid
+	csr mttp
+
 	# Smstateen/Ssstateen extensions
 	csr mstateen0
 	csr mstateen1

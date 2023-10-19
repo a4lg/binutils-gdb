@@ -909,6 +909,18 @@
 .*Info: macro .*
 .*Warning: invalid CSR `minstretcfgh', needs `smcntrpmf' extension
 .*Info: macro .*
+.*Warning: invalid CSR `msdeia', needs `smsdia' extension
+.*Info: macro .*
+.*Warning: invalid CSR `msdeia', needs `smsdia' extension
+.*Info: macro .*
+.*Warning: invalid CSR `msdeie', needs `smsdia' extension
+.*Info: macro .*
+.*Warning: invalid CSR `msdeie', needs `smsdia' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mttp', needs `smsdid' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mttp', needs `smsdid' extension
+.*Info: macro .*
 .*Warning: invalid CSR `mstateen0', needs `smstateen' extension
 .*Info: macro .*
 .*Warning: invalid CSR `mstateen0', needs `smstateen' extension

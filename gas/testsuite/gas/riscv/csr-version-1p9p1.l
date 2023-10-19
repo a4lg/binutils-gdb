@@ -1029,6 +1029,18 @@
 .*Info: macro .*
 .*Warning: invalid CSR `minstretcfgh' for the privileged spec `1.9.1'
 .*Info: macro .*
+.*Warning: invalid CSR `msdeia', needs `smsdia' extension
+.*Info: macro .*
+.*Warning: invalid CSR `msdeia', needs `smsdia' extension
+.*Info: macro .*
+.*Warning: invalid CSR `msdeie', needs `smsdia' extension
+.*Info: macro .*
+.*Warning: invalid CSR `msdeie', needs `smsdia' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mttp', needs `smsdid' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mttp', needs `smsdid' extension
+.*Info: macro .*
 .*Warning: invalid CSR `mstateen0', needs `smstateen' extension
 .*Info: macro .*
 .*Warning: invalid CSR `mstateen0', needs `smstateen' extension

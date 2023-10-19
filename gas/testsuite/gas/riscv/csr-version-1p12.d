@@ -631,6 +631,12 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+72159073[ 	]+csrw[ 	]+mcyclecfgh,a1
 [ 	]+[0-9a-f]+:[ 	]+72202573[ 	]+csrr[ 	]+a0,minstretcfgh
 [ 	]+[0-9a-f]+:[ 	]+72259073[ 	]+csrw[ 	]+minstretcfgh,a1
+[ 	]+[0-9a-f]+:[ 	]+bc102573[ 	]+csrr[ 	]+a0,msdeia
+[ 	]+[0-9a-f]+:[ 	]+bc159073[ 	]+csrw[ 	]+msdeia,a1
+[ 	]+[0-9a-f]+:[ 	]+bc202573[ 	]+csrr[ 	]+a0,msdeie
+[ 	]+[0-9a-f]+:[ 	]+bc259073[ 	]+csrw[ 	]+msdeie,a1
+[ 	]+[0-9a-f]+:[ 	]+bc002573[ 	]+csrr[ 	]+a0,mttp
+[ 	]+[0-9a-f]+:[ 	]+bc059073[ 	]+csrw[ 	]+mttp,a1
 [ 	]+[0-9a-f]+:[ 	]+30c02573[ 	]+csrr[ 	]+a0,mstateen0
 [ 	]+[0-9a-f]+:[ 	]+30c59073[ 	]+csrw[ 	]+mstateen0,a1
 [ 	]+[0-9a-f]+:[ 	]+30d02573[ 	]+csrr[ 	]+a0,mstateen1

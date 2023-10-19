@@ -326,6 +326,11 @@ _start:
 	.cfi_offset minstretcfg, 3208
 	.cfi_offset mcyclecfgh, 7300
 	.cfi_offset minstretcfgh, 7304
+	# Smsdia extension
+	.cfi_offset msdeia, 12036
+	.cfi_offset msdeie, 12040
+	# Smsdid extension
+	.cfi_offset mttp, 12032
 	# Smstateen extension
 	.cfi_offset mstateen0, 3120
 	.cfi_offset mstateen1, 3124
