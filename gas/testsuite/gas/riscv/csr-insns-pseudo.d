@@ -1,5 +1,5 @@
 #source: csr-insns-pseudo.s
-#as: -march=rv32if
+#as: -march=rv32if_zicntr
 #objdump: -dr
 
 .*:[ 	]+file format .*
