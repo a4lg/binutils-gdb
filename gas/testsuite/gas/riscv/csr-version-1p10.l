@@ -1,257 +1,513 @@
 .*Assembler messages:
+.*Warning: invalid CSR `cycle', needs `zicntr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `cycle', needs `zicntr' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw cycle,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `time', needs `zicntr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `time', needs `zicntr' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw time,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `instret', needs `zicntr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `instret', needs `zicntr' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw instret,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter3', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter3', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter3,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter4', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter4', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter4,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter5', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter5', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter5,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter6', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter6', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter6,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter7', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter7', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter7,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter8', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter8', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter8,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter9', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter9', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter9,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter10', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter10', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter10,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter11', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter11', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter11,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter12', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter12', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter12,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter13', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter13', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter13,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter14', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter14', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter14,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter15', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter15', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter15,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter16', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter16', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter16,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter17', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter17', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter17,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter18', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter18', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter18,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter19', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter19', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter19,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter20', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter20', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter20,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter21', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter21', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter21,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter22', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter22', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter22,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter23', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter23', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter23,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter24', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter24', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter24,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter25', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter25', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter25,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter26', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter26', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter26,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter27', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter27', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter27,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter28', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter28', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter28,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter29', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter29', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter29,a1'
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter30', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter30', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter30,a1'
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter31', needs `zihpm' extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter31', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter31,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `cycleh', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `cycleh', needs `zicntr' extension
+.*Info: macro .*
 .*Warning: invalid CSR `cycleh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `cycleh', needs `zicntr' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw cycleh,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `timeh', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `timeh', needs `zicntr' extension
+.*Info: macro .*
 .*Warning: invalid CSR `timeh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `timeh', needs `zicntr' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw timeh,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `instreth', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `instreth', needs `zicntr' extension
+.*Info: macro .*
 .*Warning: invalid CSR `instreth', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `instreth', needs `zicntr' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw instreth,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter3h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter3h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter3h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter3h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter3h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter4h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter4h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter4h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter4h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter4h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter5h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter5h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter5h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter5h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter5h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter6h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter6h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter6h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter6h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter6h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter7h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter7h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter7h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter7h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter7h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter8h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter8h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter8h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter8h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter8h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter9h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter9h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter9h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter9h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter9h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter10h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter10h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter10h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter10h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter10h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter11h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter11h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter11h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter11h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter11h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter12h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter12h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter12h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter12h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter12h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter13h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter13h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter13h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter13h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter13h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter14h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter14h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter14h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter14h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter14h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter15h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter15h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter15h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter15h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter15h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter16h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter16h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter16h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter16h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter16h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter17h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter17h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter17h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter17h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter17h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter18h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter18h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter18h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter18h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter18h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter19h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter19h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter19h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter19h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter19h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter20h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter20h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter20h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter20h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter20h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter21h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter21h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter21h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter21h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter21h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter22h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter22h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter22h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter22h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter22h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter23h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter23h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter23h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter23h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter23h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter24h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter24h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter24h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter24h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter24h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter25h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter25h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter25h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter25h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter25h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter26h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter26h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter26h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter26h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter26h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter27h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter27h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter27h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter27h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter27h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter28h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter28h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter28h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter28h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter28h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter29h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter29h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter29h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter29h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter29h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter30h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter30h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter30h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter30h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter30h,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `hpmcounter31h', needs rv32i extension
 .*Info: macro .*
+.*Warning: invalid CSR `hpmcounter31h', needs `zihpm' extension
+.*Info: macro .*
 .*Warning: invalid CSR `hpmcounter31h', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `hpmcounter31h', needs `zihpm' extension
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter31h,a1'
 .*Info: macro .*
