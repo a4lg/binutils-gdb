@@ -1259,6 +1259,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zihintntl",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
   {"zmmul",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zalasr",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
   {"zawrs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfa",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
   {"zfh",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -2409,6 +2410,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zmmul");
     case INSN_CLASS_A:
       return riscv_subset_supports (rps, "a");
+    case INSN_CLASS_ZALASR:
+      return riscv_subset_supports (rps, "zalasr");
     case INSN_CLASS_ZAWRS:
       return riscv_subset_supports (rps, "zawrs");
     case INSN_CLASS_F:
@@ -2619,6 +2622,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return _ ("m' or `zmmul");
     case INSN_CLASS_A:
       return "a";
+    case INSN_CLASS_ZALASR:
+      return "zalasr";
     case INSN_CLASS_ZAWRS:
       return "zawrs";
     case INSN_CLASS_F:
