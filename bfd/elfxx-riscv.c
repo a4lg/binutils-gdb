@@ -1148,6 +1148,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zhinx", "zhinxmin",	check_implicit_always},
   {"zhinxmin", "zfinx",	check_implicit_always},
   {"zfinx", "zicsr",	check_implicit_always},
+  {"zabha", "a",	check_implicit_always},
   {"zacas", "a",	check_implicit_always},
   {"zk", "zkn",		check_implicit_always},
   {"zk", "zkr",		check_implicit_always},
@@ -1260,6 +1261,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zihintntl",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
   {"zmmul",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zabha",		ISA_SPEC_CLASS_DRAFT,		0, 9,  0 },
   {"zacas",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zawrs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfa",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
@@ -2411,6 +2413,11 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zmmul");
     case INSN_CLASS_A:
       return riscv_subset_supports (rps, "a");
+    case INSN_CLASS_ZABHA:
+      return riscv_subset_supports (rps, "zabha");
+    case INSN_CLASS_ZABHA_AND_ZACAS:
+      return (riscv_subset_supports (rps, "zabha")
+	      && riscv_subset_supports (rps, "zacas"));
     case INSN_CLASS_ZACAS:
       return riscv_subset_supports (rps, "zacas");
     case INSN_CLASS_ZAWRS:
@@ -2623,6 +2630,16 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return _ ("m' or `zmmul");
     case INSN_CLASS_A:
       return "a";
+    case INSN_CLASS_ZABHA:
+      return "zabha";
+    case INSN_CLASS_ZABHA_AND_ZACAS:
+      if (!riscv_subset_supports (rps, "zabha")
+	  && !riscv_subset_supports (rps, "zacas"))
+	return _("zabha' and `zacas");
+      else if (!riscv_subset_supports (rps, "zabha"))
+	return "zabha";
+      else
+	return "zacas";
     case INSN_CLASS_ZACAS:
       return "zacas";
     case INSN_CLASS_ZAWRS:
