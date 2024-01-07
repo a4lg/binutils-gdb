@@ -1,0 +1,13 @@
+target:
+	amocas.w	a1, a5, (a3)
+	amocas.w.aq	a1, a5, (a3)
+	amocas.w.rl	a1, a5, (a3)
+	amocas.w.aqrl	a1, a5, (a3)
+	amocas.d	a1, a5, (a3)
+	amocas.d.aq	a1, a5, (a3)
+	amocas.d.rl	a1, a5, (a3)
+	amocas.d.aqrl	a1, a5, (a3)
+	amocas.q	a0, a4, (a3)
+	amocas.q.aq	a0, a4, (a3)
+	amocas.q.rl	a0, a4, (a3)
+	amocas.q.aqrl	a0, a4, (a3)
