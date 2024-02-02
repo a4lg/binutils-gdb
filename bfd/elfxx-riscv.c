@@ -1148,6 +1148,9 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zhinx", "zhinxmin",	check_implicit_always},
   {"zhinxmin", "zfinx",	check_implicit_always},
   {"zfinx", "zicsr",	check_implicit_always},
+  {"zicfiss", "zicsr",	check_implicit_always},
+  {"zicfiss", "zimop",	check_implicit_always},
+  {"zicfiss", "zcmop",	check_implicit_always},
   {"zk", "zkn",		check_implicit_always},
   {"zk", "zkr",		check_implicit_always},
   {"zk", "zkt",		check_implicit_always},
@@ -1192,6 +1195,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"ssstateen", "zicsr",	check_implicit_always},
   {"sstc", "zicsr",		check_implicit_always},
   {"svadu", "zicsr",		check_implicit_always},
+  /* Complex implications (that should be checked after others).  */
+  /* Tail of the list.  */
   {NULL, NULL, NULL}
 };
 
@@ -1252,6 +1257,8 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zicbom",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicbop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicboz",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zicfilp",		ISA_SPEC_CLASS_DRAFT,		0, 3,  0 },
+  {"zicfiss",		ISA_SPEC_CLASS_DRAFT,		0, 3,  0 },
   {"zicond",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
@@ -2392,6 +2399,10 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zicbop");
     case INSN_CLASS_ZICBOZ:
       return riscv_subset_supports (rps, "zicboz");
+    case INSN_CLASS_ZICFILP:
+      return riscv_subset_supports (rps, "zicfilp");
+    case INSN_CLASS_ZICFISS:
+      return riscv_subset_supports (rps, "zicfiss");
     case INSN_CLASS_ZICOND:
       return riscv_subset_supports (rps, "zicond");
     case INSN_CLASS_ZICSR:
@@ -2599,6 +2610,10 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zicbop";
     case INSN_CLASS_ZICBOZ:
       return "zicboz";
+    case INSN_CLASS_ZICFILP:
+      return "zicfilp";
+    case INSN_CLASS_ZICFISS:
+      return "zicfiss";
     case INSN_CLASS_ZICOND:
       return "zicond";
     case INSN_CLASS_ZICSR:

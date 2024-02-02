@@ -895,3 +895,5 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+c2159073[ 	]+csrw[ 	]+vtype,a1
 [ 	]+[0-9a-f]+:[ 	]+c2202573[ 	]+csrr[ 	]+a0,vlenb
 [ 	]+[0-9a-f]+:[ 	]+c2259073[ 	]+csrw[ 	]+vlenb,a1
+[ 	]+[0-9a-f]+:[ 	]+01102573[ 	]+csrr[ 	]+a0,ssp
+[ 	]+[0-9a-f]+:[ 	]+01159073[ 	]+csrw[ 	]+ssp,a1

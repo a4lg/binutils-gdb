@@ -405,6 +405,8 @@ _start:
 	.cfi_offset stimecmph, 1396
 	.cfi_offset vstimecmp, 2356
 	.cfi_offset vstimecmph, 2420
+	# Zicfiss extension
+	.cfi_offset ssp, 68
 	# dropped
 	.cfi_offset ubadaddr, 268	# aliases
 	.cfi_offset sbadaddr, 1292	# aliases

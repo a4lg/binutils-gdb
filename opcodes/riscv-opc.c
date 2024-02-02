@@ -319,6 +319,30 @@ match_th_load_pair(const struct riscv_opcode *op,
   return rd1 != rd2 && rd1 != rs && rd2 != rs && match_opcode (op, insn);
 }
 
+static int
+match_rd_eq_1_or_5(const struct riscv_opcode *op,
+		insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  return match_opcode (op, insn) && (rd == 1 || rd == 5);
+}
+
+static int
+match_rs1_eq_1_or_5(const struct riscv_opcode *op,
+		insn_t insn)
+{
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_opcode (op, insn) && (rs1 == 1 || rs1 == 5);
+}
+
+static int
+match_rs2_eq_1_or_5(const struct riscv_opcode *op,
+		insn_t insn)
+{
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  return match_opcode (op, insn) && (rs2 == 1 || rs2 == 5);
+}
+
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
    for arguments must apear in the correct order in this table for the
@@ -350,6 +374,23 @@ const struct riscv_opcode riscv_opcodes[] =
 {"c.ntl.s1",    0, INSN_CLASS_ZIHINTNTL_AND_C, "", MATCH_C_NTL_S1, MASK_C_NTL_S1, match_opcode, 0 },
 {"c.ntl.all",   0, INSN_CLASS_ZIHINTNTL_AND_C, "", MATCH_C_NTL_ALL, MASK_C_NTL_ALL, match_opcode, 0 },
 {"pause",       0, INSN_CLASS_ZIHINTPAUSE, "", MATCH_PAUSE, MASK_PAUSE, match_opcode, 0 },
+{"lpad",        0, INSN_CLASS_ZICFILP, "u", MATCH_LPAD, MASK_LPAD, match_opcode, 0 },
+
+/* Standard "May Be Ops" (and compressed aliases).  */
+{"sspush",     0, INSN_CLASS_ZICFISS, "d",  MATCH_C_SSPUSH, MASK_C_SSPUSH, match_opcode, INSN_ALIAS|INSN_DREF },
+{"sspush",     0, INSN_CLASS_ZICFISS, "t",  MATCH_SSPUSH, MASK_SSPUSH, match_rs2_eq_1_or_5, INSN_DREF },
+{"sspopchk",   0, INSN_CLASS_ZICFISS, "d",  MATCH_C_SSPOPCHK, MASK_C_SSPOPCHK, match_opcode, INSN_ALIAS|INSN_DREF },
+{"sspopchk",   0, INSN_CLASS_ZICFISS, "s",  MATCH_SSPOPCHK, MASK_SSPOPCHK, match_rs1_eq_1_or_5, INSN_DREF },
+{"sslw",      32, INSN_CLASS_ZICFISS, "d",  MATCH_SSLW, MASK_SSLW, match_rd_eq_1_or_5, INSN_DREF },
+{"ssld",      64, INSN_CLASS_ZICFISS, "d",  MATCH_SSLD, MASK_SSLD, match_rd_eq_1_or_5, INSN_DREF },
+{"ssincp",     0, INSN_CLASS_ZICFISS, "",   MATCH_C_SSINCP, MASK_C_SSINCP, match_opcode, INSN_ALIAS|INSN_DREF },
+{"ssincp",     0, INSN_CLASS_ZICFISS, "",   MATCH_SSINCP, MASK_SSINCP, match_opcode, 0 },
+{"ssrdp",      0, INSN_CLASS_ZICFISS, "d",  MATCH_SSRDP, MASK_SSRDP, match_rd_nonzero, 0 },
+
+/* Standard compressed "May Be Ops".  */
+{"c.sspush",   0, INSN_CLASS_ZICFISS, "d",  MATCH_C_SSPUSH, MASK_C_SSPUSH, match_opcode, INSN_DREF },
+{"c.sspopchk", 0, INSN_CLASS_ZICFISS, "d",  MATCH_C_SSPOPCHK, MASK_C_SSPOPCHK, match_opcode, INSN_DREF },
+{"c.ssincp",   0, INSN_CLASS_ZICFISS, "",   MATCH_C_SSINCP, MASK_C_SSINCP, match_opcode, INSN_DREF },
 
 /* Basic RVI instructions and aliases.  */
 {"unimp",       0, INSN_CLASS_C, "",          0, 0xffffU, match_opcode, INSN_ALIAS },
