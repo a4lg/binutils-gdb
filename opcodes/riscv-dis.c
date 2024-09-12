@@ -875,12 +875,12 @@ riscv_get_map_state (int n,
       char *suffix = strchr (name, '.');
       if (suffix)
 	{
-	  int suffix_index = (int)(suffix - name);
-	  char *name_substr = xmalloc (suffix_index + 1);
-	  strncpy (name_substr, name, suffix_index);
-	  name_substr[suffix_index] = '\0';
-	  riscv_parse_subset (&riscv_rps_dis, name_substr + 2);
-	  free (name_substr);
+	  size_t arch_len = (size_t) (suffix - name) - 2;
+	  char *arch = xmalloc (arch_len + 1);
+	  memcpy (arch, name + 2, arch_len);
+	  arch[arch_len] = '\0';
+	  riscv_parse_subset (&riscv_rps_dis, arch);
+	  free (arch);
 	}
       else
 	riscv_parse_subset (&riscv_rps_dis, name + 2);
