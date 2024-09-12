@@ -456,6 +456,8 @@ enum riscv_insn_class
   INSN_CLASS_XTHEADMEMPAIR,
   INSN_CLASS_XTHEADSYNC,
   INSN_CLASS_XVENTANACONDOPS,
+
+  NUM_INSN_CLASSES,
 };
 
 /* This structure holds information for a particular instruction.  */

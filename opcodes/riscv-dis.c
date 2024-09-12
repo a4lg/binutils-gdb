@@ -110,6 +110,9 @@ static bool no_aliases = false;
 
 /* If set, disassemble with numeric register names.  */
 static bool is_numeric = false;
+
+/* Instruction support cache.  */
+static signed char riscv_insn_support_cache[NUM_INSN_CLASSES];
 
 
 /* Set current disassembler context (dis_arch_context_current).
@@ -181,6 +184,8 @@ free_riscv_dis_arch_context (riscv_dis_arch_context_t* context)
 }
 
 
+static void build_riscv_opcodes_hash_table (void);
+
 /* Guess and update current XLEN.  */
 
 static void
@@ -217,6 +222,9 @@ static void
 init_riscv_dis_state_for_arch (void)
 {
   is_arch_changed = true;
+  /* Clear instruction support cache.  */
+  for (size_t i = 0; i < NUM_INSN_CLASSES; i++)
+    riscv_insn_support_cache[i] = 0;
 }
 
 /* Initialization (for arch and options).  */
@@ -224,6 +232,12 @@ init_riscv_dis_state_for_arch (void)
 static void
 init_riscv_dis_state_for_arch_and_options (void)
 {
+  static bool init = false;
+  if (!init)
+    {
+      build_riscv_opcodes_hash_table ();
+      init = true;
+    }
   /* If the architecture string is changed, update XLEN.  */
   if (is_arch_changed)
     update_riscv_dis_xlen (NULL);
@@ -892,6 +906,82 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
     }
 }
 
+/* Build a hash table for the disassembler to shorten the search time.
+   We sort riscv_opcodes entry pointers for further performance.
+   Hash index is computed by masking the instruction with...
+   - 0x03 (OP_MASK_OP2) for real 16-bit instructions
+   - 0x7f (OP_MASK_OP)  for all other instructions.  */
+
+#define OP_HASH_LEN (OP_MASK_OP + 1)
+#define OP_HASH_IDX(i)                                                        \
+  ((i) & (((i & OP_MASK_OP2) != OP_MASK_OP2) ? OP_MASK_OP2 : OP_MASK_OP))
+static const struct riscv_opcode **riscv_hash[OP_HASH_LEN + 1];
+static const struct riscv_opcode **riscv_opcodes_sorted;
+
+/* Whether the fallback should be used.  */
+static bool is_riscv_hash_fallback = false;
+
+/* Compare two riscv_opcode* objects to sort by hash index.  */
+
+static int
+compare_opcodes (const void *ap, const void *bp)
+{
+  const struct riscv_opcode *a = *(const struct riscv_opcode **) ap;
+  const struct riscv_opcode *b = *(const struct riscv_opcode **) bp;
+  int ai = (int) OP_HASH_IDX (a->match);
+  int bi = (int) OP_HASH_IDX (b->match);
+  if (ai != bi)
+    return ai - bi;
+  /* Stable sort (on riscv_opcodes entry order) is required.  */
+  if (a < b)
+    return -1;
+  if (a > b)
+    return +1;
+  return 0;
+}
+
+/* Build riscv_opcodes-based hash table.  */
+
+static void
+build_riscv_opcodes_hash_table (void)
+{
+  const struct riscv_opcode *op;
+  const struct riscv_opcode **pop, **pop_end;
+  size_t len = 0;
+
+  /* Sort riscv_opcodes entry pointers (except macros).  */
+  for (op = riscv_opcodes; op->name; op++)
+    {
+      if (op->pinfo == INSN_MACRO)
+	continue;
+      len++;
+      if (is_riscv_hash_fallback)
+	continue;
+      if (OP_HASH_IDX (op->match) < OP_MASK_OP2
+	      ? (op->mask & OP_MASK_OP2) != OP_MASK_OP2
+	      : (op->mask & OP_MASK_OP)  != OP_MASK_OP)
+	is_riscv_hash_fallback = true;
+    }
+  riscv_opcodes_sorted = xcalloc (len, sizeof (struct riscv_opcode *));
+  pop_end = riscv_opcodes_sorted;
+  for (op = riscv_opcodes; op->name; op++)
+    if (op->pinfo != INSN_MACRO)
+      *pop_end++ = op;
+  if (!is_riscv_hash_fallback)
+    qsort (riscv_opcodes_sorted, len, sizeof (struct riscv_opcode *),
+	   compare_opcodes);
+
+  /* Initialize faster hash table.  */
+  pop = riscv_opcodes_sorted;
+  for (unsigned i = 0; i < OP_HASH_LEN; i++)
+    {
+      riscv_hash[i] = pop;
+      while (pop != pop_end && OP_HASH_IDX ((*pop)->match) == i)
+	pop++;
+    }
+  riscv_hash[OP_HASH_LEN] = pop_end;
+}
+
 /* Print the RISC-V instruction at address MEMADDR in debugged memory,
    on using INFO.  Returns length of the instruction, in bytes.
    BIGENDIAN must be 1 if this is big-endian code, 0 if
@@ -903,24 +993,11 @@ riscv_disassemble_insn (bfd_vma memaddr,
 			const bfd_byte *packet,
 			disassemble_info *info)
 {
+  const struct riscv_opcode **pop, **pop_end;
   const struct riscv_opcode *op, *matched_op;
-  static bool init = false;
-  static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
   struct riscv_private_data *pd = info->private_data;
   int insnlen, i;
   bool printed;
-
-#define OP_HASH_IDX(i) ((i) & (riscv_insn_length (i) == 2 ? 0x3 : OP_MASK_OP))
-
-  /* Build a hash table to shorten the search time.  */
-  if (! init)
-    {
-      for (op = riscv_opcodes; op->name; op++)
-	if (!riscv_hash[OP_HASH_IDX (op->match)])
-	  riscv_hash[OP_HASH_IDX (op->match)] = op;
-
-      init = true;
-    }
 
   insnlen = riscv_insn_length (word);
 
@@ -939,10 +1016,19 @@ riscv_disassemble_insn (bfd_vma memaddr,
   info->target2 = 0;
 
   matched_op = NULL;
-  op = riscv_hash[OP_HASH_IDX (word)];
-
-  for (; op && op->name; op++)
+  if (!is_riscv_hash_fallback)
     {
+      pop     = riscv_hash[OP_HASH_IDX (word)];
+      pop_end = riscv_hash[OP_HASH_IDX (word) + 1];
+    }
+  else
+    {
+      pop     = riscv_hash[0];
+      pop_end = riscv_hash[OP_HASH_LEN];
+    }
+  for (; pop != pop_end; pop++)
+    {
+      op = *pop;
       /* Does the opcode match?  */
       if (!(op->match_func) (op, word))
 	continue;
@@ -953,7 +1039,14 @@ riscv_disassemble_insn (bfd_vma memaddr,
       if ((op->xlen_requirement != 0) && (op->xlen_requirement != xlen))
 	continue;
       /* Is this instruction supported by the current architecture?  */
-      if (!riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class))
+      if (riscv_insn_support_cache[op->insn_class] == 0)
+	{
+	  riscv_insn_support_cache[op->insn_class]
+	      = riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class)
+		    ? +1
+		    : -1;
+	}
+      if (riscv_insn_support_cache[op->insn_class] < 0)
 	continue;
 
       matched_op = op;
