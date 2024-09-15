@@ -69,6 +69,7 @@ enum riscv_csr_class
   CSR_CLASS_F,		/* f-ext only */
   CSR_CLASS_ZKR,	/* zkr only */
   CSR_CLASS_V,		/* rvv only */
+  CSR_CLASS_V_OR_P,	/* RVV or RVP.  */
   CSR_CLASS_DEBUG,	/* debug CSR */
   CSR_CLASS_H,		/* hypervisor */
   CSR_CLASS_H_32,	/* hypervisor, rv32 only */
@@ -864,7 +865,7 @@ static const struct opcode_name_t opcode_name_list[] =
   /*reserved    0x5b.  */
   {"JAL",       0x6f},
   {"SYSTEM",    0x73},
-  /*reserved    0x77.  */
+  {"OP_P",      0x77},
   {"CUSTOM_3",  0x7b},
   /* >80b       0x7f.  */
 
@@ -1017,7 +1018,9 @@ riscv_csr_address (const char *csr_name,
   bool need_check_version = false;
   bool is_rv32_only = false;
   bool is_h_required = false;
+  bool custom = true;
   const char* extension = NULL;
+  const char* custom_display = NULL;
 
   switch (csr_class)
     {
@@ -1042,6 +1045,11 @@ riscv_csr_address (const char *csr_name,
       break;
     case CSR_CLASS_V:
       extension = "zve32x";
+      break;
+    case CSR_CLASS_V_OR_P:
+      custom = riscv_subset_supports (&riscv_rps_as, "zve32x")
+	       || riscv_subset_supports (&riscv_rps_as, "zpn");
+      custom_display = "zve32x' or `zpn";
       break;
     case CSR_CLASS_SMAIA_32:
       is_rv32_only = true;
@@ -1107,6 +1115,9 @@ riscv_csr_address (const char *csr_name,
 	  && !riscv_subset_supports (&riscv_rps_as, extension))
 	as_warn (_("invalid CSR `%s', needs `%s' extension"),
 		 csr_name, extension);
+      if (custom_display != NULL && !custom)
+	as_warn (_("invalid CSR `%s', needs `%s' extension"),
+		 csr_name, custom_display);
     }
 
   while (entry != NULL)
@@ -1388,6 +1399,10 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	      USE_BITS (OP_MASK_RS1, OP_SH_RS1);
 	      USE_BITS (OP_MASK_RS2, OP_SH_RS2);
 	      break;
+	    case 'F': /* For funnel shift aliases (RS3 == RS1 + 1).  */
+	      USE_BITS (OP_MASK_RS1, OP_SH_RS1);
+	      USE_BITS (OP_MASK_RS3, OP_SH_RS3);
+	      break;
 	    default:
 	      goto unknown_validate_operand;
 	    }
@@ -1426,6 +1441,7 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		case 's': /* 'XsN@S' ... N-bit signed immediate at bit S.  */
 		  goto use_imm;
 		case 'u': /* 'XuN@S' ... N-bit unsigned immediate at bit S.  */
+		case 'U': /* 'XUN@S' ... same but disassembled as hex.  */
 		  goto use_imm;
 		use_imm:
 		  n = strtol (oparg + 1, (char **)&oparg, 10);
@@ -2008,6 +2024,7 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
   int rd = (ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD;
   int rs1 = (ip->insn_opcode >> OP_SH_RS1) & OP_MASK_RS1;
   int rs2 = (ip->insn_opcode >> OP_SH_RS2) & OP_MASK_RS2;
+  int rs3 = (ip->insn_opcode >> OP_SH_RS3) & OP_MASK_RS3;
   int mask = ip->insn_mo->mask;
 
   switch (mask)
@@ -2149,6 +2166,12 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
     case M_FSH:
       pcrel_store (rs2, rs1, imm_expr, "fsh",
 		   BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_S);
+      break;
+
+    case M_WEXT:
+      /* BUG: If RD is either RS1 or RS1+1, the result is broken.  */
+      md_assemblef ("andi x%d, x%d, %u", rd, rs2, xlen - 1);
+      md_assemblef ("fsr x%d, x%d, x%d, x%d", rd, rs1, rs3, rd);
       break;
 
     default:
@@ -2538,6 +2561,12 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      */
 	      switch (insn_class)
 		{
+		case INSN_CLASS_ZBB:
+		case INSN_CLASS_ZBPBO:
+		  if (*riscv_rps_as.xlen == 32
+		      && strcmp (insn->name, "clz") == 0)
+		    insn_class = INSN_CLASS_ZBB_OR_ZBPBO;
+		  break;
 		default:
 		  break;
 		}
@@ -3229,6 +3258,10 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      INSERT_OPERAND (RS1, *ip, regno);
 		      INSERT_OPERAND (RS2, *ip, regno);
 		      break;
+		    case 'F':
+		      INSERT_OPERAND (RS1, *ip, regno);
+		      INSERT_OPERAND (RS3, *ip, regno + 1);
+		      break;
 		    default:
 		      goto unknown_riscv_ip_operand;
 		    }
@@ -3551,6 +3584,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      sign = true;
 		      goto parse_imm;
 		    case 'u': /* 'XuN@S' ... N-bit unsigned immediate at bit S.  */
+		    case 'U': /* 'XUN@S' ... same but disassembled as hex.  */
 		      sign = false;
 		      goto parse_imm;
 		    parse_imm:

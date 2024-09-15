@@ -433,6 +433,11 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		 riscv_gpr_names[EXTRACT_OPERAND (RS2, l)]);
 	  break;
 
+	case 'r':
+	  print (info->stream, dis_style_register, "%s",
+		 riscv_gpr_names[EXTRACT_OPERAND (RS3, l)]);
+	  break;
+
 	case 'u':
 	  print (info->stream, dis_style_immediate, "0x%x",
 		 (unsigned)EXTRACT_UTYPE_IMM (l) >> RISCV_IMM_BITS);
@@ -526,6 +531,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	      case 't': regno = EXTRACT_OPERAND (RS2, l); break;
 	      case 'r': regno = EXTRACT_OPERAND (RS3, l); break;
 	      case 'u': regno = rs1; break; /* RS1 == RS2.  */
+	      case 'F': regno = rs1; break; /* RS1.  RS3 == RS1 + 1.  */
 	      default:
 		goto undefined_modifier;
 	      }
@@ -618,8 +624,9 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    size_t n;
 	    size_t s;
 	    bool sign;
+	    char opch = *++oparg;
 
-	    switch (*++oparg)
+	    switch (opch)
 	      {
 		case 'l': /* Literal.  */
 		  oparg++;
@@ -634,6 +641,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		  sign = true;
 		  goto print_imm;
 		case 'u': /* 'XuN@S' ... N-bit unsigned immediate at bit S.  */
+		case 'U': /* 'XUN@S' ... same but disassembled as hex.  */
 		  sign = false;
 		  goto print_imm;
 		print_imm:
@@ -644,8 +652,9 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		  oparg--;
 
 		  if (!sign)
-		    print (info->stream, dis_style_immediate, "%lu",
-			   (unsigned long)EXTRACT_U_IMM (n, s, l));
+		    print (info->stream, dis_style_immediate,
+			   opch == 'U' ? "0x%lx" : "%lu",
+			   (unsigned long) EXTRACT_U_IMM (n, s, l));
 		  else
 		    print (info->stream, dis_style_immediate, "%li",
 			   (signed long)EXTRACT_S_IMM (n, s, l));

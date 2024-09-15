@@ -1319,9 +1319,9 @@
 .*Info: macro .*
 .*Warning: invalid CSR `vstart', needs `zve32x' extension
 .*Info: macro .*
-.*Warning: invalid CSR `vxsat', needs `zve32x' extension
+.*Warning: invalid CSR `vxsat', needs `zve32x' or `zpn' extension
 .*Info: macro .*
-.*Warning: invalid CSR `vxsat', needs `zve32x' extension
+.*Warning: invalid CSR `vxsat', needs `zve32x' or `zpn' extension
 .*Info: macro .*
 .*Warning: invalid CSR `vxrm', needs `zve32x' extension
 .*Info: macro .*
