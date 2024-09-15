@@ -986,6 +986,11 @@ const struct riscv_opcode riscv_opcodes[] =
 {"wrs.nto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_NTO, MASK_WRS_NTO, match_opcode, 0 },
 {"wrs.sto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_STO, MASK_WRS_STO, match_opcode, 0 },
 
+/* Zfbfmin instructions.  */
+{"fcvt.bf16.s", 0, INSN_CLASS_ZFBFMIN,     "D,S",   MATCH_FCVT_BF16_S|MASK_RM, MASK_FCVT_BF16_S|MASK_RM, match_opcode, 0 },
+{"fcvt.bf16.s", 0, INSN_CLASS_ZFBFMIN,     "D,S,m", MATCH_FCVT_BF16_S, MASK_FCVT_BF16_S, match_opcode, 0 },
+{"fcvt.s.bf16", 0, INSN_CLASS_ZFBFMIN,     "D,S",   MATCH_FCVT_S_BF16, MASK_FCVT_S_BF16|MASK_RM, match_opcode, 0 },
+
 /* Zfa instructions.  */
 {"fli.s",       0, INSN_CLASS_ZFA,         "D,Wfv", MATCH_FLI_S, MASK_FLI_S, match_opcode, 0 },
 {"fli.d",       0, INSN_CLASS_D_AND_ZFA,   "D,Wfv", MATCH_FLI_D, MASK_FLI_D, match_opcode, 0 },
@@ -1932,6 +1937,14 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vclmul.vx",   0, INSN_CLASS_ZVBC, "Vd,Vt,sVm", MATCH_VCLMUL_VX, MASK_VCLMUL_VX, match_opcode, 0},
 {"vclmulh.vv",   0, INSN_CLASS_ZVBC, "Vd,Vt,VsVm", MATCH_VCLMULH_VV, MASK_VCLMULH_VV, match_opcode, 0},
 {"vclmulh.vx",   0, INSN_CLASS_ZVBC, "Vd,Vt,sVm", MATCH_VCLMULH_VX, MASK_VCLMULH_VX, match_opcode, 0},
+
+/* Zvfbfmin instructions.  */
+{"vfncvtbf16.f.f.w", 0, INSN_CLASS_ZVFBFMIN, "Vd,VtVm", MATCH_VFNCVTBF16_F_F_W, MASK_VFNCVTBF16_F_F_W, match_opcode, 0},
+{"vfwcvtbf16.f.f.v", 0, INSN_CLASS_ZVFBFMIN, "Vd,VtVm", MATCH_VFWCVTBF16_F_F_V, MASK_VFWCVTBF16_F_F_V, match_opcode, 0},
+
+/* Zvfbfwma instructions.  */
+{"vfwmaccbf16.vv",   0, INSN_CLASS_ZVFBFWMA, "Vd,Vt,VsVm", MATCH_VFWMACCBF16_VV, MASK_VFWMACCBF16_VV, match_opcode, 0},
+{"vfwmaccbf16.vf",   0, INSN_CLASS_ZVFBFWMA, "Vd,Vt,SVm", MATCH_VFWMACCBF16_VF, MASK_VFWMACCBF16_VF, match_opcode, 0},
 
 /* Zvkg instructions.  */
 {"vghsh.vv",   0, INSN_CLASS_ZVKG, "Vd,Vt,Vs", MATCH_VGHSH_VV, MASK_VGHSH_VV, match_opcode, 0},
