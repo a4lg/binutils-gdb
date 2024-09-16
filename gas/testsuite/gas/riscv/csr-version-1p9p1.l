@@ -1595,6 +1595,10 @@
 .*Info: macro .*
 .*Warning: invalid CSR `mhpmevent31h', needs `sscofpmf' extension
 .*Info: macro .*
+.*Warning: invalid CSR `sqoscfg', needs `ssqosid' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sqoscfg', needs `ssqosid' extension
+.*Info: macro .*
 .*Warning: invalid CSR `stimecmp', needs `sstc' extension
 .*Info: macro .*
 .*Warning: invalid CSR `stimecmp', needs `sstc' extension

@@ -400,6 +400,8 @@ _start:
 	.cfi_offset mhpmevent29h, 7412
 	.cfi_offset mhpmevent30h, 7416
 	.cfi_offset mhpmevent31h, 7420
+	# Ssqosid extension
+	.cfi_offset sqoscfg, 5888
 	# Sstc extension
 	.cfi_offset stimecmp, 1332
 	.cfi_offset stimecmph, 1396
