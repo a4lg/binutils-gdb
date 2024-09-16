@@ -1,4 +1,4 @@
-#as: -march=rv32ic
+#as: -march=rv32i_zca
 #source: dis-addr-overflow.s
 #objdump: -d
 

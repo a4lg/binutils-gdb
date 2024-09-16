@@ -4339,7 +4339,11 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
     }
   else if (strcmp (name, "norvc") == 0)
     {
-      riscv_update_subset (&riscv_rps_as, "-c");
+      /* Compatibility:
+	 Disable classic 'C' extension and its subsets.
+	 It won't completely disable them if other enabled extensions
+	 depend on 'C' or 'Zc*'.  */
+      riscv_update_subset (&riscv_rps_as, "-c,-zca,-zcf,-zcd");
       riscv_reset_subsets_list_arch_str ();
       riscv_set_rvc (false);
     }

@@ -1,4 +1,4 @@
-#as: -march=rv64ic -defsym rv64=1
+#as: -march=rv64i_zca -defsym rv64=1
 #source: dis-addr-overflow.s
 #objdump: -d
 
