@@ -1097,6 +1097,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"e", "i",		check_implicit_always},
   {"i", "zicsr",	check_implicit_for_i},
   {"i", "zifencei",	check_implicit_for_i},
+  {"i", "zicntr",	check_implicit_for_i},
+  {"i", "zihpm",	check_implicit_for_i},
   {"g", "i",		check_implicit_always},
   {"g", "m",		check_implicit_always},
   {"g", "a",		check_implicit_always},
@@ -1148,6 +1150,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zhinx", "zhinxmin",	check_implicit_always},
   {"zhinxmin", "zfinx",	check_implicit_always},
   {"zfinx", "zicsr",	check_implicit_always},
+  {"zicntr", "zicsr",	check_implicit_always},
+  {"zihpm", "zicsr",	check_implicit_always},
   {"zk", "zkn",		check_implicit_always},
   {"zk", "zkr",		check_implicit_always},
   {"zk", "zkt",		check_implicit_always},
@@ -1251,13 +1255,17 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zicbom",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicbop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicboz",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zicntr",		ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
   {"zicond",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
+  {"zicsr",		ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
+  {"zifencei",		ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
   {"zihintntl",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
+  {"zihpm",		ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
   {"zmmul",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zawrs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfa",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
@@ -1649,6 +1657,18 @@ riscv_get_default_ext_version (enum riscv_spec_class *default_isa_spec,
     }
 }
 
+/* Check if the subset is one of the extensions split from
+   the 'I' extension version 2.0.  */
+
+static bool
+riscv_is_subset_of_i_2p0 (const char *subset)
+{
+  return (strcmp (subset, "zicsr") == 0
+	  || strcmp (subset, "zifencei") == 0
+	  || strcmp (subset, "zicntr") == 0
+	  || strcmp (subset, "zihpm") == 0);
+}
+
 /* Find the default versions for the extension before adding them to
    the subset list, if their versions are RISCV_UNKNOWN_VERSION.
    Afterwards, report errors if we can not find their default versions.  */
@@ -1662,9 +1682,26 @@ riscv_parse_add_subset (riscv_parse_subset_t *rps,
 {
   int major_version = major;
   int minor_version = minor;
+  bool handle_subset_of_i_2p0 = false;
 
-  if (major_version == RISCV_UNKNOWN_VERSION
-       || minor_version == RISCV_UNKNOWN_VERSION)
+  /* If a subset of the 'I' extension version 2.0 is being added,
+     check the version of 'I' and allow its version unknown when the
+     'I' extension version is less than 2.1.
+     Draft 'E' is arbitrarily handled since it's a draft but the default
+     handling is the same as 'I' >= 2.1 because non-draft 'E' extension
+     does not have 'I' version 2.0 subsets.  */
+  if (riscv_is_subset_of_i_2p0 (subset))
+    {
+      riscv_subset_t *ext_i;
+      if (riscv_lookup_subset (rps->subset_list, "i", &ext_i)
+	  && (ext_i->major_version < 2
+	      || (ext_i->major_version == 2 && ext_i->minor_version < 1)))
+	handle_subset_of_i_2p0 = true;
+    }
+
+  if (!handle_subset_of_i_2p0
+      && (major_version == RISCV_UNKNOWN_VERSION
+	  || minor_version == RISCV_UNKNOWN_VERSION))
     riscv_get_default_ext_version (rps->isa_spec, subset,
 				   &major_version, &minor_version);
 
@@ -1677,9 +1714,9 @@ riscv_parse_add_subset (riscv_parse_subset_t *rps,
 	rps->error_handler
 	  (_("x ISA extension `%s' must be set with the versions"),
 	   subset);
-      /* Allow old ISA spec can recognize zicsr and zifencei.  */
-      else if (strcmp (subset, "zicsr") != 0
-	       && strcmp (subset, "zifencei") != 0)
+      /* Allow old ISA spec (version 2.2) can recognize extensions
+	 effectively split from the base 'I' extension version 2.0.  */
+      else if (!riscv_is_subset_of_i_2p0 (subset))
 	rps->error_handler
 	  (_("cannot find default versions of the ISA extension `%s'"),
 	   subset);
@@ -2389,6 +2426,9 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zicbop");
     case INSN_CLASS_ZICBOZ:
       return riscv_subset_supports (rps, "zicboz");
+    case INSN_CLASS_ZICNTR:
+      /* Instead of 'Zicntr', query for 'I' for compatibility.  */
+      return riscv_subset_supports (rps, "i");
     case INSN_CLASS_ZICOND:
       return riscv_subset_supports (rps, "zicond");
     case INSN_CLASS_ZICSR:
@@ -2592,6 +2632,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zicbop";
     case INSN_CLASS_ZICBOZ:
       return "zicboz";
+    case INSN_CLASS_ZICNTR:
+      return "zicntr";
     case INSN_CLASS_ZICOND:
       return "zicond";
     case INSN_CLASS_ZICSR:

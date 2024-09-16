@@ -1,5 +1,6 @@
 #source: csr-insns-pseudo.s
-#as: -march=rv32i_zicntr_zfinx
+#as: -march=rv32i2p1_f2p2
+#warning_output: csr-insns-pseudo-nozicntr.l
 #objdump: -dr
 
 .*:[ 	]+file format .*

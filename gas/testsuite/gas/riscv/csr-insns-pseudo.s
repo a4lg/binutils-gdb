@@ -8,11 +8,12 @@ pseudo_csr_insn:
 	csrsi 0x0, 31
 	csrci 0x0, 31
 
+	# Zicntr
 	rdcycle t0
 	rdtime t0
 	rdinstret t0
 
-	# rv32i-ext
+	# Zicntr (RV32)
 	rdcycleh t0
 	rdtimeh t0
 	rdinstreth t0
