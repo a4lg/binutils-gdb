@@ -74,14 +74,20 @@ enum riscv_csr_class
   CSR_CLASS_H_32,	/* hypervisor, rv32 only */
   CSR_CLASS_SMAIA,		/* Smaia */
   CSR_CLASS_SMAIA_32,		/* Smaia, rv32 only */
+  CSR_CLASS_SMAIA_OR_SMCSRIND,	/* Smaia or Smcsrind */
   CSR_CLASS_SMCNTRPMF,		/* Smcntrpmf */
   CSR_CLASS_SMCNTRPMF_32,	/* Smcntrpmf, rv32 only */
+  CSR_CLASS_SMCSRIND,		/* Smcsrind */
   CSR_CLASS_SMSTATEEN,		/* Smstateen only */
   CSR_CLASS_SMSTATEEN_32,	/* Smstateen RV32 only */
   CSR_CLASS_SSAIA,		/* Ssaia */
   CSR_CLASS_SSAIA_AND_H,	/* Ssaia with H */
   CSR_CLASS_SSAIA_32,		/* Ssaia, rv32 only */
   CSR_CLASS_SSAIA_AND_H_32,	/* Ssaia with H, rv32 only */
+  CSR_CLASS_SSAIA_OR_SSCSRIND,		/* Ssaia or Sscsrind */
+  CSR_CLASS_SSAIA_OR_SSCSRIND_AND_H,	/* Ssaia or Sscsrind (with H) */
+  CSR_CLASS_SSCSRIND,		/* Sscsrind */
+  CSR_CLASS_SSCSRIND_AND_H,	/* Sscsrind (with H) */
   CSR_CLASS_SSSTATEEN,		/* S[ms]stateen only */
   CSR_CLASS_SSSTATEEN_AND_H,	/* S[ms]stateen only (with H) */
   CSR_CLASS_SSSTATEEN_AND_H_32,	/* S[ms]stateen RV32 only (with H) */
@@ -1022,6 +1028,8 @@ riscv_csr_address (const char *csr_name,
   bool need_check_version = false;
   bool is_rv32_only = false;
   bool is_h_required = false;
+  bool is_csr_req_complex = false;
+  bool csr_ok = false;
   const char* extension = NULL;
 
   switch (csr_class)
@@ -1054,12 +1062,21 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_SMAIA:
       extension = "smaia";
       break;
+    case CSR_CLASS_SMAIA_OR_SMCSRIND:
+      is_csr_req_complex = true;
+      extension = _ ("smaia' or `smcsrind");
+      csr_ok = (riscv_subset_supports (&riscv_rps_as, "smaia")
+		|| riscv_subset_supports (&riscv_rps_as, "smcsrind"));
+      break;
     case CSR_CLASS_SMCNTRPMF_32:
       is_rv32_only = true;
       /* Fall through.  */
     case CSR_CLASS_SMCNTRPMF:
       need_check_version = true;
       extension = "smcntrpmf";
+      break;
+    case CSR_CLASS_SMCSRIND:
+      extension = "smcsrind";
       break;
     case CSR_CLASS_SMSTATEEN_32:
       is_rv32_only = true;
@@ -1092,6 +1109,21 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_SSCOFPMF:
       extension = "sscofpmf";
       break;
+    case CSR_CLASS_SSAIA_OR_SSCSRIND_AND_H:
+      is_h_required = true;
+      /* Fall through.  */
+    case CSR_CLASS_SSAIA_OR_SSCSRIND:
+      is_csr_req_complex = true;
+      extension = _ ("ssaia' or `sscsrind");
+      csr_ok = (riscv_subset_supports (&riscv_rps_as, "ssaia")
+		|| riscv_subset_supports (&riscv_rps_as, "sscsrind"));
+      break;
+    case CSR_CLASS_SSCSRIND_AND_H:
+      is_h_required = true;
+      /* Fall through.  */
+    case CSR_CLASS_SSCSRIND:
+      extension = "sscsrind";
+      break;
     case CSR_CLASS_SSTC:
     case CSR_CLASS_SSTC_AND_H:
     case CSR_CLASS_SSTC_32:
@@ -1115,8 +1147,10 @@ riscv_csr_address (const char *csr_name,
       if (is_h_required && !riscv_subset_supports (&riscv_rps_as, "h"))
 	as_warn (_("invalid CSR `%s', needs `h' extension"), csr_name);
 
-      if (extension != NULL
-	  && !riscv_subset_supports (&riscv_rps_as, extension))
+      if (is_csr_req_complex
+	      ? !csr_ok
+	      : (extension != NULL
+		 && !riscv_subset_supports (&riscv_rps_as, extension)))
 	as_warn (_("invalid CSR `%s', needs `%s' extension"),
 		 csr_name, extension);
     }
