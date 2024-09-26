@@ -91,3 +91,10 @@ Disassembly of section .text.relax.align:
 [ 	]+[0-9a-f]+:[ 	]+00000013[ 	]+nop
 [ 	]+[0-9a-f]+:[ 	]+00200513[ 	]+li[ 	]+a0,2
 [ 	]+[0-9a-f]+:[ 	]+00000013[ 	]+nop
+
+Disassembly of section .text.dis.zfinx:
+
+0+000 <.text.dis.zfinx>:
+[ 	]+[0-9a-f]+:[ 	]+00c5f553[ 	]+fadd\.s[ 	]+fa0,fa1,fa2
+[ 	]+[0-9a-f]+:[ 	]+00c5f553[ 	]+fadd\.s[ 	]+a0,a1,a2
+[ 	]+[0-9a-f]+:[ 	]+00c5f553[ 	]+fadd\.s[ 	]+fa0,fa1,fa2
