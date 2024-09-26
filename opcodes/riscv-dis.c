@@ -937,7 +937,7 @@ riscv_disassemble_insn (bfd_vma memaddr,
   static bool init = false;
   static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
   struct riscv_private_data *pd = info->private_data;
-  int insnlen, i;
+  int insnlen, i, masklen = -1;
   bool printed;
 
 #define OP_HASH_IDX(i) ((i) & (riscv_insn_length (i) == 2 ? 0x3 : OP_MASK_OP))
@@ -985,9 +985,23 @@ riscv_disassemble_insn (bfd_vma memaddr,
       /* Is this instruction supported by the current architecture?  */
       if (!riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class))
 	continue;
-
-      matched_op = op;
-      break;
+      /* If the instruction has no generic subsets,
+	 we don't need to scan more instructions.  */
+      if (!(op->pinfo & INSN_GENERICS))
+	{
+	  matched_op = op;
+	  break;
+	}
+      /* Prefer more generic one if "no-aliases" is specified,
+	 prefer more specific one if not.  */
+      int curmasklen = __builtin_popcountll (op->mask);
+      if (matched_op == NULL || (no_aliases
+				 ? (curmasklen < masklen)
+				 : (curmasklen >= masklen)))
+	{
+	  matched_op = op;
+	  masklen = curmasklen;
+	}
     }
 
   if (matched_op != NULL)
