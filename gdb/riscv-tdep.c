@@ -3847,14 +3847,7 @@ riscv_features_from_bfd (const bfd *abfd)
 	features.flen = 4;
 
       if (e_flags & EF_RISCV_RVE)
-	{
-	  if (features.xlen == 8)
-	    {
-	      warning (_("64-bit ELF with RV32E flag set!  Assuming 32-bit"));
-	      features.xlen = 4;
-	    }
-	  features.embedded = true;
-	}
+	features.embedded = true;
     }
 
   return features;
