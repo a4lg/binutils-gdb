@@ -1230,7 +1230,7 @@ riscv_data_length (bfd_vma memaddr,
   bfd_vma length;
   bool found = false;
 
-  length = 4;
+  length = xlen > 32 ? 8 : 4;
   if (info->symtab_size != 0
       && bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour
       && last_map_symbol >= 0)
@@ -1257,7 +1257,14 @@ riscv_data_length (bfd_vma memaddr,
       offset -= memaddr;
       length = (offset < length) ? offset : length;
     }
-  length = length == 3 ? 2 : length;
+  static const bfd_vma aligned_length[] = {
+    /* [0..0] */ 0,
+    /* [1..1] */ 1,
+    /* [2..3] */ 2, 2,
+    /* [4..7] */ 4, 4, 4, 4,
+    /* [8..8] */ 8,
+  };
+  length = aligned_length[length];
   return length;
 }
 
