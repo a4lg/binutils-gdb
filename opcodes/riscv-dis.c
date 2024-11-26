@@ -83,23 +83,33 @@ static riscv_parse_subset_t riscv_rps_dis =
   false,				/* check_unknown_prefixed_ext.  */
 };
 
+/* A RISC-V mapping symbol (parsed and expanded).  */
+struct riscv_mapping_sym
+{
+  uintptr_t section;
+  bfd_vma address;
+  const char *arch;
+  int index;
+  enum riscv_seg_mstate mstate;
+  bool with_arch;
+};
+
 /* Private data structure for the RISC-V disassembler.  */
 struct riscv_private_data
 {
   bfd_vma gp;
   bfd_vma print_addr;
   bfd_vma hi_addr[NGPR];
+  bfd_vma expected_next_addr;
+  void* last_section;
+  struct riscv_mapping_sym *mapping_syms;
+  struct riscv_mapping_sym *last_mapping_sym;
+  struct riscv_mapping_sym *prev_last_mapping_sym;
+  size_t mapping_syms_size;
   bool to_print_addr;
   bool has_gp;
+  bool is_elf_with_mapsyms;
 };
-
-/* Used for mapping symbols.  */
-static int last_map_symbol = -1;
-static bfd_vma last_stop_offset = 0;
-static bfd_vma last_map_symbol_boundary = 0;
-static enum riscv_seg_mstate last_map_state = MAP_NONE;
-static asection *last_map_section = NULL;
-static bool from_last_map_symbol = false;
 
 /* Register names as used by the disassembler.  */
 static const char (*riscv_gpr_names)[NRC];
@@ -185,6 +195,10 @@ free_riscv_dis_arch_context (riscv_dis_arch_context_t* context)
 
 
 static void build_riscv_opcodes_hash_table (void);
+static enum riscv_seg_mstate riscv_get_map_state_by_name (const char *name,
+							  const char **arch);
+static void
+riscv_propagate_prev_arch_for_mapping_syms (struct disassemble_info *, bool);
 
 /* Guess and update current XLEN.  */
 
@@ -264,15 +278,163 @@ init_riscv_dis_private_data (struct disassemble_info *info)
   pd->print_addr = 0;
   for (int i = 0; i < (int)ARRAY_SIZE (pd->hi_addr); i++)
     pd->hi_addr[i] = -1;
+  pd->expected_next_addr = 0;
+  pd->last_section = NULL;
+  pd->mapping_syms = NULL;
+  pd->last_mapping_sym = NULL;
+  pd->prev_last_mapping_sym = NULL;
+  pd->mapping_syms_size = 0;
   pd->to_print_addr = false;
   pd->has_gp = false;
 
+  size_t n_mapping_syments = 0;
+
   for (int i = 0; i < info->symtab_size; i++)
-    if (strcmp (bfd_asymbol_name (info->symtab[i]), RISCV_GP_SYMBOL) == 0)
-      {
-	pd->gp = bfd_asymbol_value (info->symtab[i]);
-	pd->has_gp = true;
-      }
+    {
+      if (strcmp (bfd_asymbol_name (info->symtab[i]), RISCV_GP_SYMBOL) == 0)
+	{
+	  pd->gp = bfd_asymbol_value (info->symtab[i]);
+	  pd->has_gp = true;
+	}
+      if (riscv_get_map_state_by_name (bfd_asymbol_name (info->symtab[i]), NULL)
+	  != MAP_NONE)
+	n_mapping_syments++;
+    }
+
+  pd->is_elf_with_mapsyms
+      = info->symtab_size != 0
+	&& bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour
+	&& n_mapping_syments;
+  if (pd->is_elf_with_mapsyms)
+    {
+	/* Allocate mapping symbols (with head/tail sentinel entries).  */
+	struct riscv_mapping_sym *msym = pd->mapping_syms
+	    = xcalloc (n_mapping_syments + 2, sizeof (struct riscv_mapping_sym));
+	/* Head sentinel entry.  */
+	msym->index = -1;
+	msym->mstate = MAP_NONE;
+	msym++;
+	/* Mapping symbols.  */
+	for (int i = 0; i < info->symtab_size; i++)
+	  {
+	    const char* arch = NULL;
+	    enum riscv_seg_mstate state = riscv_get_map_state_by_name (
+		bfd_asymbol_name (info->symtab[i]), &arch);
+	    if (state == MAP_NONE)
+	      continue;
+	    msym->section = (uintptr_t)info->symtab[i]->section;
+	    msym->address = bfd_asymbol_value (info->symtab[i]);
+	    msym->index = i;
+	    msym->mstate = state;
+	    msym->with_arch = (arch != NULL);
+	    if (arch != NULL)
+	      /* Assume symbol name is $x[ARCH].  */
+	      msym->arch = bfd_asymbol_name (info->symtab[i]) + 2;
+	    msym++;
+	  }
+	/* Tail sentinel entry.  */
+	msym->index = -1;
+	msym->mstate = MAP_NONE;
+
+	pd->mapping_syms_size = n_mapping_syments;
+	/* Mapping symbols are now ordered for section == NULL.
+	   will be qsort-ed on the first non-NULL section.
+	   Although following propagation is redundant on most cases,
+	   this is required for functional correctness.  */
+	riscv_propagate_prev_arch_for_mapping_syms (info, false);
+    }
+}
+
+/* Compare two mapping symbols (sort by original index).  */
+
+static int
+compare_mapping_syms_without_section (const void *ap, const void *bp)
+{
+  const struct riscv_mapping_sym *a = ap;
+  const struct riscv_mapping_sym *b = bp;
+  return a->index - b->index;
+}
+
+/* Compare two mapping symbols (sort by section, address and
+   original index for a stable sort).  */
+
+static int
+compare_mapping_syms_with_section (const void* ap, const void* bp)
+{
+  const struct riscv_mapping_sym *a = ap;
+  const struct riscv_mapping_sym *b = bp;
+  if (a->section < b->section)
+    return -1;
+  else if (a->section > b->section)
+    return +1;
+  else if (a->address < b->address)
+    return -1;
+  else if (a->address > b->address)
+    return +1;
+  return compare_mapping_syms_without_section (a, b);
+}
+
+/* Update "previous" architecture for sorted mapping symbol table.
+   If is_per_section is true, section boundary is handled.  */
+
+static void
+riscv_propagate_prev_arch_for_mapping_syms (struct disassemble_info *info,
+					    bool is_per_section)
+{
+  struct riscv_private_data *pd = info->private_data;
+  struct riscv_mapping_sym *msym = pd->mapping_syms + 1;
+  struct riscv_mapping_sym *mend = msym + pd->mapping_syms_size;
+  const char *prev_arch = NULL;
+  uintptr_t prev_section = 0;
+  for (; msym != mend; msym++)
+    {
+      if (msym->mstate != MAP_INSN)
+	continue;
+      if (is_per_section && prev_section != msym->section)
+	{
+	  prev_section = msym->section;
+	  /* Revert to default arch (NULL) if head of the section.  */
+	  prev_arch = NULL;
+	}
+      if (msym->with_arch)
+	prev_arch = msym->arch;
+      else
+	msym->arch = prev_arch;
+    }
+}
+
+/* Initialize private data when the section to disassemble is changed.  */
+
+static void
+init_riscv_dis_private_data_for_section (struct disassemble_info *info)
+{
+  struct riscv_private_data *pd = info->private_data;
+
+  if (pd->is_elf_with_mapsyms)
+    {
+      /* Clear the last mapping symbol because we start to
+	 dump a new section.  */
+      pd->last_mapping_sym = NULL;
+
+      /* Sort the mapping symbols depending on the current section
+	 (depending on whether the current section is NULL or not).  */
+      if (pd->last_section == NULL && info->section != NULL)
+	{
+	  qsort (pd->mapping_syms + 1, pd->mapping_syms_size,
+		 sizeof (struct riscv_mapping_sym),
+		 compare_mapping_syms_with_section);
+	  riscv_propagate_prev_arch_for_mapping_syms (info, true);
+	}
+      else if (pd->last_section != NULL && info->section == NULL)
+	{
+	  qsort (pd->mapping_syms + 1, pd->mapping_syms_size,
+		 sizeof (struct riscv_mapping_sym),
+		 compare_mapping_syms_without_section);
+	  riscv_propagate_prev_arch_for_mapping_syms (info, false);
+	}
+    }
+
+  pd->last_section = info->section;
 }
 
 /* Update architecture for disassembler with its context.
@@ -1143,173 +1305,103 @@ riscv_get_map_state_by_name (const char *name, const char** arch)
   return MAP_NONE;
 }
 
-/* Return true if we find the suitable mapping symbol,
-   and also update the STATE.  Otherwise, return false.  */
+/* Search for the suitable mapping symbol and
+   update the state data depending on the result.
+   It assumes that ELF mapping symbol table is not empty.  */
 
-static bool
-riscv_get_map_state (int n,
-		     enum riscv_seg_mstate *state,
-		     struct disassemble_info *info,
-		     bool update)
+static void
+riscv_search_mapping_sym (bfd_vma memaddr,
+			  enum riscv_seg_mstate *state,
+			  struct disassemble_info *info)
 {
-  const char *name, *arch = NULL;
-
-  /* If the symbol is in a different section, ignore it.  */
-  if (info->section != NULL
-      && info->section != info->symtab[n]->section)
-    return false;
-
-  name = bfd_asymbol_name (info->symtab[n]);
-  enum riscv_seg_mstate newstate = riscv_get_map_state_by_name (name, &arch);
-  if (newstate == MAP_NONE)
-    return false;
-  *state = newstate;
-  if (newstate == MAP_INSN && update)
-  {
-    if (arch)
-      {
-	/* Override the architecture.  */
-	update_riscv_dis_arch (&dis_arch_context_override, arch);
-      }
-    else if (!from_last_map_symbol
-	     && set_riscv_current_dis_arch_context (&dis_arch_context_default))
-      {
-	/* Revert to the default architecture and call init functions if:
-	   - there's no ISA string in the mapping symbol,
-	   - mapping symbol is not reused and
-	   - current disassembler context is changed to the default one.
-	   This is a shortcut path to avoid full update_riscv_dis_arch.  */
-	init_riscv_dis_state_for_arch ();
-	init_riscv_dis_state_for_arch_and_options ();
-      }
-  }
-  return true;
+  struct riscv_private_data *pd = info->private_data;
+  struct riscv_mapping_sym *msym = pd->mapping_syms;
+  uintptr_t cur_section = (uintptr_t) info->section;
+  /* Do a binary search to find the last mapping symbol (which does not
+     violate upper address and section boundaries) that may be suitable
+     for a given section and address.
+     This part is equivalent to std::partition_point(...)-1.  */
+  size_t low = 1, len = pd->mapping_syms_size;
+  while (len != 0)
+    {
+      size_t half = len / 2;
+      size_t mid = low + half;
+      bool is_mid_in_bound = cur_section
+				 ? (msym[mid].section < cur_section
+				    || (msym[mid].section == cur_section
+					&& msym[mid].address <= memaddr))
+				 : msym[mid].address <= memaddr;
+      if (is_mid_in_bound)
+	{
+	  len -= half + 1;
+	  low = mid + 1;
+	}
+      else
+	len = half;
+    }
+  msym += low - 1;
+  /* The result may however violate lower boundaries.
+     Check if the result is actually suitable.  */
+  if ((cur_section && cur_section != msym->section)
+      || msym->mstate == MAP_NONE)
+    {
+      pd->last_mapping_sym = NULL;
+      return;
+    }
+  /* Update the state and the last suitable mapping symbol.  */
+  pd->last_mapping_sym = msym;
+  *state = msym->mstate;
 }
 
-/* Check the sorted symbol table (sorted by the symbol value), find the
-   suitable mapping symbols.  */
+/* Check the sorted mapping symbol table (or section flags if not available)
+   and find the suitable mapping symbol.
+   Update last mapping symbol-related data and return the new state.  */
 
 static enum riscv_seg_mstate
 riscv_search_mapping_symbol (bfd_vma memaddr,
 			     struct disassemble_info *info)
 {
   enum riscv_seg_mstate mstate;
-  bool found = false;
-  int symbol = -1;
-  int n;
-
-  /* Return the last map state if the address is still within the range of the
-     last mapping symbol.  */
-  if (last_map_section == info->section
-      && (memaddr < last_map_symbol_boundary))
-    return last_map_state;
-
-  last_map_section = info->section;
+  struct riscv_private_data *pd = info->private_data;
 
   /* Decide whether to print the data or instruction by default, in case
      we can not find the corresponding mapping symbols.  */
-  mstate = MAP_DATA;
-  if ((info->section
-       && info->section->flags & SEC_CODE)
-      || !info->section)
-    mstate = MAP_INSN;
+  mstate = MAP_INSN;
+  if (info->section && (info->section->flags & SEC_CODE) == 0)
+    mstate = MAP_DATA;
 
-  if (info->symtab_size == 0
-      || bfd_asymbol_flavour (*info->symtab) != bfd_target_elf_flavour)
+  if (!pd->is_elf_with_mapsyms)
     return mstate;
 
-  /* Reset the last_map_symbol if we start to dump a new section.  */
-  if (memaddr <= 0)
-    last_map_symbol = -1;
-
-  /* If the last stop offset is different from the current one, then
-     don't use the last_map_symbol to search.  We usually reset the
-     info->stop_offset when handling a new section.  */
-  from_last_map_symbol = (last_map_symbol >= 0
-			  && info->stop_offset == last_stop_offset);
-
-  /* Start scanning at the start of the function, or wherever
-     we finished last time.  */
-  n = info->symtab_pos + 1;
-  if (from_last_map_symbol && n >= last_map_symbol)
-    n = last_map_symbol;
-
-  /* Find the suitable mapping symbol to dump.  */
-  for (; n < info->symtab_size; n++)
+  if (pd->last_mapping_sym != NULL
+      && memaddr != 0
+      && memaddr == pd->expected_next_addr)
     {
-      bfd_vma addr = bfd_asymbol_value (info->symtab[n]);
-      /* We have searched all possible symbols in the range.  */
-      if (addr > memaddr)
-	break;
-      if (riscv_get_map_state (n, &mstate, info, true))
+      /* Reuse the last mapping symbol.  */
+      mstate = pd->last_mapping_sym->mstate;
+      /* Do a forward linear search to find the next mapping symbol.  */
+      struct riscv_mapping_sym *msym = pd->last_mapping_sym + 1;
+      while (true)
 	{
-	  symbol = n;
-	  found = true;
-	  /* Do not stop searching, in case there are some mapping
-	     symbols have the same value, but have different names.
-	     Use the last one.  */
-	}
-    }
-
-  /* We can not find the suitable mapping symbol above.  Therefore, we
-     look forwards and try to find it again, but don't go past the start
-     of the section.  Otherwise a data section without mapping symbols
-     can pick up a text mapping symbol of a preceeding section.  */
-  if (!found)
-    {
-      n = info->symtab_pos;
-      if (from_last_map_symbol && n >= last_map_symbol)
-	n = last_map_symbol;
-
-      for (; n >= 0; n--)
-	{
-	  bfd_vma addr = bfd_asymbol_value (info->symtab[n]);
-	  /* We have searched all possible symbols in the range.  */
-	  if (addr < (info->section ? info->section->vma : 0))
+	  /* Break if we reached to the end.  */
+	  if (msym->mstate == MAP_NONE)
 	    break;
-	  /* Stop searching once we find the closed mapping symbol.  */
-	  if (riscv_get_map_state (n, &mstate, info, true))
-	    {
-	      symbol = n;
-	      found = true;
-	      break;
-	    }
+	  /* For section symbols, only test symbols in the same section.  */
+	  if (info->section && (uintptr_t)info->section != msym->section)
+	    break;
+	  /* Don't go beyond memaddr.  */
+	  if (memaddr < msym->address)
+	    break;
+	  /* Update the state and go to the next symbol.  */
+	  mstate = msym->mstate;
+	  pd->last_mapping_sym = msym++;
 	}
     }
-
-  if (found)
+  else
     {
-      /* Find the next mapping symbol to determine the boundary of this mapping
-	 symbol.  */
-
-      bool found_next = false;
-      /* Try to found next mapping symbol.  */
-      for (n = symbol + 1; n < info->symtab_size; n++)
-	{
-	  if (info->symtab[symbol]->section != info->symtab[n]->section)
-	    continue;
-
-	  bfd_vma addr = bfd_asymbol_value (info->symtab[n]);
-	  const char *sym_name = bfd_asymbol_name(info->symtab[n]);
-	  if (sym_name[0] == '$' && (sym_name[1] == 'x' || sym_name[1] == 'd'))
-	    {
-	      /* The next mapping symbol has been found, and it represents the
-		 boundary of this mapping symbol.  */
-	      found_next = true;
-	      last_map_symbol_boundary = addr;
-	      break;
-	    }
-	}
-
-      /* No further mapping symbol has been found, indicating that the boundary
-	 of the current mapping symbol is the end of this section.  */
-      if (!found_next)
-	last_map_symbol_boundary = info->section->vma + info->section->size;
+      /* Can't reuse the mapping symbol.  Do a binary search.  */
+      riscv_search_mapping_sym (memaddr, &mstate, info);
     }
-
-  /* Save the information for next use.  */
-  last_map_symbol = symbol;
-  last_stop_offset = info->stop_offset;
 
   return mstate;
 }
@@ -1322,25 +1414,19 @@ riscv_data_length (bfd_vma memaddr,
 {
   bfd_vma length;
   bool found = false;
+  struct riscv_private_data *pd = info->private_data;
 
   length = 4;
-  if (info->symtab_size != 0
-      && bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour
-      && last_map_symbol >= 0)
+  if (pd->last_mapping_sym != NULL)
     {
-      int n;
-      enum riscv_seg_mstate m = MAP_NONE;
-      for (n = last_map_symbol + 1; n < info->symtab_size; n++)
+      /* Get the next mapping symbol and adjust the length.  */
+      struct riscv_mapping_sym *msym = pd->last_mapping_sym + 1;
+      if (msym->mstate != MAP_NONE
+	  && (!info->section || (uintptr_t)info->section == msym->section))
 	{
-	  bfd_vma addr = bfd_asymbol_value (info->symtab[n]);
-	  if (addr > memaddr
-	      && riscv_get_map_state (n, &m, info, false))
-	    {
-	      if (addr - memaddr < length)
-		length = addr - memaddr;
-	      found = true;
-	      break;
-	    }
+	  if (msym->address - memaddr < length)
+	    length = msym->address - memaddr;
+	  found = true;
 	}
     }
   if (!found)
@@ -1419,15 +1505,20 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 
   /* Initialize the private data.  */
   if (info->private_data == NULL)
-    init_riscv_dis_private_data (info);
+    {
+      init_riscv_dis_private_data (info);
+      init_riscv_dis_private_data_for_section (info);
+    }
+  struct riscv_private_data *pd = info->private_data;
+  if (info->section != pd->last_section)
+    init_riscv_dis_private_data_for_section (info);
 
   /* Guess and update XLEN if we haven't determined it yet.  */
   if (xlen == 0)
     update_riscv_dis_xlen (info);
 
+  /* Update default state (data or code) for the disassembler.  */
   mstate = riscv_search_mapping_symbol (memaddr, info);
-  /* Save the last mapping state.  */
-  last_map_state = mstate;
 
   /* Set the size to dump.  */
   if (mstate == MAP_DATA
@@ -1449,6 +1540,30 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
       insn = (insn_t) bfd_getl16 (packet);
       dump_size = riscv_insn_length (insn);
       riscv_disassembler = riscv_disassemble_insn;
+      /* Update the architecture if the mapping symbol is updated.  */
+      if (pd->last_mapping_sym != pd->prev_last_mapping_sym)
+	{
+	  /* mapping_syms is always available but last_mapping_sym may not.  */
+	  const char *arch
+	      = pd->last_mapping_sym ? pd->last_mapping_sym->arch : NULL;
+	  if (arch)
+	    {
+	      /* Override the architecture.  */
+	      update_riscv_dis_arch (&dis_arch_context_override, arch);
+	    }
+	  else if (set_riscv_current_dis_arch_context (
+		       &dis_arch_context_default))
+	    {
+	      /* Revert to the default architecture and call init functions if:
+		 - there's no ISA string in the mapping symbol entry and
+		 - current disassembler context is changed to the default one.
+		 This is a shortcut path to avoid full update_riscv_dis_arch.
+	       */
+	      init_riscv_dis_state_for_arch ();
+	      init_riscv_dis_state_for_arch_and_options ();
+	    }
+	  pd->prev_last_mapping_sym = pd->last_mapping_sym;
+	}
     }
 
   /* Fetch the instruction to dump.  */
@@ -1460,7 +1575,10 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
     }
   insn = (insn_t) bfd_get_bits (packet, dump_size * 8, false);
 
-  return (*riscv_disassembler) (memaddr, insn, packet, info);
+  /* Print, save the next expected address and return current size.  */
+  status = (*riscv_disassembler) (memaddr, insn, packet, info);
+  pd->expected_next_addr = memaddr + status;
+  return status;
 }
 
 disassembler_ftype
@@ -1513,6 +1631,20 @@ disassemble_init_riscv (struct disassemble_info *info)
   if (info->disassembler_options != NULL)
     parse_riscv_dis_options (info->disassembler_options);
   init_riscv_dis_state_for_arch_and_options ();
+}
+
+/* Free disassemble_info and all disassembler-related info
+   (e.g. heap-allocated information that depends on either disassemble_info
+    or BFD).  */
+
+void
+disassemble_free_riscv (struct disassemble_info *info)
+{
+  free_riscv_dis_arch_context (&dis_arch_context_default);
+  free_riscv_dis_arch_context (&dis_arch_context_override);
+  struct riscv_private_data *pd = info->private_data;
+  if (pd)
+    free (pd->mapping_syms);
 }
 
 /* Prevent use of the fake labels that are generated as part of the DWARF
@@ -1683,10 +1815,4 @@ with the -M switch (multiple options should be separated by commas):\n"));
     }
 
   fprintf (stream, _("\n"));
-}
-
-void disassemble_free_riscv (struct disassemble_info *info ATTRIBUTE_UNUSED)
-{
-  free_riscv_dis_arch_context (&dis_arch_context_default);
-  free_riscv_dis_arch_context (&dis_arch_context_override);
 }
