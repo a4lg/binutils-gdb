@@ -673,6 +673,12 @@ struct riscv_opcode
 #define INSN_8_BYTE		0x00000040
 #define INSN_16_BYTE		0x00000050
 
+/* Instruction is prohibited in the exact mode.
+
+   In the exact mode, regular aliases (with INSN_ALIAS) are allowed if
+   the instruction is neither compressed (one-by-one) nor relaxed.  */
+#define INSN_NON_EXACT		0x00000080
+
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */
 #define INSN_MACRO		0xffffffff
