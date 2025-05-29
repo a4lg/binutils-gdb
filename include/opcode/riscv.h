@@ -675,6 +675,20 @@ struct riscv_opcode
 #define INSN_8_BYTE		0x00000040
 #define INSN_16_BYTE		0x00000050
 
+/* Instruction is prohibited in the exact mode.
+
+   Of instruction aliases, this flag shall be also set if:
+
+   (1) there are multiple valid candidates with the same instruction
+   name and operands (e.g. "sgt" alias should not set this flag) and
+   (2) there is another candidate with either more canonical instruction
+   length or less relaxation (e.g. a "lui" alias which expands to
+   "c.lui" shall set this flag).
+
+   Currently, this flag is set on compressed aliases of an instruction
+   with non-compressed encodings.  */
+#define INSN_NON_EXACT		0x00000080
+
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */
 #define INSN_MACRO		0xffffffff
