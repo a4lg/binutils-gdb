@@ -245,6 +245,7 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	loongarch/lasx.xml \
 	loongarch/lbt.xml \
 	riscv/rv32e-xregs.xml \
+	riscv/rv64e-xregs.xml \
 	riscv/32bit-cpu.xml \
 	riscv/32bit-fpu.xml \
 	riscv/64bit-cpu.xml \
